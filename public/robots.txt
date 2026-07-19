@@ -1,0 +1,11 @@
+# robots.txt — Skyup Digital Solutions
+User-agent: *
+Allow: /
+
+# Internal / preview routes not meant for search engines
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+Sitemap: https://www.skyupdigitalsolutions.com/sitemap.xml

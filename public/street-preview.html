@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skyup — Street Walk Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0A0805;font-family:'Geist',sans-serif;overflow-x:hidden}
+#walk{position:relative;width:100%;background:#0A0805}
+.stage{position:sticky;top:0;height:100vh;width:100%;overflow:hidden;background:#0A0805}
+.bob{position:absolute;inset:0;will-change:transform}
+.layer{position:absolute;inset:0;opacity:0;will-change:transform,opacity,filter}
+.layer img{width:100%;height:100%;object-fit:cover}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 75% 75% at 42% 52%, transparent 35%, rgba(4,3,2,0.55) 100%);z-index:20}
+.bottomglow{position:absolute;left:0;right:0;bottom:0;height:35%;pointer-events:none;background:linear-gradient(to top, rgba(10,8,5,0.7), transparent);z-index:20}
+.overlay{position:absolute;inset:0;z-index:30;pointer-events:none}
+.shopinfo{position:absolute;bottom:16%;left:50%;transform:translateX(-50%);text-align:center;opacity:0;will-change:opacity,transform}
+.shopinfo .nm{font-weight:800;color:#fff;font-size:clamp(1.5rem,3vw,2.6rem);text-shadow:0 2px 30px rgba(0,0,0,0.9);letter-spacing:-0.02em}
+.shopinfo .cta{margin-top:1rem;display:inline-flex;align-items:center;gap:.5rem;background:#0037CA;color:#fff;text-decoration:none;padding:.85rem 1.75rem;border-radius:8px;font-size:.9rem;font-weight:500;box-shadow:0 10px 30px rgba(0,55,202,0.5);pointer-events:auto}
+.shopinfo .marker{margin-top:1.4rem;color:rgba(255,255,255,0.65);font-size:.95rem}
+.dots{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:40}
+.dots i{display:block;height:6px;width:6px;border-radius:3px;background:rgba(255,255,255,0.3);transition:all .3s}
+.cue{position:absolute;bottom:1.8rem;left:50%;transform:translateX(-50%);z-index:40;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,0.5)}
+</style>
+</head>
+<body>
+<section id="walk">
+  <div class="stage">
+    <div class="bob" id="bob"></div>
+    <div class="vignette"></div>
+    <div class="bottomglow"></div>
+    <div class="overlay" id="overlay"></div>
+    <div class="dots" id="dots"></div>
+    <div class="cue" id="cue">Scroll to walk in</div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+const BASE = "/images/street";
+// vanish: transform-origin (where the lane disappears) — push toward here = walk forward
+const SCENES = [
+  { id:"entrance", img:`${BASE}/entrance.avif`,     nm:null,                              cta:null,      marker:null, vx:50, vy:54 },
+  { id:"web",      img:`${BASE}/website.avif`,      nm:"Website Design & Development",    cta:"Website", href:"/service/web-development",        marker:"SEO Studio, just ahead →",            vx:40, vy:58 },
+  { id:"seo",      img:`${BASE}/seo.avif`,          nm:"SEO Studio",                      cta:"SEO",     href:"/service/seo",                    marker:"PPC Corner, just around the corner →", vx:40, vy:58 },
+  { id:"ppc",      img:`${BASE}/ppc.avif`,          nm:"PPC Corner",                      cta:"PPC",     href:"/service/performance-marketing",  marker:"AI Automation Lab, coming up →",       vx:40, vy:58 },
+  { id:"ai",       img:`${BASE}/ai.avif`,           nm:"AI Automation Lab",               cta:"AI",      href:"/service/ai-automation",          marker:"Social Media House, last stop →",      vx:40, vy:58 },
+  { id:"social",   img:`${BASE}/socialmedia.avif`,  nm:"Social Media House",              cta:"Social",  href:"/service/social-media-marketing", marker:null,                                   vx:40, vy:58 },
+];
+const N = SCENES.length;
+
+const bob = document.getElementById("bob");
+const overlay = document.getElementById("overlay");
+const dots = document.getElementById("dots");
+
+SCENES.forEach((s, i) => {
+  const layer = document.createElement("div");
+  layer.className = "layer";
+  layer.id = "L"+i;
+  layer.style.transformOrigin = `${s.vx}% ${s.vy}%`;
+  const img = document.createElement("img");
+  img.src = s.img; img.alt = s.nm || "Skyup digital market entrance";
+  layer.appendChild(img);
+  bob.appendChild(layer);
+
+  const info = document.createElement("div");
+  info.className = "shopinfo"; info.id = "I"+i;
+  info.innerHTML = (s.nm ? `<div class="nm">${s.nm}</div>` : "")
+    + (s.cta ? `<a class="cta" href="${s.href}">Explore ${s.cta} <span>→</span></a>` : "")
+    + (s.marker ? `<div class="marker">${s.marker}</div>` : "");
+  overlay.appendChild(info);
+
+  if (i > 0) { const d=document.createElement("i"); dots.appendChild(d); }
+});
+
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const map = (v,a,b,c,d)=>c+(d-c)*clamp((v-a)/(b-a),0,1);
+const easeIO = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+
+function render(prog){
+  // s = position along the street, 0..N (each integer = a scene centered)
+  const s = prog * N;
+
+  for (let i=0;i<N;i++){
+    const layer = document.getElementById("L"+i);
+    const info  = document.getElementById("I"+i);
+    const t = s - i; // <0 ahead, 0..1 active window, >1 behind
+
+    // opacity: fade in approaching, hold, fade out as you pass
+    let op = 0;
+    if (t > -0.35 && t < 1.05){
+      if (t < 0.12) op = map(t,-0.35,0.12,0,1);
+      else if (t < 0.62) op = 1;
+      else op = map(t,0.62,1.05,1,0);
+    }
+    // scale: far(1.12) -> arrive(1.0) -> drift(1.08) -> walk past(2.3)
+    let sc = 1;
+    if (t <= 0.12) sc = map(t,-0.35,0.12,1.14,1.0);
+    else if (t <= 0.6) sc = map(t,0.12,0.6,1.0,1.08);
+    else sc = map(easeIO(clamp((t-0.6)/0.45,0,1)),0,1,1.08,2.35);
+    // blur+dim at the pass-through to mask the handoff
+    const passT = clamp((t-0.62)/0.43,0,1);
+    const blur = passT*5;
+    const bright = 1 - passT*0.5;
+
+    layer.style.opacity = op.toFixed(3);
+    layer.style.transform = `scale(${sc.toFixed(4)})`;
+    layer.style.filter = `blur(${blur.toFixed(2)}px) brightness(${bright.toFixed(3)})`;
+    layer.style.zIndex = Math.round(10 - Math.abs(t));
+
+    // shop info: in during hold, out as you leave
+    let io = 0;
+    if (t > 0.12 && t < 0.66){
+      if (t < 0.22) io = map(t,0.12,0.22,0,1);
+      else if (t < 0.55) io = 1;
+      else io = map(t,0.55,0.66,1,0);
+    }
+    info.style.opacity = io.toFixed(3);
+    info.style.transform = `translateX(-50%) translateY(${(1-io)*16}px)`;
+  }
+
+  // camera bob — subtle footsteps
+  bob.style.transform = `translateY(${Math.sin(s*Math.PI*2)*4}px)`;
+
+  // dots
+  const cur = Math.round(clamp(s-0.5,0,N-1));
+  [...dots.children].forEach((d,idx)=>{
+    const on = idx === cur-1;
+    d.style.width = on?"22px":"6px";
+    d.style.background = on?"#FA9F43":"rgba(255,255,255,0.3)";
+  });
+  document.getElementById("cue").style.opacity = s<0.4?1:0;
+}
+
+gsap.registerPlugin(ScrollTrigger);
+const SCROLL_VH = 700;
+// set the scroll height
+document.getElementById("walk").style.height = (SCROLL_VH+100)+"vh";
+
+ScrollTrigger.create({
+  trigger:"#walk", start:"top top", end:`+=${SCROLL_VH}%`,
+  scrub:1, pin:".stage", anticipatePin:1,
+  onUpdate:(self)=>render(self.progress)
+});
+render(0);
+</script>
+</body>
+</html>
