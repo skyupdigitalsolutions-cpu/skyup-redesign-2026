@@ -9,7 +9,7 @@ import { RINGS, COLORS } from "../heroConfig";
 export default function OrbitRings() {
   return (
     <div
-      className="absolute inset-0 z-[2] flex items-center justify-center"
+      className="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center"
       style={{ perspective: "1200px" }}
       aria-hidden="true"
     >

@@ -341,7 +341,7 @@ function Rings() {
 /* ── orbiting metrics (Scene 1) ── */
 function Metrics() {
   return (
-    <div className="absolute inset-0 z-[3]">
+    <div className="pointer-events-none absolute inset-0 z-[3]">
       {METRICS.map((m) => {
         const { x, y } = polarToOffset(m.angle, m.radius);
         const accent = m.accent === "orange" ? COLORS.orange : COLORS.blueLight;

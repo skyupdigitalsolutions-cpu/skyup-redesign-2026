@@ -433,6 +433,12 @@ export default function ServiceSolar() {
         {/* premium cosmic backdrop (drop-in image; falls back to solid dark until present) */}
         <div className="ss3-backdrop" aria-hidden="true" />
 
+        {/* click hint — tells users the planets are interactive (works on desktop + mobile) */}
+        <div className="ss3-hint">
+          <span className="ss3-hint-ping" aria-hidden="true" />
+          <span>Tap any <span className="ss3-hl-o">planet</span> to explore that <span className="ss3-hl-b">service</span></span>
+        </div>
+
         {/* solar-system group — scales + fades into place on scroll (the "arrival") */}
         <div className="ss3-system" ref={systemRef}>
 
@@ -661,6 +667,19 @@ const CSS = `
 
 .ss3-wrap{ position:relative; background:#04050C; }
 .ss3{ position:relative; height:100vh; min-height:640px; background:#04050C; overflow:hidden; --amber:#FA9F43; --blue:#5b8cff; }
+.ss3-hint{ position:absolute; top:6%; left:50%; transform:translateX(-50%); z-index:6;
+  display:inline-flex; align-items:center; gap:.6rem; white-space:nowrap;
+  padding:9px 18px; border-radius:999px; font-size:clamp(.72rem,1.4vw,.9rem); font-weight:500; color:#dfe8ff;
+  background:rgba(8,12,26,.62); border:1px solid rgba(91,140,255,.28); backdrop-filter:blur(10px);
+  box-shadow:0 10px 34px -14px rgba(0,0,0,.7), 0 0 34px -18px rgba(91,140,255,.6);
+  animation:ss3HintFloat 3.4s ease-in-out infinite; }
+.ss3-hl-o{ color:#FA9F43; font-weight:700; }
+.ss3-hl-b{ color:#7FB0FF; font-weight:700; }
+.ss3-hint-ping{ position:relative; width:9px; height:9px; border-radius:50%; background:#FA9F43; flex:none; box-shadow:0 0 10px #FA9F43; }
+.ss3-hint-ping::after{ content:""; position:absolute; inset:-4px; border-radius:50%; border:1px solid #FA9F43; opacity:0; animation:ss3Ping 2s ease-out infinite; }
+@keyframes ss3Ping{ 0%{ transform:scale(.6); opacity:.9; } 70%{ opacity:0; } 100%{ transform:scale(2.4); opacity:0; } }
+@keyframes ss3HintFloat{ 0%,100%{ transform:translateX(-50%) translateY(0); } 50%{ transform:translateX(-50%) translateY(-6px); } }
+@media (prefers-reduced-motion:reduce){ .ss3-hint{ animation:none; } .ss3-hint-ping::after{ animation:none; } }
 .ss3-system{ position:absolute; inset:0; z-index:2; transform-origin:50% 50%; will-change:transform,opacity; }
 .ss3-flash{
   position:fixed; inset:0; z-index:9998; opacity:0; pointer-events:none;

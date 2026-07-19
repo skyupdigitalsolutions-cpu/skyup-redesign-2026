@@ -67,7 +67,7 @@ export default function Header() {
 
   return (
     <header
-      className="fixed top-0 z-50 w-full transition-all duration-500"
+      className="fixed top-0 z-[120] w-full transition-all duration-500"
       style={{
         opacity: revealed ? 1 : 0,
         transform: revealed ? "translateY(0)" : "translateY(-100%)",
@@ -140,9 +140,12 @@ export default function Header() {
 
           {/* Mobile toggle */}
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white backdrop-blur-md transition-colors duration-300 hover:bg-white/10 lg:hidden"
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            className="relative z-[130] flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white backdrop-blur-md transition-colors duration-300 hover:bg-white/10 lg:hidden"
+            style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
             aria-label="Toggle menu"
+            aria-expanded={menuOpen}
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -151,8 +154,8 @@ export default function Header() {
 
       {/* Mobile menu */}
       <div
-        className={`overflow-hidden border-b border-white/5 bg-[#0A0805]/95 backdrop-blur-xl transition-[max-height,opacity] duration-300 ease-out lg:hidden ${
-          menuOpen ? "max-h-[640px] opacity-100" : "max-h-0 opacity-0"
+        className={`relative z-[125] overflow-hidden border-b border-white/5 bg-[#0A0805]/95 backdrop-blur-xl transition-[max-height,opacity] duration-300 ease-out lg:hidden ${
+          menuOpen ? "max-h-[640px] opacity-100" : "pointer-events-none invisible max-h-0 opacity-0"
         }`}
       >
         <div className="px-5 py-5">

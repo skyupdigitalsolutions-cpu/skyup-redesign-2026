@@ -107,14 +107,11 @@ export default function BulbIntro({ children }) {
               If the world can&apos;t see your business,
               <br />it might as well look like this.
             </div>
-            <div className="mx-auto mt-7 inline-flex max-w-md items-start gap-2.5 rounded-2xl border px-4 py-2.5 text-left"
-              style={{ fontFamily: "'Poppins',sans-serif", color: "#FFD9A6", borderColor: "rgba(255,170,80,0.32)", background: "rgba(255,140,40,0.07)" }}>
-              <span className="text-base leading-none"></span>
-              <span className="text-[0.82rem] leading-snug">
-                <b style={{ color: "#FA9F43" }}>Note:</b> if you scroll down, you might make your business visible to the whole world — so think twice before scrolling.
-              </span>
+            <div className="mt-8 text-sm md:text-base" style={{ fontFamily: "'Poppins',sans-serif", color: "rgba(238,236,231,0.72)" }}>
+              <span style={{ color: "#3D6BF0", fontWeight: 600 }}>Scroll</span>{" "}
+              <span style={{ color: "#FA9F43", fontWeight: 600 }}>down</span>{" "}
+              to see what real visibility looks like&nbsp;↓
             </div>
-            <div className="mt-6 text-xs uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.32)", fontFamily: "'Poppins',sans-serif" }}>scroll down ↓</div>
           </div>
 
           {/* the real bulb — stays lit above as the constant */}
