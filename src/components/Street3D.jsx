@@ -310,7 +310,7 @@ export default function Street3D() {
           <Canvas
             frameloop={inView ? "always" : "never"}
             camera={{ position: [0, 1.5, CAM_START], fov: isMobile ? 86 : 60, near: 0.1, far: 200 }}
-            dpr={[1, 2]}
+            dpr={[1, 1.5]}
             gl={{ antialias: true, powerPreference: "high-performance" }}
             style={{ position: "absolute", inset: 0 }}
           >
