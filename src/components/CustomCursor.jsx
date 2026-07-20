@@ -1,9 +1,4 @@
 // src/components/CustomCursor.jsx
-// Site-wide cosmic cursor: a crisp glowing dot that tracks the pointer exactly,
-// plus a soft ring that trails behind with easing. Grows over links/buttons.
-// SSR-safe (all logic in useEffect). Disabled on touch devices and when the user
-// prefers reduced motion — native cursor stays in those cases.
-
 import { useEffect, useRef } from "react";
 
 export default function CustomCursor() {
@@ -13,16 +8,21 @@ export default function CustomCursor() {
   useEffect(() => {
     const finePointer = window.matchMedia("(pointer: fine)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!finePointer || reduce) return; // keep the native cursor
+    if (!finePointer || reduce) return;
 
     const dot = dotRef.current, ring = ringRef.current;
     if (!dot || !ring) return;
 
     document.body.classList.add("cursor-on");
 
-    let mx = window.innerWidth / 2, my = window.innerHeight / 2;   // pointer
-    let rx = mx, ry = my;                                          // ring (eased)
+    let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+    let rx = mx, ry = my;
     let visible = false;
+
+    // Pre-position at center so rAF loop runs immediately on mount.
+    // Cursor becomes visible on first actual mousemove.
+    dot.style.transform = `translate3d(${mx}px, ${my}px, 0) translate(-50%, -50%)`;
+    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0) translate(-50%, -50%)`;
 
     const onMove = (e) => {
       mx = e.clientX; my = e.clientY;
@@ -40,7 +40,7 @@ export default function CustomCursor() {
     let raf = 0;
     const loop = () => {
       raf = requestAnimationFrame(loop);
-      rx += (mx - rx) * 0.18;          // trailing ease
+      rx += (mx - rx) * 0.18;
       ry += (my - ry) * 0.18;
       ring.style.transform = `translate3d(${rx}px, ${ry}px, 0) translate(-50%, -50%)`;
     };

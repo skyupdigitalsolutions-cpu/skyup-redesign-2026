@@ -108,26 +108,32 @@ export default function AboutUniverse() {
     // reset scroll) or browser scroll-restoration on refresh leaves window.scrollY
     // large, the hero reads "scrolled to the end", and the .au-white overlay snaps to
     // full white at the top of the page. This is the real cause of the white screen.
+    // Disable browser scroll restoration so it never fights our manual reset.
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    // Reset immediately — catches client-side navigation arriving mid-scroll.
     window.scrollTo(0, 0);
-    if (white) white.style.opacity = "0"; // never start white, regardless of measurement
+    if (white) white.style.opacity = "0"; // never start white
 
     let sY = 0, heroTop = 0, heroRange = 1, docH = 1, userScrolled = false;
     const measure = () => { const hr = hero.getBoundingClientRect(); heroTop = hr.top + window.scrollY; heroRange = Math.max(1, hr.height - window.innerHeight); docH = document.documentElement.scrollHeight - window.innerHeight; };
-    // readScroll: updates sY for internal math WITHOUT arming the white-out guard.
-    // Only a real "scroll" event (bound below) should ever set userScrolled = true —
-    // otherwise the guard is worthless, since setup/resize/remeasure would flip it on
-    // their own and let the white-out fire before the user has scrolled at all.
     const readScroll = () => { sY = window.scrollY; };
     const onScroll = () => { sY = window.scrollY; userScrolled = true; };
     const onResize = () => { resize(); measure(); readScroll(); };
     resize(); measure(); readScroll();
-    // Re-measure once layout settles — fonts, images and Lenis can shift offsets a few
-    // frames after mount, which would otherwise leave heroTop/heroRange stale.
+
+    // On hard refresh the browser may restore scroll position AFTER the first
+    // useEffect runs. We catch it by scrolling back to 0 in rAF (one paint later)
+    // AND on the load event (fully after all async restoration). Both re-measure
+    // so heroTop/heroRange are always based on scroll=0.
+    const resetToTop = () => {
+      window.scrollTo(0, 0);
+      if (white) white.style.opacity = "0";
+      measure(); readScroll();
+    };
     const remeasure = () => { measure(); readScroll(); };
-    const rafMeasure = requestAnimationFrame(remeasure);
-    const tMeasure = setTimeout(remeasure, 350);
-    window.addEventListener("load", remeasure);
+    const rafMeasure = requestAnimationFrame(resetToTop);   // catches late browser restore
+    const tMeasure = setTimeout(remeasure, 350);            // catches font/image shifts
+    window.addEventListener("load", resetToTop);            // catches very late restoration
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
 
@@ -281,7 +287,7 @@ export default function AboutUniverse() {
       }
     };
     raf = requestAnimationFrame(loop);
-    return () => { const l = getLenis(); if (l) l.start(); io.disconnect(); cancelAnimationFrame(raf); cancelAnimationFrame(rafMeasure); clearTimeout(tMeasure); window.removeEventListener("load", remeasure); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onResize); window.removeEventListener("wheel", onGesture); window.removeEventListener("touchstart", onGesture); window.removeEventListener("keydown", onGesture); window.removeEventListener("wheel", blockScroll); window.removeEventListener("touchmove", blockScroll); window.removeEventListener("keydown", blockKeys); };
+    return () => { const l = getLenis(); if (l) l.start(); io.disconnect(); cancelAnimationFrame(raf); cancelAnimationFrame(rafMeasure); clearTimeout(tMeasure); window.removeEventListener("load", resetToTop); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onResize); window.removeEventListener("wheel", onGesture); window.removeEventListener("touchstart", onGesture); window.removeEventListener("keydown", onGesture); window.removeEventListener("wheel", blockScroll); window.removeEventListener("touchmove", blockScroll); window.removeEventListener("keydown", blockKeys); };
   }, []);
 
   // ---- TEAM cylinder (auto-rotate, timer-driven, independent of scroll) ----
