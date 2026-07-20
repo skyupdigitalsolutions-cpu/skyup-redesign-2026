@@ -12,39 +12,34 @@ import { BLOGS } from "@/data/blogs";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { INDUSTRY_META } from "@/data/industries";
 
-// ── Dynamic SEO for slug pages ──────────────────────────────────
-// If/when the redesign has these data files, uncomment the imports
-// AND the matching blocks inside the effect below.
-//
-// import { SERVICES, DEFAULT_SERVICE_SLUG } from "../src/data/servicesData";
-// import { BLOGS } from "../src/data/blogs";
-
 export default function Layout({ children }) {
   const pageContext = usePageContext();
   const { config, urlPathname } = pageContext;
   const lenisRef = useRef(null);
 
   // ── Smooth scrolling (Lenis) synced with GSAP ScrollTrigger ──
-  // Buttery scroll + smooth handoff between the pinned intro / hero sections.
   useEffect(() => {
-    // Stop the browser restoring the previous scroll position on reload. Combined with
-    // the route-change reset below, this guarantees scroll-driven heroes (e.g. About)
-    // always open at frame 0 instead of mid-sequence (the white-flash end state).
+    // Disable browser scroll restoration globally — we manage scroll position ourselves.
+    // Must be set before Lenis starts so the browser never fights us.
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
+    // Raw scroll reset BEFORE Lenis initialises — catches hard refresh where the
+    // browser may have already applied a restored scroll position by the time
+    // useEffect runs. Lenis will inherit scroll=0 as its starting position.
+    window.scrollTo(0, 0);
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     gsap.registerPlugin(ScrollTrigger);
     const lenis = new Lenis({
-      duration: 1.15,            // higher = smoother / more glide
+      duration: 1.15,
       smoothWheel: true,
       touchMultiplier: 1.4,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
     lenisRef.current = lenis;
-    if (typeof window !== "undefined") window.__lenis = lenis; // let scroll-driven heroes (e.g. About) drive Lenis instead of fighting it
+    if (typeof window !== "undefined") window.__lenis = lenis;
 
-    // drive Lenis off GSAP's ticker and let ScrollTrigger read Lenis' scroll
     lenis.on("scroll", ScrollTrigger.update);
     const onTick = (time) => lenis.raf(time * 1000);
     gsap.ticker.add(onTick);
@@ -58,28 +53,56 @@ export default function Layout({ children }) {
     };
   }, []);
 
-  // ── Start every navigated/loaded page at the very top (Lenis-aware) ──
-  // window.scrollTo alone doesn't move Lenis' virtual scroll, so we reset Lenis itself.
-  // Reset immediately and again next frame, since the browser can apply its restored
-  // scroll position a beat after the first effect runs.
+  // ── Force every page to start at the top on load and navigation ──
+  // The browser can restore scroll position AFTER useEffect runs (especially on
+  // hard refresh). We fight this by:
+  // 1. Resetting immediately (catches client-side nav)
+  // 2. Resetting in rAF (catches one-frame-late browser restoration)
+  // 3. Keeping resetting every frame for 500ms until the user scrolls
+  //    (catches multi-frame-late restoration on slow/mobile browsers)
   useEffect(() => {
-    const toTop = () => {
+    let cancelled = false;
+    let userScrolled = false;
+
+    const onUserScroll = () => { userScrolled = true; };
+    window.addEventListener("wheel", onUserScroll, { once: true, passive: true });
+    window.addEventListener("touchstart", onUserScroll, { once: true, passive: true });
+
+    const reset = () => {
+      if (cancelled || userScrolled) return;
       const lenis = lenisRef.current;
-      if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
-      else window.scrollTo(0, 0);
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: true, force: true });
+      } else {
+        window.scrollTo(0, 0);
+      }
     };
-    toTop();
-    const id = requestAnimationFrame(toTop);
-    return () => cancelAnimationFrame(id);
+
+    // Reset now, next frame, and keep polling for 500ms
+    reset();
+    const id1 = requestAnimationFrame(reset);
+    const id2 = requestAnimationFrame(() => requestAnimationFrame(reset));
+    const id3 = setTimeout(reset, 100);
+    const id4 = setTimeout(reset, 300);
+    const id5 = setTimeout(reset, 500);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(id1);
+      cancelAnimationFrame(id2);
+      clearTimeout(id3);
+      clearTimeout(id4);
+      clearTimeout(id5);
+      window.removeEventListener("wheel", onUserScroll);
+      window.removeEventListener("touchstart", onUserScroll);
+    };
   }, [urlPathname]);
 
   useEffect(() => {
     let title = config?.title;
-    // Use metaDescription for static pages (avoids Vike native duplicate)
     let description = config?.metaDescription;
     let keywords = config?.keywords;
 
-    // ── Service slug pages (/service/<slug>) ──────────────────
     const serviceMatch = urlPathname.match(/^\/service\/([^/]+)$/);
     if (serviceMatch && SERVICE_META[serviceMatch[1]]) {
       const m = SERVICE_META[serviceMatch[1]];
@@ -88,7 +111,6 @@ export default function Layout({ children }) {
       keywords = undefined;
     }
 
-    // ── Blog article pages (/blog/<slug>) ─────────────────────
     const blogMatch = urlPathname.match(/^\/blog\/([^/]+)$/);
     if (blogMatch) {
       const blog = BLOGS.find((b) => b.slug === blogMatch[1]);
@@ -99,7 +121,6 @@ export default function Layout({ children }) {
       }
     }
 
-    // ── Work case-study pages (/work/<slug>) ──────────────────
     const workMatch = urlPathname.match(/^\/work\/([^/]+)$/);
     if (workMatch) {
       const work = CASE_STUDIES.find((w) => w.slug === workMatch[1]);
@@ -110,7 +131,6 @@ export default function Layout({ children }) {
       }
     }
 
-    // ── Industry landing pages (/industries/<slug>) ───────────
     const industryMatch = urlPathname.match(/^\/industries\/([^/]+)$/);
     if (industryMatch && INDUSTRY_META[industryMatch[1]]) {
       const m = INDUSTRY_META[industryMatch[1]];
@@ -119,10 +139,8 @@ export default function Layout({ children }) {
       keywords = undefined;
     }
 
-    // ── Apply title ───────────────────────────────────────────
     if (title) document.title = title;
 
-    // ── Apply description (don't blank an SSR-set value) ──────
     if (description) {
       let descTag = document.querySelector('meta[name="description"]');
       if (!descTag) {
@@ -133,7 +151,6 @@ export default function Layout({ children }) {
       descTag.setAttribute("content", description);
     }
 
-    // ── Apply keywords (only when present) ────────────────────
     if (keywords) {
       let kwTag = document.querySelector('meta[name="keywords"]');
       if (!kwTag) {
@@ -144,7 +161,6 @@ export default function Layout({ children }) {
       kwTag.setAttribute("content", keywords);
     }
 
-    // ── Canonical ─────────────────────────────────────────────
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement("link");
