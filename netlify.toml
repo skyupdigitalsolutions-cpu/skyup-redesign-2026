@@ -1,0 +1,27 @@
+[build]
+  command   = "npm run build"
+  publish   = "dist/client"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Since Vike pre-renders all pages to static HTML, every route already has
+# a real index.html in dist/client/<route>/index.html. The splat redirect
+# below is only a safety net for any route that isn't pre-rendered — it
+# sends unknown paths to the root so the client-side router can handle them.
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Cache immutable hashed assets forever
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Don't cache HTML — always fresh
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
