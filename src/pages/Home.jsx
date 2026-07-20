@@ -1,7 +1,6 @@
+import { lazy, Suspense } from "react";
 import BulbIntro from "@/components/BulbIntro";
-import ScrollStoryHero from "@/components/hero/ScrollStoryHero";
 import ValueProposition from "../components/ValueProposition";
-import Street3D from "@/components/Street3D";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import CaseStudies from "@/components/CaseStudies";
 import ProcessSection from "@/components/ProcessSection";
@@ -11,15 +10,25 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import HomeSchema from "@/components/home/HomeSchema";
 
+// Street3D and ScrollStoryHero both use three.js + @react-three/fiber (883KB chunk).
+// Neither is visible until the user scrolls past BulbIntro (330vh) so lazy-loading
+// defers parsing that chunk off the critical path entirely — no visual change.
+const Street3D = lazy(() => import("@/components/Street3D"));
+const ScrollStoryHero = lazy(() => import("@/components/hero/ScrollStoryHero"));
+
 export default function Home() {
   return (
     <>
       <HomeSchema />
       <Header />
       <BulbIntro />
-      <Street3D />
+      <Suspense fallback={null}>
+        <Street3D />
+      </Suspense>
       <WhyChooseUs />
-      <ScrollStoryHero />
+      <Suspense fallback={null}>
+        <ScrollStoryHero />
+      </Suspense>
       <CaseStudies />
       <ValueProposition />
       <ProcessSection />
