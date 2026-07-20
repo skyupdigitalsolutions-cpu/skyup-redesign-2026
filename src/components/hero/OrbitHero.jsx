@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import EnergyCore from "./components/EnergyCore";
 import OrbitRings from "./components/OrbitRings";
@@ -29,10 +29,20 @@ import { COLORS } from "./heroConfig";
  */
 export default function OrbitHero() {
   const [mounted, setMounted] = useState(false);
+  const [inView, setInView] = useState(false);
+  const rootRef = useRef(null);
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") { setInView(true); return; }
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "600px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <section
+      ref={rootRef}
       className="relative w-full overflow-hidden"
       style={{ background: COLORS.bg, minHeight: "100vh" }}
       aria-label="AI-powered growth — Skyup"
@@ -67,6 +77,7 @@ export default function OrbitHero() {
             <div className="absolute inset-0 z-[1]">
               {mounted ? (
                 <Canvas
+                  frameloop={inView ? "always" : "never"}
                   camera={{ position: [0, 0, 5], fov: 45 }}
                   dpr={[1, 2]}
                   gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}

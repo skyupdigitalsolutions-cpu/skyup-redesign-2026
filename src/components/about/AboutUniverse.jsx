@@ -5,7 +5,7 @@
 // astronaut hero -> About/Who We Are -> Mission -> Core Values -> How We Work ->
 // Meet the Team (auto-rotating 3D CYLINDER coverflow, 9 members) -> Why Choose
 // Skyup -> CTA. All copy = real DOM text (SEO). SSR-safe, reduced-motion, Lenis.
-// Brand: blue #5b8cff/#9cc0ff + amber #FA9F43. Assets: /images/about/astronaut.png
+// Brand: blue #5b8cff/#9cc0ff + amber #FA9F43. Assets: /images/about/astronaut.webp
 // and team photos /images/about/team/1.jpg … 9.jpg (1:1; fallback = glow tile).
 
 import React, { useEffect, useRef } from "react";
@@ -191,19 +191,17 @@ export default function AboutUniverse() {
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const time = (performance.now() - t0) / 1000;
-      // Live progress straight from the hero's on-screen rect — independent of
-      // window.scrollY, scroll-restoration and Lenis, so it can never read "scrolled to
-      // the end" while we're actually at the top. hr.top === 0 at the start → 0; hero
-      // bottom reaching the viewport bottom → 1. This is the definitive white-screen fix.
       // Progress model:
       //  • BEFORE arming — pH follows the hero's scroll position, so the astronaut
       //    visibly moves as the user scrolls (their first couple of scrolls).
       //  • AFTER 2 scroll gestures (armed) — pH auto-completes from wherever it was to 1
       //    over AUTO_MS, and we auto-scroll the window in step so the sticky hero stays
       //    pinned (it never "jumps down" to the next section) and releases cleanly at the end.
-      const heroRect = hero.getBoundingClientRect();
-      const liveRange = Math.max(1, heroRect.height - window.innerHeight);
-      const scrollP = clamp(-heroRect.top / liveRange, 0, 1);
+      // Use CACHED geometry (measured on mount/resize/load) + the scroll value tracked by
+      // the passive scroll listener. Identical math to reading the live rect every frame,
+      // but WITHOUT forcing a synchronous layout (getBoundingClientRect) 60×/sec.
+      const liveRange = heroRange;
+      const scrollP = clamp((sY - heroTop) / liveRange, 0, 1);
       if (armed && !autoDone) {
         const tl = smooth(clamp((performance.now() - animStart) / AUTO_MS, 0, 1));
         pH = armStartP + (1 - armStartP) * tl;
@@ -271,6 +269,15 @@ export default function AboutUniverse() {
         if (white) white.style.opacity = (userScrolled ? expand : 0).toFixed(3);
         if (reveal) { const ab = seg(pH, 0.9, 1.0); reveal.style.opacity = ab.toFixed(3); reveal.style.transform = `translateY(${((1 - ab) * 20).toFixed(1)}px)`; }
         if (intro) intro.style.opacity = (1 - seg(pH, 0.05, 0.16)).toFixed(3);
+      } else {
+        // Sequence finished OR was skipped/interrupted (fast scroll, nav): force a
+        // clean, visible end state so the white flash can never stay stuck over the
+        // page. This is the fix for the blank/white screen on interrupt.
+        if (white) white.style.opacity = "0";
+        if (reveal) { reveal.style.opacity = "1"; reveal.style.transform = "translateY(0)"; }
+        if (intro) intro.style.opacity = "0";
+        if (astro) astro.style.opacity = "0";
+        if (starEl) starEl.style.opacity = "0";
       }
     };
     raf = requestAnimationFrame(loop);
@@ -343,7 +350,7 @@ export default function AboutUniverse() {
       {/* ===== HERO ===== */}
       <section ref={heroRef} className="au-hero">
         <div className="au-stage">
-          <img ref={astroRef} className="au-astro" src="/images/about/astronaut.png" alt="Astronaut exploring the Skyup universe" />
+          <img ref={astroRef} className="au-astro" src="/images/about/astronaut.avif" alt="Astronaut exploring the Skyup universe" />
           <div ref={flareRef} className="au-flare" aria-hidden="true" />
           <div ref={starRef} className="au-star" aria-hidden="true" />
           <canvas ref={fxRef} className="au-fx" aria-hidden="true" />

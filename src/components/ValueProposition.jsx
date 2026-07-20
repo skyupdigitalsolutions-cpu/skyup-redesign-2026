@@ -84,6 +84,10 @@ export default function ValueProposition() {
         @media (prefers-reduced-motion: reduce){.vp * {transition:none!important;opacity:1!important;transform:none!important}}
         .vp-card{transition:transform .4s cubic-bezier(.22,1,.36,1), box-shadow .4s ease, border-color .4s ease;}
         .vp-card:hover{transform:translateY(-5px); border-color:rgba(255,255,255,0.18); box-shadow:0 28px 60px -26px rgba(242,86,35,0.45);}
+        /* low-end / touch: drop the expensive blurred shadow repaint on scroll */
+        .low-perf .vp-card{transition:transform .3s ease, border-color .3s ease;}
+        .low-perf .vp-card:hover{box-shadow:none;}
+        @media (hover:none){.vp-card:hover{box-shadow:none;}}
       `}</style>
 
       {/* ambient glows */}

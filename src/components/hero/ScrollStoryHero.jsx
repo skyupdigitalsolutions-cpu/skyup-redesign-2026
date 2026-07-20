@@ -64,6 +64,7 @@ export default function ScrollStoryHero({ children }) {
   const story = useRef({ zoom: 0, spin: 1, intensity: 1, pulseT: -1 });
   const [mounted, setMounted] = useState(false);
   const [webgl, setWebgl] = useState(true);
+  const [inView, setInView] = useState(false); // render WebGL only while on-screen
   const [word, setWord] = useState(0);
 
   useEffect(() => {
@@ -72,6 +73,16 @@ export default function ScrollStoryHero({ children }) {
       const c = document.createElement("canvas");
       setWebgl(!!(window.WebGLRenderingContext && (c.getContext("webgl") || c.getContext("experimental-webgl"))));
     } catch { setWebgl(false); }
+  }, []);
+
+  // Render the WebGL core only while the hero is on-screen (pre-activated by a margin
+  // so it's ready before it's seen). Off-screen → the render loop stops.
+  useEffect(() => {
+    const el = root.current;
+    if (!el || typeof IntersectionObserver === "undefined") { setInView(true); return; }
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "600px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   // cycling headline word (client only)
@@ -218,7 +229,7 @@ export default function ScrollStoryHero({ children }) {
           {/* full-screen 3D core — z-0 keeps WebGL strictly behind everything */}
           <div className="absolute inset-0 z-[0]" style={{ isolation: "isolate" }}>
             {mounted && webgl ? (
-              <Canvas camera={{ position: [0, 0, 6.5], fov: 45 }} dpr={[1, 1.5]}
+              <Canvas frameloop={inView ? "always" : "never"} camera={{ position: [0, 0, 6.5], fov: 45 }} dpr={[1, 1.5]}
                 gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
                 style={{ background: "transparent" }}>
                 <StoryCore story={story} />

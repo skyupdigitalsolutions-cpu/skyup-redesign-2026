@@ -217,6 +217,10 @@ export default function Street3D() {
   const scroll = useRef(0);
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(-1);
+  const [atEnd, setAtEnd] = useState(false);
+  const [inView, setInView] = useState(false); // render the WebGL scene only while on-screen
+  const activeRef = useRef(-1);   // last value pushed to React state (avoids per-frame re-render)
+  const atEndRef = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
   const [ready, setReady] = useState(false);       // true once textures have resolved + drawn
   const [loadFailed, setLoadFailed] = useState(false);
@@ -242,6 +246,16 @@ export default function Street3D() {
   }, []);
 
   // Scroll-driven walk: scrub the camera down the market as you scroll (normal both directions).
+  // Render the scene only while the section is on-screen (with a generous margin so
+  // it's fully drawn before the user sees it). Off-screen → stop the render loop.
+  useEffect(() => {
+    const el = stageRef.current || root.current;
+    if (!el || typeof IntersectionObserver === "undefined") { setInView(true); return; }
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "600px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   useIso(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
@@ -256,12 +270,26 @@ export default function Street3D() {
         onUpdate: (self) => {
           scroll.current = self.progress;
           const camZ = CAM_START + (CAM_END - CAM_START) * self.progress;
-          let nearest = -1, best = 1e9;
-          SHOPS.forEach((s, i) => {
-            const d = Math.abs(camZ - s.z);
-            if (d < best && d < 6) { best = d; nearest = i; }
-          });
-          setActive(nearest);
+          const last = SHOPS[SHOPS.length - 1];
+          let nextAtEnd = false, nextActive = -1;
+          if (self.progress > 0.9 || camZ < last.z - 1.5) {
+            // Past the final shop → show the closing panel instead of blank black.
+            nextAtEnd = true; nextActive = -1;
+          } else if (camZ > 2) {
+            // Not walked in yet → keep the "scroll to walk in" hint.
+            nextActive = -1;
+          } else {
+            // Bias shop positions toward the camera so each name appears BEFORE you reach
+            // the shop, while still matching the shop you're facing.
+            const BIAS = 6;
+            let idx = 0, best = 1e9;
+            SHOPS.forEach((s, i) => { const d = Math.abs(camZ - (s.z + BIAS)); if (d < best) { best = d; idx = i; } });
+            nextActive = idx;
+          }
+          // Only touch React state when a value actually changes — this keeps the scroll
+          // loop from re-rendering the component (and the WebGL tree) on every frame.
+          if (nextAtEnd !== atEndRef.current) { atEndRef.current = nextAtEnd; setAtEnd(nextAtEnd); }
+          if (nextActive !== activeRef.current) { activeRef.current = nextActive; setActive(nextActive); }
         },
       });
       return () => st.kill();
@@ -280,7 +308,7 @@ export default function Street3D() {
       <div ref={stageRef} className="s3d-stage h-screen w-full overflow-hidden" style={{ background: COLORS.bg }}>
         {mounted && (
           <Canvas
-            frameloop="always"
+            frameloop={inView ? "always" : "never"}
             camera={{ position: [0, 1.5, CAM_START], fov: isMobile ? 86 : 60, near: 0.1, far: 200 }}
             dpr={[1, 2]}
             gl={{ antialias: true, powerPreference: "high-performance" }}
@@ -321,10 +349,10 @@ export default function Street3D() {
         {SHOPS.map((shop, i) => (
           <div
             key={shop.id}
-            className="pointer-events-none absolute inset-0 transition-opacity duration-500"
+            className="pointer-events-none absolute inset-0 transition-opacity duration-200"
             style={{ opacity: active === i ? 1 : 0 }}
           >
-            <div className="pointer-events-auto absolute bottom-[16%] left-1/2 -translate-x-1/2 text-center">
+            <div className="absolute bottom-[16%] left-1/2 -translate-x-1/2 text-center" style={{ pointerEvents: active === i ? "auto" : "none" }}>
               <div className="mb-3 font-bold text-white" style={{ fontFamily: "'Geist Variable',sans-serif", fontSize: "clamp(1.4rem,2.6vw,2.2rem)", textShadow: "0 2px 24px rgba(0,0,0,0.8)" }}>
                 {shop.name}
               </div>
@@ -339,15 +367,32 @@ export default function Street3D() {
           </div>
         ))}
 
-        {/* progress dots */}
-        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-          {SHOPS.map((_, i) => (
-            <span key={i} className="h-1.5 rounded-full transition-all duration-300"
-              style={{ width: active === i ? 22 : 6, background: active === i ? COLORS.orange : "rgba(255,255,255,0.3)" }} />
-          ))}
+        {/* closing panel — fills the end of the lane so it never finishes on blank black */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-700" style={{ opacity: atEnd ? 1 : 0 }}>
+          <div className="px-6 text-center" style={{ pointerEvents: atEnd ? "auto" : "none" }}>
+            <div className="text-xs uppercase tracking-[0.3em]" style={{ color: COLORS.orange }}>End of the street</div>
+            <div className="mx-auto mt-4 max-w-2xl font-bold text-white" style={{ fontFamily: "'Geist Variable',sans-serif", fontSize: "clamp(1.6rem,3.4vw,2.8rem)", lineHeight: 1.2, textShadow: "0 2px 24px rgba(0,0,0,0.8)" }}>
+              Every corner of your growth, under one roof.
+            </div>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <a href="/service" className="inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-medium text-white transition-transform hover:translate-x-0.5" style={{ background: COLORS.blue, boxShadow: `0 10px 30px ${COLORS.blue}66` }}>Explore all services <span>→</span></a>
+              <a href="/contact" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white/85 transition-colors hover:border-white/50">Let's talk</a>
+            </div>
+          </div>
         </div>
 
-        {active < 0 && (
+        {/* progress dots */}
+        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+          {SHOPS.map((_, i) => {
+            const on = active === i || (atEnd && i === SHOPS.length - 1);
+            return (
+              <span key={i} className="h-1.5 rounded-full transition-all duration-300"
+                style={{ width: on ? 22 : 6, background: on ? COLORS.orange : "rgba(255,255,255,0.3)" }} />
+            );
+          })}
+        </div>
+
+        {active < 0 && !atEnd && (
           <div className="pointer-events-none absolute bottom-7 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.25em] text-white/50">
             Scroll to walk in
           </div>

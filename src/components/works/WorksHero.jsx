@@ -190,10 +190,10 @@ export default function WorksHero() {
       `}</style>
 
       {/* layers */}
-      <div ref={bgRef} className="wh-bg" style={{ backgroundImage: "url(/images/works/works-hero-bg.jpg)" }} />
+      <div ref={bgRef} className="wh-bg" style={{ backgroundImage: "url(/images/works/works-hero-bg.webp)" }} />
       <canvas ref={canvasRef} className="wh-stars" />
       <div ref={bloomRef} className="wh-bloom" />
-      <div ref={stationRef} className="wh-station" style={{ backgroundImage: "url(/images/works/works-hero-station.png)" }} />
+      <div ref={stationRef} className="wh-station" style={{ backgroundImage: "url(/images/works/works-hero-station.webp)" }} />
 
       {/* content column — headline group centered in the space above, telemetry
           pinned in normal flow at the bottom so the two can never overlap */}

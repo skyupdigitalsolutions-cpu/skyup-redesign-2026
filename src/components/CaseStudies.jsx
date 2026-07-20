@@ -47,6 +47,7 @@ export default function CaseStudies() {
   const cardRefs = useRef([]);
   const audioRef = useRef(null);
   const [revealed, setRevealed] = useState([false, false, false]);
+  const [flipped, setFlipped] = useState(null); // which card is flipped (mobile tap)
 
   // Prime the audio on the FIRST user interaction anywhere on the page, so the
   // blaster can play the very first time the section is seen (and after refresh).
@@ -242,7 +243,31 @@ export default function CaseStudies() {
         .cs-card{opacity:0;transform:translateY(26px) scale(.92)}
         .cs-card.cs-show{animation:csCardIn .6s cubic-bezier(.2,.9,.3,1.2) forwards}
         @keyframes csCardIn{0%{opacity:0;transform:translateY(26px) scale(.92);box-shadow:0 0 0 1px #FF7A1A,0 0 44px -4px rgba(255,122,26,.7)}60%{opacity:1;box-shadow:0 0 0 1px #FF7A1A,0 0 30px -6px rgba(255,122,26,.5)}100%{opacity:1;transform:none;box-shadow:0 20px 50px -24px rgba(0,55,202,.5)}}
-        @media (prefers-reduced-motion: reduce){.cs-card{opacity:1!important;transform:none!important;animation:none!important}.cs-thruster,.cs-char.cs-idle{animation:none}}
+
+        /* ── flip cards (non-clickable; flip on hover / tap) ── */
+        .cs-flip{position:relative;aspect-ratio:1/1.08;border-radius:1rem;cursor:pointer;background:transparent;-webkit-tap-highlight-color:transparent;perspective:1400px}
+        .cs-flip-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.2,.8,.2,1);will-change:transform}
+        @media (hover:hover){.cs-flip:hover .cs-flip-inner{transform:rotateY(180deg)}}
+        .cs-flip.is-flipped .cs-flip-inner{transform:rotateY(180deg)}
+        .cs-face{position:absolute;inset:0;border-radius:1rem;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid rgba(255,255,255,.10);font-family:'Poppins',sans-serif}
+        .cs-front{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));display:flex;flex-direction:column}
+        .cs-thumb{position:relative;flex:1;min-height:0;overflow:hidden}
+        .cs-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.92}
+        .cs-cat{position:absolute;left:14px;top:14px;border-radius:999px;background:rgba(255,255,255,.15);backdrop-filter:blur(6px);padding:5px 12px;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+        .cs-front-foot{padding:16px 18px 18px}
+        .cs-front-client{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+        .cs-front-title{margin-top:5px;font-size:1.02rem;font-weight:700;line-height:1.3;color:#fff}
+        .cs-front-hint{margin-top:10px;display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:#FA9F43}
+        .cs-back{transform:rotateY(180deg);background:linear-gradient(160deg,#0c1430,#0a0f1f);display:flex;flex-direction:column;padding:22px}
+        .cs-back-cat{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#FA9F43}
+        .cs-back-client{margin-top:8px;font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+        .cs-back-title{margin:4px 0 0;font-size:1.05rem;font-weight:700;line-height:1.3;color:#fff}
+        .cs-back-sum{margin:10px 0 0;font-size:.85rem;line-height:1.55;color:rgba(255,255,255,.6);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+        .cs-back-metrics{margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;border-top:1px solid rgba(255,255,255,.1);padding-top:16px}
+        .cs-back-v{font-size:1.15rem;font-weight:800;letter-spacing:-.02em}
+        .cs-back-l{margin-top:2px;font-size:.6rem;line-height:1.2;color:rgba(255,255,255,.45)}
+
+        @media (prefers-reduced-motion: reduce){.cs-card{opacity:1!important;transform:none!important;animation:none!important}.cs-thruster,.cs-char.cs-idle{animation:none}.cs-flip-inner{transition:none}}
       `}</style>
 
       <div className="cs-glow pointer-events-none absolute inset-0" />
@@ -310,41 +335,54 @@ export default function CaseStudies() {
           </svg>
         </div>
 
-        {/* cards */}
+        {/* cards — flip on hover (desktop) / tap (mobile); NOT links */}
         <div className="relative z-10 grid grid-cols-1 gap-6 md:grid-cols-3">
           {featured.map((study, i) => (
-            <a
+            <div
               key={study.slug}
               ref={(el) => (cardRefs.current[i] = el)}
-              href={`/work/${study.slug}`}
-              className={`cs-card group relative flex flex-col overflow-hidden rounded-2xl ${revealed[i] ? "cs-show" : ""}`}
-              style={{ background: "linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015))", border: "1px solid rgba(255,255,255,.09)" }}
+              className={`cs-card cs-flip ${revealed[i] ? "cs-show" : ""} ${flipped === i ? "is-flipped" : ""}`}
+              onClick={() => setFlipped((f) => (f === i ? null : i))}
+              role="button"
+              tabIndex={0}
+              aria-label={`${study.client} — ${study.title}`}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setFlipped((f) => (f === i ? null : i)); } }}
             >
-              <div className="relative h-36 w-full overflow-hidden" style={{ background: COVER_BG[i % COVER_BG.length] }}>
-                {study.image ? (
-                  <img src={study.image} alt={study.client} loading="lazy" className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                ) : null}
-                <span className="absolute left-4 top-4 rounded-full bg-white/15 px-3 py-1 text-[0.66rem] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">{study.category}</span>
-                <span className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors group-hover:bg-white group-hover:text-neutral-900">
-                  <ArrowUpRight className="h-4 w-4" />
-                </span>
-              </div>
-              <div className="flex flex-1 flex-col p-6" style={{ fontFamily: "'Poppins',sans-serif" }}>
-                <div className="text-[0.66rem] font-medium uppercase tracking-wider text-white/40">{study.client}</div>
-                <h3 className="mt-2 text-lg font-bold leading-snug text-white">{study.title}</h3>
-                <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/55">{study.summary}</p>
-                {(study.metrics || []).slice(0, 3).length > 0 && (
-                  <div className="mt-auto grid grid-cols-3 gap-3 border-t border-white/10 pt-5">
-                    {(study.metrics || []).slice(0, 3).map((m, j) => (
-                      <div key={j}>
-                        <div className="text-xl font-extrabold tracking-tight" style={{ color: j === 1 ? ACCENT : BLUE_L }}>{m.value}</div>
-                        <div className="mt-0.5 text-[0.66rem] leading-tight text-white/45">{m.label}</div>
-                      </div>
-                    ))}
+              <div className="cs-flip-inner">
+                {/* FRONT — cover + client + title */}
+                <div className="cs-face cs-front">
+                  <div className="cs-thumb" style={{ background: COVER_BG[i % COVER_BG.length] }}>
+                    {study.image ? (
+                      <img src={study.image} alt={study.client} loading="lazy" className="cs-img" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                    ) : null}
+                    <span className="cs-cat">{study.category}</span>
                   </div>
-                )}
+                  <div className="cs-front-foot">
+                    <div className="cs-front-client">{study.client}</div>
+                    <div className="cs-front-title">{study.title}</div>
+                    <div className="cs-front-hint"><span>See the results</span><ArrowUpRight className="h-3.5 w-3.5" /></div>
+                  </div>
+                </div>
+
+                {/* BACK — the outcome */}
+                <div className="cs-face cs-back">
+                  <div className="cs-back-cat">{study.category}</div>
+                  <div className="cs-back-client">{study.client}</div>
+                  <h3 className="cs-back-title">{study.title}</h3>
+                  <p className="cs-back-sum">{study.summary}</p>
+                  {(study.metrics || []).slice(0, 3).length > 0 && (
+                    <div className="cs-back-metrics">
+                      {(study.metrics || []).slice(0, 3).map((m, j) => (
+                        <div key={j}>
+                          <div className="cs-back-v" style={{ color: j === 1 ? ACCENT : BLUE_L }}>{m.value}</div>
+                          <div className="cs-back-l">{m.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </a>
+            </div>
           ))}
         </div>
 
