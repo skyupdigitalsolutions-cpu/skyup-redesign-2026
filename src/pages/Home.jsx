@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { ClientOnly } from "vike-react/ClientOnly";
 import BulbIntro from "@/components/BulbIntro";
 import ValueProposition from "../components/ValueProposition";
 import WhyChooseUs from "@/components/WhyChooseUs";
@@ -10,11 +10,11 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import HomeSchema from "@/components/home/HomeSchema";
 
-// Street3D and ScrollStoryHero both use three.js + @react-three/fiber (883KB chunk).
-// Neither is visible until the user scrolls past BulbIntro (330vh) so lazy-loading
-// defers parsing that chunk off the critical path entirely — no visual change.
-const Street3D = lazy(() => import("@/components/Street3D"));
-const ScrollStoryHero = lazy(() => import("@/components/hero/ScrollStoryHero"));
+// Street3D and ScrollStoryHero use three.js + @react-three/fiber (883KB chunk).
+// ClientOnly keeps them out of SSR entirely (no hydration mismatch) and defers
+// their JS until the client is interactive — same visual result, no React #419 error.
+const Street3D = () => import("@/components/Street3D").then((m) => ({ default: m.default }));
+const ScrollStoryHero = () => import("@/components/hero/ScrollStoryHero").then((m) => ({ default: m.default }));
 
 export default function Home() {
   return (
@@ -22,13 +22,9 @@ export default function Home() {
       <HomeSchema />
       <Header />
       <BulbIntro />
-      <Suspense fallback={null}>
-        <Street3D />
-      </Suspense>
+      <ClientOnly load={Street3D} fallback={<div style={{ height: "100vh" }} />} />
       <WhyChooseUs />
-      <Suspense fallback={null}>
-        <ScrollStoryHero />
-      </Suspense>
+      <ClientOnly load={ScrollStoryHero} fallback={<div style={{ height: "100vh" }} />} />
       <CaseStudies />
       <ValueProposition />
       <ProcessSection />
