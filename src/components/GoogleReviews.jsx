@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 const GOLD = "#FFC53D", BLUE = "#2E6BFF", ORANGE = "#FF7A1A", ORANGE_L = "#FFB066";
 
-const SUMMARY = { rating: 4.9, count: 92, writeReviewUrl: "#", allReviewsUrl: "https://share.google/0iNO9uI09kcC5H3XP" };
+const SUMMARY = { rating: 4.9, count: 92, writeReviewUrl: "https://search.google.com/local/writereview?placeid=ChIJmzKRD-8XrjsRK6s6rZmQDKQ", allReviewsUrl: "https://share.google/0iNO9uI09kcC5H3XP" };
 
 const REVIEWS = [
   { name: "Pooja M S", initial: "P", color: "#1A73E8", text: "I had a very good experience with SKYUP Digital Solutions LLP. The team is friendly, professional, and easy to work with — they improved my online presence and brought more leads to my business." },
@@ -155,7 +155,7 @@ export default function GoogleReviews() {
             <div className="flex items-center gap-2 text-[0.82rem] font-semibold text-white"><GoogleG size={18} /> Google Business</div>
             <div className="flex items-center gap-1.5 text-[0.7rem] font-semibold" style={{ color: "#34A853" }}>✔ Verified reviews</div>
             <div className="flex gap-2">
-              <a href={SUMMARY.writeReviewUrl} className="rounded-full px-3.5 py-2 text-[0.76rem] font-semibold text-white" style={{ background: BLUE }}>Write a review</a>
+              <a href={SUMMARY.writeReviewUrl} target="_blank" rel="noopener noreferrer" className="rounded-full px-3.5 py-2 text-[0.76rem] font-semibold text-white" style={{ background: BLUE }}>Write a review</a>
               <a href={SUMMARY.allReviewsUrl} target="_blank" rel="noopener noreferrer" className="rounded-full border px-3.5 py-2 text-[0.76rem] font-semibold text-white/85" style={{ borderColor: "rgba(255,255,255,.16)" }}>Read all {SUMMARY.count}</a>
             </div>
           </div>

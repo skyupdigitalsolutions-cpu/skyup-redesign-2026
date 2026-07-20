@@ -10,18 +10,32 @@ export default function Head() {
       {description && <meta name="description" content={description} />}
       {config?.keywords && <meta name="keywords" content={config.keywords} />}
 
-      {/* Preconnect — keep these */}
+      {/* Poppins + Geist are self-hosted (@fontsource, bundled). Only Cormorant Garamond
+          is fetched from Google, and it's loaded non-render-blocking (media=print, flipped
+          to all after load) so it never blocks first paint. Same fonts, same look. */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link
         rel="preconnect"
         href="https://fonts.gstatic.com"
         crossOrigin="anonymous"
       />
-
-      {/* Non-blocking font load */}
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+        media="print"
+        data-font="cormorant"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+      />
+      <noscript>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+        />
+      </noscript>
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "requestAnimationFrame(function(){var l=document.querySelector('link[data-font=cormorant]');if(l)l.media='all';});",
+        }}
       />
 
       {/* Icons — point at the file that actually exists in /public */}
