@@ -92,18 +92,30 @@ export default function Head() {
       <meta name="twitter:description" content={ogDesc} />
       <meta name="twitter:image" content={ogImage} />
 
-      {/* Preconnect */}
+      {/* Preconnect — only needed for Cormorant (Poppins + Geist are self-hosted via fontsource) */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossOrigin="anonymous"
-      />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
-      {/* Non-blocking font load */}
+      {/* Cormorant Garamond — non-render-blocking (media=print flipped to all after load).
+          Poppins is NOT fetched from Google — it is bundled via @fontsource in index.css.
+          Space Mono removed from Google too; add a fontsource import if you use it. */}
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Space+Mono:wght@400;700&display=swap"
+        media="print"
+        data-font="cormorant"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+      />
+      <noscript>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+        />
+      </noscript>
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "requestAnimationFrame(function(){var l=document.querySelector('link[data-font=cormorant]');if(l)l.media='all';});",
+        }}
       />
 
       {/* Icons + manifest */}
