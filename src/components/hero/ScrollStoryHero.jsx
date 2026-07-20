@@ -1,10 +1,8 @@
-import { useRef, useState, useEffect, useLayoutEffect, lazy, Suspense } from "react";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
+import { Canvas } from "@react-three/fiber";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-// The WebGL core (@react-three/fiber + StoryCore's Three) is code-split and loaded only
-// when the hero is approached — off the initial page parse. Renders identically.
-const StoryCanvas = lazy(() => import("./components/StoryCanvas"));
+import StoryCore from "./components/StoryCore";
 
 /* ── inline config (no external heroConfig file needed) ── */
 const COLORS = { blue: "#0037CA", blueLight: "#3D6BF0", orange: "#F25623", bg: "#04050C" };
@@ -67,7 +65,6 @@ export default function ScrollStoryHero({ children }) {
   const [mounted, setMounted] = useState(false);
   const [webgl, setWebgl] = useState(true);
   const [inView, setInView] = useState(false); // render WebGL only while on-screen
-  const [entered, setEntered] = useState(false); // mounts the scene once approached, then keeps it
   const [word, setWord] = useState(0);
 
   useEffect(() => {
@@ -82,8 +79,8 @@ export default function ScrollStoryHero({ children }) {
   // so it's ready before it's seen). Off-screen → the render loop stops.
   useEffect(() => {
     const el = root.current;
-    if (!el || typeof IntersectionObserver === "undefined") { setInView(true); setEntered(true); return; }
-    const io = new IntersectionObserver(([e]) => { setInView(e.isIntersecting); if (e.isIntersecting) setEntered(true); }, { rootMargin: "600px 0px" });
+    if (!el || typeof IntersectionObserver === "undefined") { setInView(true); return; }
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "600px 0px" });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -231,10 +228,12 @@ export default function ScrollStoryHero({ children }) {
 
           {/* full-screen 3D core — z-0 keeps WebGL strictly behind everything */}
           <div className="absolute inset-0 z-[0]" style={{ isolation: "isolate" }}>
-            {mounted && webgl && entered ? (
-              <Suspense fallback={null}>
-                <StoryCanvas inView={inView} story={story} />
-              </Suspense>
+            {mounted && webgl ? (
+              <Canvas frameloop={inView ? "always" : "never"} camera={{ position: [0, 0, 6.5], fov: 45 }} dpr={[1, 1.5]}
+                gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+                style={{ background: "transparent" }}>
+                <StoryCore story={story} />
+              </Canvas>
             ) : (
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
                 style={{ width: "44vh", height: "44vh", background: `radial-gradient(circle, ${COLORS.blueLight}55 0%, ${COLORS.blue}22 45%, transparent 70%)` }} />
