@@ -314,8 +314,7 @@ export default function IndustriesWeServe() {
   // scrolls the body behind the modal and the page ends up scrolled when you close it.)
   useEffect(() => {
     if (!open) return;
-    // Safety net: never lock scroll on desktop. If the viewport is (or becomes)
-    // lg and up, the modal is hidden, so close it and leave scrolling intact.
+    // Safety net: never lock scroll on desktop.
     if (
       typeof window !== "undefined" &&
       window.matchMedia("(min-width: 1024px)").matches
@@ -323,6 +322,11 @@ export default function IndustriesWeServe() {
       setOpen(false);
       return;
     }
+
+    // Push a history entry so the mobile back button closes the modal
+    // instead of navigating away from the page.
+    history.pushState({ industryModal: true }, "");
+
     const scrollY = window.scrollY;
     const body = document.body;
     const prev = {
@@ -335,15 +339,25 @@ export default function IndustriesWeServe() {
     body.style.position = "fixed";
     body.style.top = `-${scrollY}px`;
     body.style.width = "100%";
+
     const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    // Back button on mobile fires popstate — close the modal instead of leaving the page.
+    const onPop = (e) => { setOpen(false); };
+
     window.addEventListener("keydown", onKey);
+    window.addEventListener("popstate", onPop);
+
     return () => {
       body.style.overflow = prev.overflow;
       body.style.position = prev.position;
       body.style.top = prev.top;
       body.style.width = prev.width;
-      window.scrollTo(0, scrollY); // restore — closing never jumps the page
+      window.scrollTo(0, scrollY);
       window.removeEventListener("keydown", onKey);
+      window.removeEventListener("popstate", onPop);
+      // If the modal was closed by X button or backdrop (not back button),
+      // pop the history entry we pushed so the browser history stays clean.
+      if (history.state?.industryModal) history.back();
     };
   }, [open]);
 
