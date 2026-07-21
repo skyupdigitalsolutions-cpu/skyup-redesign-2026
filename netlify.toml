@@ -5,22 +5,27 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Since Vike pre-renders all pages to static HTML, every route already has
-# a real index.html in dist/client/<route>/index.html. The splat redirect
-# below is only a safety net for any route that isn't pre-rendered — it
-# sends unknown paths to the root so the client-side router can handle them.
+# Vike pre-renders every page to its own index.html.
+# e.g. /about -> dist/client/about/index.html
+#      /service/seo -> dist/client/service/seo/index.html
+#
+# The redirect below uses `force = false` (the default) which means Netlify
+# will ONLY use this rule if no matching static file exists.
+# This preserves all pre-rendered pages while still handling any
+# dynamic or unknown routes via the root SPA entry.
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
   status = 200
+  force  = false
 
-# Cache immutable hashed assets forever
+# Cache hashed assets forever (safe — filenames change on rebuild)
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Don't cache HTML — always fresh
+# Never cache HTML — always serve fresh
 [[headers]]
   for = "/*.html"
   [headers.values]
