@@ -17,7 +17,7 @@ export default function Layout({ children }) {
   const { config, urlPathname } = pageContext;
   const lenisRef = useRef(null);
 
-  // ── Smooth scrolling (Lenis) synced with GSAP ScrollTrigger ──
+  // ── Lenis smooth scroll + GSAP ScrollTrigger — runs once on mount ──
   useEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
@@ -25,6 +25,7 @@ export default function Layout({ children }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     gsap.registerPlugin(ScrollTrigger);
+
     const lenis = new Lenis({
       duration: 1.15,
       smoothWheel: true,
@@ -32,7 +33,7 @@ export default function Layout({ children }) {
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
     lenisRef.current = lenis;
-    if (typeof window !== "undefined") window.__lenis = lenis;
+    window.__lenis = lenis;
 
     lenis.on("scroll", ScrollTrigger.update);
     const onTick = (time) => lenis.raf(time * 1000);
@@ -43,16 +44,24 @@ export default function Layout({ children }) {
       gsap.ticker.remove(onTick);
       lenis.destroy();
       lenisRef.current = null;
-      if (typeof window !== "undefined" && window.__lenis === lenis) window.__lenis = null;
+      if (window.__lenis === lenis) window.__lenis = null;
     };
   }, []);
 
-  // ── Force every page to top on navigation AND refresh ──
-  // Critical: after scrolling to 0 we MUST call ScrollTrigger.refresh()
-  // so pinned sections recalculate their start/end positions against the
-  // new page's DOM. Without this, animations from the previous page's
-  // measurements bleed into the new page — causing broken animations,
-  // wrong pin positions, and elements stuck in mid-animation state.
+  // ── On every page change: scroll to top + refresh ScrollTrigger ──
+  // This runs on both hard refresh AND client-side navigation.
+  //
+  // WHY ScrollTrigger.refresh() is critical:
+  // When Lenis scrolls to 0, the visual position resets but ScrollTrigger
+  // still holds measurements from the previous page's DOM (pin positions,
+  // trigger offsets, scroll percentages). Without refresh(), every
+  // animation on the new page fires at wrong scroll positions — elements
+  // appear stuck, animations don't play, pins are in wrong places.
+  //
+  // WHY multiple timeouts:
+  // Hard refresh: browser restores scroll position AFTER useEffect runs,
+  // sometimes up to 500ms later on slow mobile. We keep resetting to 0
+  // until the user intentionally scrolls.
   useEffect(() => {
     let cancelled = false;
     let userScrolled = false;
@@ -61,7 +70,7 @@ export default function Layout({ children }) {
     window.addEventListener("wheel", onUserScroll, { once: true, passive: true });
     window.addEventListener("touchstart", onUserScroll, { once: true, passive: true });
 
-    const reset = () => {
+    const scrollToTop = () => {
       if (cancelled || userScrolled) return;
       const lenis = lenisRef.current;
       if (lenis) {
@@ -71,37 +80,36 @@ export default function Layout({ children }) {
       }
     };
 
-    const refreshTriggers = () => {
+    const refreshST = () => {
       if (cancelled) return;
-      try { ScrollTrigger.refresh(); } catch {}
+      try { ScrollTrigger.refresh(true); } catch (_) {}
     };
 
-    // Step 1: scroll to top immediately
-    reset();
+    // Immediate reset
+    scrollToTop();
 
-    // Step 2: scroll to top next frame (catches browser late restoration)
-    const id1 = requestAnimationFrame(() => {
-      reset();
-      // Step 3: refresh ScrollTrigger AFTER scroll reset so it remeasures
-      // the new page's DOM with scroll=0 as the baseline
-      requestAnimationFrame(refreshTriggers);
+    // rAF 1: reset again (catches one-frame-late browser restoration)
+    const raf1 = requestAnimationFrame(() => {
+      scrollToTop();
+      // Refresh ScrollTrigger AFTER scroll is at 0 so it measures correctly
+      requestAnimationFrame(refreshST);
     });
 
-    // Step 4: belt-and-suspenders resets for slow mobile browsers
-    const id3 = setTimeout(() => { reset(); refreshTriggers(); }, 150);
-    const id4 = setTimeout(() => { reset(); refreshTriggers(); }, 400);
+    // Belt-and-suspenders for slow mobile browsers
+    const t1 = setTimeout(() => { scrollToTop(); refreshST(); }, 150);
+    const t2 = setTimeout(() => { scrollToTop(); refreshST(); }, 500);
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(id1);
-      clearTimeout(id3);
-      clearTimeout(id4);
+      cancelAnimationFrame(raf1);
+      clearTimeout(t1);
+      clearTimeout(t2);
       window.removeEventListener("wheel", onUserScroll);
       window.removeEventListener("touchstart", onUserScroll);
     };
   }, [urlPathname]);
 
-  // ── Dynamic SEO ──
+  // ── Dynamic SEO meta per page ──
   useEffect(() => {
     let title = config?.title;
     let description = config?.metaDescription;
@@ -142,15 +150,15 @@ export default function Layout({ children }) {
     if (title) document.title = title;
 
     if (description) {
-      let descTag = document.querySelector('meta[name="description"]');
-      if (!descTag) { descTag = document.createElement("meta"); descTag.setAttribute("name", "description"); document.head.appendChild(descTag); }
-      descTag.setAttribute("content", description);
+      let tag = document.querySelector('meta[name="description"]');
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute("name", "description"); document.head.appendChild(tag); }
+      tag.setAttribute("content", description);
     }
 
     if (keywords) {
-      let kwTag = document.querySelector('meta[name="keywords"]');
-      if (!kwTag) { kwTag = document.createElement("meta"); kwTag.setAttribute("name", "keywords"); document.head.appendChild(kwTag); }
-      kwTag.setAttribute("content", keywords);
+      let tag = document.querySelector('meta[name="keywords"]');
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute("name", "keywords"); document.head.appendChild(tag); }
+      tag.setAttribute("content", keywords);
     }
 
     let canonical = document.querySelector('link[rel="canonical"]');
