@@ -123,7 +123,7 @@ export default function GoogleReviews() {
       <style>{`
         .gr-grid{background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:30px 30px;-webkit-mask-image:radial-gradient(120% 80% at 50% 20%,#000 24%,transparent 70%);mask-image:radial-gradient(120% 80% at 50% 20%,#000 24%,transparent 70%)}
         .gr-bloom{background:radial-gradient(40% 32% at 50% 5%,rgba(255,197,61,.10),transparent 70%),radial-gradient(42% 50% at 88% 92%,rgba(46,107,255,.12),transparent 72%)}
-        .gr-fill{position:absolute;left:0;top:0;color:${GOLD};overflow:hidden;white-space:nowrap;transition:width 1.1s cubic-bezier(.4,1,.4,1)}
+        .gr-fill{position:absolute;left:0;top:0;color:${GOLD};white-space:nowrap;clip-path:inset(0 100% 0 0);transition:clip-path 1.1s cubic-bezier(.4,1,.4,1)}
         .gr-card{position:absolute;left:50%;top:52%;width:320px;will-change:transform,opacity;transform-origin:center center;opacity:0}
         .gr-dot{height:7px;width:7px;border-radius:999px;background:rgba(255,255,255,.2);transition:all .4s}
         .gr-dot.gr-on{width:22px;background:${ORANGE}}
@@ -146,7 +146,7 @@ export default function GoogleReviews() {
             <div className="font-extrabold leading-none" style={{ fontFamily: "'Poppins',sans-serif", fontSize: "3rem", letterSpacing: "-0.03em", background: `linear-gradient(180deg,#fff,${GOLD})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{scoreText}</div>
             <div className="relative inline-block text-[1.1rem] leading-none">
               <span style={{ color: "rgba(255,255,255,.16)" }}>★★★★★</span>
-              <span className="gr-fill" style={{ width: `${starW}%` }}>★★★★★</span>
+              <span className="gr-fill" style={{ clipPath: `inset(0 ${100 - starW}% 0 0)` }}>★★★★★</span>
             </div>
             <div className="text-[0.78rem] text-white/55">Based on <b className="text-white/80">{countText}</b> Google reviews</div>
           </div>

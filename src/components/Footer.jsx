@@ -48,7 +48,7 @@ const SOCIAL_LINKS = [
 
 function BrandMark() {
   // full-colour logo (blue + orange); dark ink pre-swapped to white for the dark footer
-  return <img src="/images/skyup-logo.svg" alt="SkyUp logo" className="h-auto w-full" />;
+  return <img src="/images/skyup-logo.svg" alt="SkyUp logo" width="351" height="115" className="h-auto w-full" />;
 }
 
 function ColHeading({ children }) {

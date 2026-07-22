@@ -84,7 +84,7 @@ export default function Header() {
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-3.5 md:px-8 lg:px-12">
           {/* Logo */}
           <a href="/" className="shrink-0 transition-transform duration-300 hover:scale-[1.03]">
-            <img src="/images/skyup-logo.svg" alt="Skyup Digital Solutions" className="h-[48px] w-auto object-contain" />
+            <img src="/images/skyup-logo.svg" alt="Skyup Digital Solutions" width="147" height="48" className="h-[48px] w-auto object-contain" />
           </a>
 
           {/* Center: pill nav (dark glass) */}
