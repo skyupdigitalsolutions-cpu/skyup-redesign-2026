@@ -5,6 +5,11 @@
 
 import React, { useState } from "react";
 
+// Backend base URL. Set VITE_API_BASE_URL in your Cloudflare build env to override.
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://skyup-redesign-backend-2026.onrender.com";
+
 const INTERESTS = [
   "SEO",
   "Google / Meta Ads (PPC)",
@@ -21,6 +26,8 @@ export default function ContactForm() {
   const [f, setF] = useState({ firstName: "", lastName: "", company: "", email: "", interest: "", phone: "", message: "" });
   const [err, setErr] = useState({});
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const set = (k) => (e) => { setF((s) => ({ ...s, [k]: e.target.value })); if (err[k]) setErr((s) => ({ ...s, [k]: undefined })); };
 
@@ -38,7 +45,39 @@ export default function ContactForm() {
     return Object.keys(e).length === 0;
   };
 
-  const onSubmit = (ev) => { ev.preventDefault(); if (validate()) setSent(true); };
+  const onSubmit = async (ev) => {
+    ev.preventDefault();
+    if (!validate()) return;
+
+    // Map form fields to the backend Contact model.
+    // Backend requires: name, company, email, phone, service, budget, message.
+    const payload = {
+      name: `${f.firstName} ${f.lastName}`.trim(),
+      company: f.company.trim(),
+      email: f.email.trim(),
+      phone: f.phone.trim(),
+      service: f.interest,
+      budget: "Not specified", // form doesn't collect a budget; backend requires the field
+      message: f.message.trim() || "No message provided", // backend requires a non-empty message
+    };
+
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch(`${API_BASE}/api/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Something went wrong. Please try again.");
+      setSent(true);
+    } catch (e) {
+      setSubmitError(e.message || "Could not send your message. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (sent) {
     return (
@@ -110,13 +149,18 @@ export default function ContactForm() {
       </div>
 
       <div className="vgf-actions">
-        <button type="submit" className="vgf-submit">Submit</button>
+        {submitError && <p className="vgf-error" role="alert">{submitError}</p>}
+        <button type="submit" className="vgf-submit" disabled={submitting}>
+          {submitting ? "Sending…" : "Submit"}
+        </button>
       </div>
     </form>
   );
 }
 
 const CSS = `
+.vgf-error{ position:relative; z-index:2; color:#ff8a8a; font-size:13.5px; margin:0 0 12px; text-align:center; }
+.vgf-submit:disabled{ opacity:.6; cursor:not-allowed; }
 .vgf-card{ position:relative; width:min(1080px,94vw); margin:0 auto; padding:clamp(26px,4vw,54px);
   border-radius:28px; overflow:hidden; font-family:'Poppins',system-ui,sans-serif;
   background:linear-gradient(160deg, #17171b 0%, #0b0b0e 46%, #030304 100%);
