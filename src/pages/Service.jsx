@@ -1,3 +1,4 @@
+import { ClientOnly } from "vike-react/ClientOnly";
 import FaqSection from "@/components/FaqSection";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -53,17 +54,19 @@ export default function Service() {
   return (
     <div style={{ background: "#04050C" }}>
       <Header />
-      <ServiceUniverse>
-        {/* Solar System hero: the sun (Skyup) at center with 8 service-planets in orbit */}
-        <ServiceSolar />
-        <ResultsAndProcess />
-        <IndustriesWeServe />
-        <FaqSection
-          faqs={FAQ_questions}
-          title="Questions Businesses Often Ask Us"
-          subtitle=""
-        />
-      </ServiceUniverse>
+      <ClientOnly fallback={<div style={{ minHeight: "100vh", background: "#04050C" }} />}>
+        <ServiceUniverse>
+          {/* Solar System hero: the sun (Skyup) at center with 8 service-planets in orbit */}
+          <ServiceSolar />
+          <ResultsAndProcess />
+          <IndustriesWeServe />
+          <FaqSection
+            faqs={FAQ_questions}
+            title="Questions Businesses Often Ask Us"
+            subtitle=""
+          />
+        </ServiceUniverse>
+      </ClientOnly>
       <Footer
         ctaProps={{
           title: "READY TO GROW?",
