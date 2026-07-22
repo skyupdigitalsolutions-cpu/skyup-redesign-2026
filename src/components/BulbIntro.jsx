@@ -121,7 +121,7 @@ export default function BulbIntro({ children }) {
             alt=""
             aria-hidden="true"
             width="400"
-            height="600"
+            height="910"
             fetchpriority="high"
             className="absolute left-1/2 top-[3vh] z-[8] h-[44vh] w-auto object-contain"
             style={{ opacity: 0, transform: "translate(-50%, -120px)", filter: "brightness(0.26)", willChange: "transform, opacity, filter" }}

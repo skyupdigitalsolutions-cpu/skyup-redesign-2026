@@ -1,11 +1,7 @@
 /* Critical weights only — loaded synchronously (400 = body, 600 = nav/headings).
    300, 500, 700, 800 are loaded via JS after first paint to avoid parse cost. */
-@import "@fontsource/poppins/300.css";
 @import "@fontsource/poppins/400.css";
-@import "@fontsource/poppins/500.css";
 @import "@fontsource/poppins/600.css";
-@import "@fontsource/poppins/700.css";
-@import "@fontsource/poppins/800.css";
 
 /* Cormorant Garamond — self-hosted via fontsource (no Google Fonts network round-trip).
    Only the weights actually used: 500 (BulbIntro body), 600, 700 (headings/tagline). */
