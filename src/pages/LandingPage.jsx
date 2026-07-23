@@ -480,6 +480,160 @@ const GLOBAL_CSS = `
   @media (max-width: 768px) {
     .process-line::before { display: none; }
   }
+
+  /* ── Floating Robot Chip ── */
+  .robot-chip {
+    position: fixed;
+    bottom: 28px;
+    right: 24px;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #0037CA, #1F6BFF);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 999px;
+    padding: 10px 18px 10px 10px;
+    cursor: pointer;
+    box-shadow: 0 8px 32px -8px rgba(0,55,202,0.7), 0 0 0 0 rgba(0,55,202,0.4);
+    animation: robotPulse 2.8s ease-in-out infinite;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    font-family: Poppins, sans-serif;
+  }
+  .robot-chip:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 16px 40px -8px rgba(0,55,202,0.8), 0 0 0 6px rgba(0,55,202,0.15);
+  }
+  @keyframes robotPulse {
+    0%, 100% { box-shadow: 0 8px 32px -8px rgba(0,55,202,0.7), 0 0 0 0 rgba(0,55,202,0.35); }
+    50% { box-shadow: 0 8px 32px -8px rgba(0,55,202,0.7), 0 0 0 10px rgba(0,55,202,0); }
+  }
+  .robot-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    animation: robotBob 1.8s ease-in-out infinite;
+  }
+  @keyframes robotBob {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-4px) rotate(3deg); }
+  }
+  .robot-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .robot-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .robot-cta {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* popup */
+  .robot-popup {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    z-index: 99998;
+    width: 280px;
+    background: linear-gradient(160deg, #0c1024, #070a14);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 24px 60px -16px rgba(0,0,0,0.9);
+    animation: popupIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+    font-family: Poppins, sans-serif;
+  }
+  @keyframes popupIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .robot-popup-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    transition: color 0.2s;
+  }
+  .robot-popup-close:hover { color: #fff; }
+  .robot-popup-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0,55,202,0.3), rgba(46,107,255,0.2));
+    border: 1px solid rgba(46,107,255,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 12px;
+    animation: robotBob 1.8s ease-in-out infinite;
+  }
+  .robot-popup-msg {
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .robot-popup-msg strong { color: #fff; }
+  .robot-popup-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 11px 16px;
+    background: linear-gradient(135deg, #0037CA, #1F6BFF);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 20px -6px rgba(0,55,202,0.6);
+  }
+  .robot-popup-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px -6px rgba(0,55,202,0.8);
+  }
+  .robot-popup-footer {
+    margin-top: 10px;
+    font-size: 10.5px;
+    color: rgba(255,255,255,0.35);
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .robot-chip { bottom: 16px; right: 12px; padding: 9px 14px 9px 9px; }
+    .robot-popup { right: 12px; width: calc(100vw - 24px); bottom: 80px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .robot-chip, .robot-avatar { animation: none !important; }
+  }
+
 `;
 
 /* ══════════════════════════════════════════
@@ -3368,6 +3522,56 @@ function DocSections() {
   );
 }
 
+
+/* ══════════════════════════════════════════
+   FLOATING ROBOT CHIP — invites visitors to explore the main site
+══════════════════════════════════════════ */
+function RobotChip() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      {/* Popup */}
+      {open && (
+        <div className="robot-popup">
+          <button
+            className="robot-popup-close"
+            onClick={() => setOpen(false)}
+            aria-label="Close"
+          >×</button>
+          <div className="robot-popup-avatar">🤖</div>
+          <p className="robot-popup-msg">
+            Hey! I'm the Skyup bot 👋<br />
+            <strong>Want to see how we grow businesses beyond real estate?</strong>{" "}
+            Check out everything we build — SEO, AI automation, web development and more.
+          </p>
+          <a
+            href="https://www.skyupdigitalsolutions.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="robot-popup-btn"
+          >
+            🚀 Explore Skyup Digital →
+          </a>
+          <p className="robot-popup-footer">Opens skyupdigitalsolutions.com</p>
+        </div>
+      )}
+
+      {/* Chip */}
+      <button
+        className="robot-chip"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Chat with Skyup bot"
+      >
+        <span className="robot-avatar">🤖</span>
+        <span className="robot-text">
+          <span className="robot-label">Skyup Bot</span>
+          <span className="robot-cta">Explore our universe →</span>
+        </span>
+      </button>
+    </>
+  );
+}
+
 export function LandingPage() {
   useReveal();
 
@@ -3395,6 +3599,7 @@ export function LandingPage() {
         </p>
       </div>
       <Footer />
+      <RobotChip />
     </div>
   );
 }
