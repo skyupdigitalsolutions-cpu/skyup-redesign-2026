@@ -555,6 +555,7 @@ const STATS = []; // removed fabricated stats — add genuine, verifiable result
    so it stays clearly a demo and within Google Ads misrepresentation policy. */
 const PIPELINE_STAGES = [
   { Icon: Megaphone, label: "Google Ads" },
+  { Icon: Share2, label: "Meta Ads" },
   { Icon: LayoutTemplate, label: "Landing Page" },
   { Icon: CheckCircle2, label: "Qualified" },
   { Icon: Database, label: "CRM" },
@@ -605,6 +606,7 @@ const WORKS = [
   {
     client: "Rathna Bhoomi Developers",
     category: "Google Ads",
+    image: "/images/case-studies/rathna-bhoomi-ppc.avif",
     title: "Google Ads that fill the site-visit calendar",
     summary:
       "Rebuilt account structure and honest conversion tracking turned wasted spend into a steady stream of booked site visits.",
@@ -618,6 +620,7 @@ const WORKS = [
   {
     client: "GK Hill View",
     category: "Real Estate",
+    image: "/images/case-studies/gk-hill-view.avif",
     title: "A plotted-development launch with a full pipeline",
     summary:
       "Meta + Google campaigns feeding a conversion landing page brought a flood of qualified plot enquiries at launch.",
@@ -630,6 +633,7 @@ const WORKS = [
   {
     client: "Gruhakalpa",
     category: "WhatsApp Automation",
+    image: "/images/case-studies/gruhakalpa.avif",
     title: "Instant WhatsApp follow-up on every lead",
     summary:
       "An automated WhatsApp flow answered and qualified buyers within seconds, so the team spoke only to serious ones.",
@@ -642,6 +646,7 @@ const WORKS = [
   {
     client: "NS Brothers SLV",
     category: "Web & SEO",
+    image: "/images/case-studies/ns-brothers-slv.avif",
     title: "A fast project microsite that ranks locally",
     summary:
       "A performance-first microsite plus local SEO lifted organic visibility and enquiry conversions.",
@@ -654,6 +659,7 @@ const WORKS = [
   {
     client: "Garuda Holiday",
     category: "Performance Marketing",
+    image: "/images/case-studies/garuda-holiday.avif",
     title: "Full-funnel lead gen that scales profitably",
     summary:
       "Google + Meta campaigns with strong creative delivered a steady pipeline at a lower cost per lead.",
@@ -666,6 +672,7 @@ const WORKS = [
   {
     client: "The Vector Graphics",
     category: "Branding & Creative",
+    image: "/images/case-studies/vector-graphics.avif",
     title: "An ad-creative system that lifts every campaign",
     summary:
       "A cohesive creative system for ads and landing pages raised click-through and made testing faster.",
@@ -1487,7 +1494,10 @@ function WorkCard({ work, i }) {
         <div className="wfc-face wfc-front">
           <div
             className="wfc-thumb"
-            style={{ background: `linear-gradient(150deg, ${g1}, ${g2})` }}
+            style={work.image
+              ? { backgroundImage: `url(${work.image})`, backgroundSize: "cover", backgroundPosition: "center" }
+              : { background: `linear-gradient(150deg, ${g1}, ${g2})` }
+            }
           />
           <span className="wfc-cat">{work.category}</span>
           <div className="wfc-front-body">
