@@ -20,8 +20,8 @@ const TEAM = [
   { name: "Ismail Zabiulla",   role: "Sales Manager",        n: 5, file: "ismail" },
   { name: "Jahnavi AK",  role: "Perfomance Marketer",        n: 6, file: "jahnavi" },
   { name: "Pooja Kadwadi",    role: "Frontend Developer",   n: 7, file: "pooja" },
-  { name: "Shashikant",   role: "Full Stack Developer", n: 8, file: "shashi" },
-  { name: "Srinivas", role: "Backend Developer",    n: 9, file: "srinivas" },
+  { name: "Shashikant S Bilgundi ",   role: "Full Stack Developer", n: 8, file: "shashi" },
+  { name: "Srinivas Sutar", role: "Backend Developer",    n: 9, file: "srinivas" },
   { name: "Teja GS",     role: "Tele Sales Executive", n: 10, file: "teja" },
 ];
 const VALUES = [
