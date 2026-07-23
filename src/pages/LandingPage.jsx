@@ -918,40 +918,73 @@ const PROCESS = [
   },
 ];
 
-const TESTIMONIALS = []; // removed fabricated testimonials — add real, attributable quotes
+const TESTIMONIALS = [
+  {
+    name: "Pooja M S",
+    initials: "P",
+    color: "#1A73E8",
+    time: "3 months ago",
+    quote: "I had a very good experience with SKYUP Digital Solutions LLP. The team is friendly, professional, and easy to work with — they improved my online presence and brought more leads to my business.",
+    rating: 5,
+  },
+  {
+    name: "Maltesh G",
+    initials: "M",
+    color: "#D93025",
+    time: "5 months ago",
+    quote: "Skyup did an excellent job in website design and development for our business. The website is fast, responsive, and SEO-friendly. Highly recommend them.",
+    rating: 5,
+  },
+  {
+    name: "Pranoy Gowda",
+    initials: "P",
+    color: "#188038",
+    time: "4 months ago",
+    quote: "SKYUP delivers effective digital advertising with a strong focus on performance and ROI — targeted campaigns across search and social that drive measurable growth.",
+    rating: 5,
+  },
+  {
+    name: "Rathna Bhoomi Developers",
+    initials: "R",
+    color: "#FA9F43",
+    time: "2 months ago",
+    quote: "Skyup helped us generate consistent property enquiries through Google Ads and Meta campaigns. Their team understood our project requirements and delivered results that matched our sales goals.",
+    rating: 5,
+  },
+];
 
 const FAQS = [
   {
-    q: "How can digital marketing help my real estate business?",
-    a: "Digital marketing helps you reach potential buyers actively looking for properties, generate qualified enquiries, increase site visits, and improve project visibility through targeted online campaigns.",
+    q: "Which digital marketing agency in Bangalore is best for real estate lead generation?",
+    a: "Skyup Digital Solutions is a Bangalore-based digital marketing agency specialising in real estate lead generation. We run targeted Google Ads and Meta Ads campaigns for builders, developers, and property consultants across Bangalore — from Whitefield and Sarjapur Road to Devanahalli and North Bangalore.",
   },
   {
-    q: "Which marketing channels work best for real estate lead generation?",
-    a: "Google Ads and Meta Ads are among the most effective channels for generating property enquiries. Combined with landing pages, WhatsApp marketing, and remarketing campaigns, they help attract and convert potential buyers.",
+    q: "How much does real estate digital marketing cost in Bangalore?",
+    a: "Real estate digital marketing costs in Bangalore typically range from ₹50,000 to ₹3,00,000+ per month depending on the number of platforms, project type, competition, and ad budget. We offer flexible plans starting from ₹50,000/month that include campaign management, landing pages, and lead tracking.",
   },
   {
-    q: "Do you work with builders, developers, and real estate consultants?",
-    a: "Yes. We work with builders, developers, property consultants, plotted development projects, apartment projects, villa projects, and other real estate businesses looking to increase lead generation and sales opportunities.",
+    q: "How do you generate property leads for projects in Whitefield, Sarjapur, and Devanahalli?",
+    a: "We build hyper-local campaigns targeting buyers searching for properties in specific Bangalore micro-markets like Whitefield, Sarjapur Road, Electronic City, Devanahalli, Hebbal, and Kanakapura Road. Our targeting is based on location, buyer intent, income signals, and property type — so your ads reach the right buyers in the right areas.",
   },
   {
-    q: "How long does it take to start generating leads?",
-    a: "Campaign performance depends on factors such as project location, competition, budget, and market demand. In many cases, qualified enquiries can start coming in within the first few weeks of campaign launch.",
+    q: "Can you run Google Ads and Meta Ads together for my real estate project?",
+    a: "Yes. We manage end-to-end campaigns across Google Search Ads, Google Display, YouTube, Facebook, and Instagram. Running both together gives your project broader visibility — Google captures active property searchers while Meta builds awareness and re-targets interested buyers.",
   },
   {
-    q: "Can you manage both Google Ads and Meta Ads?",
-    a: "Yes. We provide end-to-end campaign management across Google Ads, Facebook, and Instagram to help maximise reach, improve lead quality, and increase conversion opportunities.",
+    q: "How do you improve the quality of real estate leads from digital ads?",
+    a: "We improve lead quality by combining precise audience targeting, intent-based keyword selection, dedicated landing pages with clear qualification questions, and CRM integration. We continuously review lead feedback from your sales team and adjust campaigns to reduce irrelevant enquiries.",
   },
   {
-    q: "How do you track lead quality and campaign performance?",
-    a: "We implement conversion tracking, lead tracking, and performance reporting to help you understand where your enquiries are coming from and how your campaigns are performing.",
+    q: "Do you work with plotted development, apartment, and villa projects in Bangalore?",
+    a: "Yes. We have experience running campaigns for plotted developments, apartment projects, villa projects, commercial properties, and holiday home projects across Bangalore and surrounding areas including Mysuru Road, Tumkur Road, and the Hosur corridor.",
   },
   {
-    q: "Do I need a landing page for my real estate project?",
-    a: "A dedicated landing page is highly recommended because it focuses on lead generation, improves conversion rates, and helps capture more qualified enquiries compared to sending traffic to a general website.",
+    q: "How long does it take to start getting property enquiries from digital marketing?",
+    a: "In most cases, qualified enquiries begin within 2–4 weeks of campaign launch. The ramp-up period depends on your project location, competition level, ad budget, and landing page quality. We focus on getting you to the right cost per lead as quickly as possible.",
   },
   {
-    q: "How do I get started?",
-    a: "Simply book a free consultation with our team. We will review your project, understand your goals, and recommend a customised digital marketing strategy for your business.",
+    q: "How do I get started with Skyup Digital Solutions for my real estate project?",
+    a: "Book a free consultation using the form on this page. Our team will review your project, location, and target buyers — then recommend a customised digital marketing plan. No commitment required.",
   },
 ];
 
@@ -2047,8 +2080,8 @@ const handleSubmit = async (e) => {
 
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <a
-                href="#contact"
-                onClick={(e) => scrollToSection(e, "#contact")}
+                href="#consultation"
+                onClick={(e) => scrollToSection(e, "#consultation")}
                 className="btn-primary inline-flex items-center justify-center rounded-full px-7 py-3.5 font-semibold text-white"
                 style={{
                   background: `linear-gradient(135deg, ${C.brand} 0%, #1F6BFF 100%)`,
@@ -2670,117 +2703,76 @@ function Process() {
    TESTIMONIALS — styled as Google reviews
 ══════════════════════════════════════════ */
 function Testimonials() {
-  const AVATAR_COLORS = ["#1A73E8", "#EA4335", "#34A853", "#F9AB00"];
   const GOLD = "#FBBC04";
-
   return (
-    <section
-      id="testimonials"
-      className="font-poppins"
-      style={{ background: C.cream }}
-    >
+    <section id="testimonials" className="font-poppins" style={{ background: C.cream }}>
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-16">
-        {/* heading */}
-        <div className="text-center reveal mb-8">
+
+        {/* heading + rating hero */}
+        <div className="text-center reveal mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
             <span className="gold-rule" />
-            <span
-              style={{
-                color: C.brand,
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-              }}
-            >
-              Testimonial
+            <span style={{ color: C.brand, fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              Google Reviews
             </span>
             <span className="gold-rule" />
           </div>
-          <h2
-            style={{
-              fontSize: "clamp(28px, 3.5vw, 48px)",
-              fontWeight: 800,
-              lineHeight: 1.16,
-              letterSpacing: "-0.025em",
-            }}
-          >
+          <h2 style={{ fontSize: "clamp(28px, 3.5vw, 48px)", fontWeight: 800, lineHeight: 1.16, letterSpacing: "-0.025em" }}>
             What our clients say
           </h2>
+
+          {/* Rating badge */}
+          <div className="mt-6 inline-flex items-center gap-4 rounded-2xl px-6 py-4"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "42px", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.03em" }}>4.9</div>
+              <div className="flex items-center justify-center gap-0.5 mt-1">
+                {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={14} fill={GOLD} stroke="none" />)}
+              </div>
+              <div style={{ fontSize: "11px", color: C.muted, marginTop: "4px" }}>Google Rating</div>
+            </div>
+            <div style={{ width: "1px", height: "52px", background: "rgba(255,255,255,0.12)" }} />
+            <div style={{ textAlign: "center" }}>
+              <GoogleG size={28} />
+              <div style={{ fontSize: "11px", color: C.muted, marginTop: "6px" }}>92+ Reviews</div>
+            </div>
+          </div>
         </div>
 
-        {/* review cards */}
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Review cards */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {TESTIMONIALS.map((t, i) => (
-            <div
-              key={t.name}
-              className="reveal surface flex flex-col rounded-2xl lg:mt-4 p-6"
-              style={{
-                border: `1px solid ${C.creamBorder}`,
-                boxShadow: "0 2px 16px rgba(0,55,202,0.05)",
-                transitionDelay: `${i * 80}ms`,
-              }}
-            >
-              {/* header row */}
+            <div key={t.name} className="reveal flex flex-col rounded-2xl p-5"
+              style={{ background: "#fff", border: "1px solid #e8eaed", boxShadow: "0 2px 12px rgba(0,0,0,0.08)", transitionDelay: `${i * 80}ms` }}>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div
-                    className="flex items-center justify-center rounded-full text-white"
-                    style={{
-                      width: 44,
-                      height: 44,
-                      fontSize: "16px",
-                      fontWeight: 700,
-                      background: AVATAR_COLORS[i % AVATAR_COLORS.length],
-                    }}
-                  >
+                  <div className="flex items-center justify-center rounded-full text-white flex-shrink-0"
+                    style={{ width: 40, height: 40, fontSize: "15px", fontWeight: 700, background: t.color }}>
                     {t.initials}
                   </div>
                   <div>
-                    <div
-                      style={{
-                        fontSize: "15px",
-                        fontWeight: 700,
-                        color: "#EEF2FF",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {t.name}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: C.subtle,
-                        marginTop: "2px",
-                      }}
-                    >
-                      {t.time}
-                    </div>
+                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#202124", lineHeight: 1.2 }}>{t.name}</div>
+                    <div style={{ fontSize: "11px", color: "#70757a", marginTop: "2px" }}>{t.time}</div>
                   </div>
                 </div>
-                <GoogleG size={20} />
+                <GoogleG size={18} />
               </div>
-
-              {/* stars */}
-              <div className="mt-4 flex items-center gap-0.5">
-                {Array.from({ length: 5 }).map((_, idx) => (
-                  <Star key={idx} size={16} fill={GOLD} stroke="none" />
-                ))}
+              <div className="flex items-center gap-0.5 mt-3">
+                {Array.from({ length: t.rating }).map((_, idx) => <Star key={idx} size={14} fill={GOLD} stroke="none" />)}
               </div>
-
-              {/* review text */}
-              <p
-                style={{
-                  marginTop: "12px",
-                  fontSize: "14px",
-                  lineHeight: 1.7,
-                  color: "#3c4043",
-                }}
-              >
-                {t.quote}
-              </p>
+              <p style={{ marginTop: "10px", fontSize: "13px", lineHeight: 1.7, color: "#3c4043", flexGrow: 1 }}>{t.quote}</p>
             </div>
           ))}
+        </div>
+
+        {/* CTA — view all reviews */}
+        <div className="mt-10 text-center">
+          <a href="https://share.google/0iNO9uI09kcC5H3XP" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full font-semibold"
+            style={{ padding: "13px 28px", background: "#fff", color: "#1a73e8", fontSize: "14px", border: "1.5px solid #dadce0", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", textDecoration: "none", transition: "box-shadow 0.2s" }}>
+            <GoogleG size={18} />
+            See all 92+ Google Reviews →
+          </a>
         </div>
       </div>
     </section>
