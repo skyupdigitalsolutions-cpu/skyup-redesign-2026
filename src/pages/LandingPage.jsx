@@ -3627,6 +3627,8 @@ export function LandingPage() {
         <About />
         <Services />
         <Process />
+        <Testimonials />
+        <FAQ />
         <DocSections />
         <Contact />
       </main>
