@@ -30,9 +30,9 @@ const LEGAL_LINKS = [
 ];
 
 const SOCIAL_LINKS = [
-  { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61584820941998", src: "/images/facebook.svg" },
-  { label: "Instagram", href: "https://www.instagram.com/skyupdigitalsolutions/", src: "/images/instagram.svg" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/110886969/", src: "/images/Linkedin.svg" },
+  { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61584820941998&sk=directory_contact_info", src: "/images/facebook.svg" },
+  { label: "Instagram", href: "https://www.instagram.com/skyupdigitalsolutions?igsh=ZDN3cDl1bG80bXV4", src: "/images/instagram.svg" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/skyup-digital-solutions/", src: "/images/Linkedin.svg" },
 ];
 
 function BrandMark() {
