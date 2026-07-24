@@ -26,7 +26,7 @@ export function Login() {
         if (role === "admin") {
           await navigate("/admin/receipt");
         } else if (role === "blogger") {
-          await navigate("/blogger/dynamicblog")
+          await navigate("/blogger/dynamicblog");
         } else {
           await navigate("/admin");
         }
@@ -38,6 +38,12 @@ export function Login() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const inputStyle = {
+    color: "#111827",
+    WebkitTextFillColor: "#111827",
+    backgroundColor: "#ffffff",
   };
 
   return (
@@ -95,7 +101,7 @@ export function Login() {
 
           {/* Form */}
           <Formik
-            initialValues={{ email: "", : "" }}
+            initialValues={{ email: "", password: "" }}
             validationSchema={loginValidationSchema}
             onSubmit={handleSubmit}
           >
@@ -129,12 +135,12 @@ export function Login() {
                       type="email"
                       name="email"
                       id="email"
-                      style={{
-                          color: "#111827",
-                          WebkitTextFillColor: "#111827",
-                          backgroundColor: "#ffffff",
-                           }}
-                      className={`w-full pl-10 pr-4 py-3 border ${errors.email && touched.email ? "border-red-500 focus:ring-red-500 focus:border-red-500" : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"} rounded-lg transition duration-200 focus:ring-2 focus:outline-none`}
+                      style={inputStyle}
+                      className={`w-full pl-10 pr-4 py-3 border ${
+                        errors.email && touched.email
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      } rounded-lg transition duration-200 focus:ring-2 focus:outline-none`}
                       placeholder="admin@skyupdigitalsolutions.com"
                       autoComplete="email"
                     />
@@ -157,7 +163,7 @@ export function Login() {
                   )}
                 </div>
 
-                {/*  */}
+                {/* Password */}
                 <div>
                   <label
                     htmlFor="password"
@@ -182,22 +188,18 @@ export function Login() {
                       </svg>
                     </div>
                     <Field
-  type="password"
-  name="password"
-  id="password"
-  style={{
-    color: "#111827",
-    WebkitTextFillColor: "#111827",
-    backgroundColor: "#ffffff",
-  }}
-  className={`w-full pl-10 pr-4 py-3 border ${
-    errors.password && touched.password
-      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-  } rounded-lg transition duration-200 focus:ring-2 focus:outline-none`}
-  placeholder="Enter your password"
-  autoComplete="current-password"
-/>                 
+                      type="password"
+                      name="password"
+                      id="password"
+                      style={inputStyle}
+                      className={`w-full pl-10 pr-4 py-3 border ${
+                        errors.password && touched.password
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      } rounded-lg transition duration-200 focus:ring-2 focus:outline-none`}
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
+                    />
                   </div>
                   {errors.password && touched.password && (
                     <div className="text-red-600 text-sm mt-2 flex items-center gap-1">
@@ -268,7 +270,7 @@ export function Login() {
         </div>
       </div>
 
-     <style>{`
+      <style>{`
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-10px); }
