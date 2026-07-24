@@ -38,18 +38,21 @@ export const generatePDF = async (element, invoiceNumber) => {
       compress: true,
     });
 
-    // A4 dimensions in mm
-    const pdfWidth = 271;
-    const pdfHeight = 316;
-    
-    // Add image to PDF - fit exactly to A4
+    // Real A4 dimensions in mm (previously hardcoded to 271x316, which is
+    // larger than an actual A4 page and stretched/distorted the layout).
+    const pdfWidth = 210;
+    // Derive height from the canvas's own aspect ratio so the invoice is
+    // never stretched, even if content pushes it past a single page.
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    // Add image to PDF - fit to A4 width, preserving aspect ratio
     pdf.addImage(
       imgData, 
       'PNG', 
       0,  // x position
       0,  // y position
       pdfWidth,  // width - full A4 width
-      pdfHeight  // height - full A4 height
+      pdfHeight  // height - proportional to actual content, no distortion
     );
 
     // Generate filename
