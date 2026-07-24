@@ -1,0 +1,244 @@
+export default function ReceiptTemplate({ data }) {
+  if (!data) return null;
+
+  // Format numbers as Indian currency keeping paise (always 2 decimals).
+  const money = (n) =>
+    Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // CGST/SGST can be a half-paise (e.g. ₹114.405) when the GST splits evenly.
+  // Show up to 3 decimals for those so the two halves match and the line items
+  // still add up to the total exactly.
+  const money3 = (n) =>
+    Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  return (
+    <div
+      className="font-poppins bg-white"
+      style={{
+        backgroundImage: "url('/images/watermark.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        width: "210mm",
+        minHeight: "297mm",
+        fontFamily: "Arial, sans-serif",
+        boxSizing: "border-box",
+        padding: 0,
+        margin: 0,
+        display: "block",
+      }}
+    >
+      {/* Header */}
+      {/* pt-12 (was pt-4) adds a bit more top space so the INVOICE heading and
+          everything below it start slightly lower on the page. */}
+      <div className="flex justify-between items-center mb-6 pt-12 pb-3 px-[60px]">
+        <div>
+          <h1 className="text-5xl font-extrabold text-black mb-4">INVOICE</h1>
+        </div>
+        <div className="text-right">
+          <img src="/images/rbd-logo.webp" className="h-16" alt="Logo" />
+        </div>
+      </div>
+
+      {/* From and GST Section */}
+      <div className="flex justify-between mb-6 px-[60px]">
+        <div>
+          <div className="font-bold text-sm mb-2">FROM:</div>
+          <div className="font-bold text-sm">{data.name}</div>
+          <div className="text-sm whitespace-pre-line">{data.address}</div>
+        </div>
+        <div className="text-right">
+          <div className="text-sm">
+            <span className="font-bold">GST No:</span> {data.gstNo}
+          </div>
+        </div>
+      </div>
+
+      {/* To and Invoice Details Section */}
+      <div className="flex justify-between mb-10 h-[110px] px-[60px]">
+        <div className="flex-1">
+          <div className="font-bold text-sm mb-2">TO:</div>
+          {(() => {
+            const lines = data.to.split("\n").filter((line) => line.trim());
+            return (
+              <>
+                {lines.length > 0 && (
+                  <div className="font-bold text-sm">{lines[0]}</div>
+                )}
+                {lines.length > 1 && (
+                  <div className="text-sm whitespace-pre-line">
+                    {lines.slice(1).join("\n")}
+                  </div>
+                )}
+              </>
+            );
+          })()}
+          <div className="text-sm mt-2">
+            <span className="font-bold text-sm mb-2">GST No: </span>
+            {data.client_gst}
+          </div>
+        </div>
+        <div className="rounded-lg text-right min-w-[250px]">
+          <div className="text-sm mb-2">
+            <span className="font-semibold">Invoice No:</span> {data.invoice_no}
+          </div>
+          <div className="text-sm mb-2">
+            <span className="font-semibold">HSN/SAN Number:</span> {data.hsn_no}
+          </div>
+          <div className="text-sm mb-2">
+            <span className="font-semibold">Date:</span> {formatDate(data.date)}
+          </div>
+          {data.invoice_due && (
+            <div className="text-sm">
+              <span className="font-semibold">Invoice Due:</span>{" "}
+              {formatDate(data.invoice_due)}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* New Table Layout with Borders */}
+      {/* px-[60px] matches the FROM/TO/bank-details text blocks so the table's
+          left & right edges align with the rest of the invoice content
+          (was px-4 sm:px-6 lg:px-8 → 32px at desktop; now 60px each side). */}
+      <div className="mb-5 px-[60px] min-h-[410px]">
+        <table
+  style={{
+    width: "100%",
+    tableLayout: "fixed",
+    borderCollapse: "collapse",
+    textAlign: "center",
+  }}
+>
+  <thead>
+    <tr style={{ backgroundColor: "#fed7aa" }}>
+      <th style={{ border: "1px solid #2b2b2b", padding: "8px 6px", width: "8%" }}>SL.No.</th>
+      <th style={{ border: "1px solid #2b2b2b", padding: "8px 6px", width: "40%" }}>Description</th>
+      <th style={{ border: "1px solid #2b2b2b", padding: "8px 6px", width: "12%" }}>Tax Rate</th>
+      <th style={{ border: "1px solid #2b2b2b", padding: "8px 6px", width: "10%" }}>Qty</th>
+      <th style={{ border: "1px solid #2b2b2b", padding: "8px 6px", width: "15%" }}>Rate</th>
+      <th style={{ border: "1px solid #2b2b2b", padding: "8px 6px", width: "15%" }}>Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    {data.items &&
+      (() => {
+        let itemCounter = 0;
+        return data.items.map((item, index) => {
+          const isAdvance = (item.description || "").trim() === "Advance Received";
+          if (!isAdvance) itemCounter += 1;
+          return (
+            <tr key={index}>
+              <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px" }}>{index + 1}</td>
+              <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", whiteSpace: "pre-wrap", wordBreak: "break-word", textAlign: "left" }}>
+                <div style={{ fontWeight: 700, marginBottom: item.description ? "2px" : 0 }}>
+                  {isAdvance ? "Advance Received" : `Item ${itemCounter}`}
+                </div>
+                {!isAdvance && item.description}
+              </td>
+              <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px" }}>18%</td>
+              <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px" }}>{item.qty}</td>
+              <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px" }}>{money(item.rate)}</td>
+              <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontWeight: 700 }}>{money(item.amount)}</td>
+            </tr>
+          );
+        });
+      })()}
+
+    <tr>
+      <td colSpan="4" style={{ border: "1px solid #2b2b2b", padding: "8px 6px" }}></td>
+      <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontSize: "14px", fontWeight: "500", color: "#374151" }}>Total</td>
+      <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontSize: "14px", color: "#374151" }}>{money(data.subtotal)}</td>
+    </tr>
+
+    {data.cgst > 0 && (
+      <tr>
+        <td colSpan="4" style={{ border: "1px solid #2b2b2b", padding: "8px 6px" }}></td>
+        <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontSize: "14px", fontWeight: "500", color: "#374151" }}>{data.cgstLabel || "CGST @ 9%"}</td>
+        <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontSize: "14px", color: "#374151" }}>{money3(data.cgst)}</td>
+      </tr>
+    )}
+
+    {data.sgst > 0 && (
+      <tr>
+        <td colSpan="4" style={{ border: "1px solid #2b2b2b", padding: "8px 6px" }}></td>
+        <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontSize: "14px", fontWeight: "500", color: "#374151" }}>{data.sgstLabel || "SGST @ 9%"}</td>
+        <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontSize: "14px", color: "#374151" }}>{money3(data.sgst)}</td>
+      </tr>
+    )}
+
+    {data.igst > 0 && (
+      <tr>
+        <td colSpan="4" style={{ border: "1px solid #2b2b2b", padding: "8px 6px" }}></td>
+        <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontSize: "14px", fontWeight: "500", color: "#374151" }}>{data.igstLabel || "IGST @ 18%"}</td>
+        <td style={{ border: "1px solid #2b2b2b", padding: "8px 6px", fontSize: "14px", color: "#374151" }}>{money(data.igst)}</td>
+      </tr>
+    )}
+
+    <tr style={{ backgroundColor: "#2563eb" }}>
+      <td colSpan="4" style={{ border: "1px solid #1e40af", padding: "8px 6px", fontSize: "14px", color: "white" }}>
+        {data.amount_in_words}
+      </td>
+      <td style={{ border: "1px solid #1e40af", padding: "8px 6px", fontSize: "14px", fontWeight: "bold", color: "white" }}>TOTAL</td>
+      <td style={{ border: "1px solid #1e40af", padding: "8px 6px", fontSize: "14px", fontWeight: "bold", color: "white" }}>{money(data.total)}</td>
+    </tr>
+  </tbody>
+</table>
+      </div>
+
+      {/* Bank Details and Thank You Section */}
+      <div className="flex justify-between">
+        {/* Bank Details */}
+        <div className="flex-1 py-2 px-[60px]">
+          {" "}
+          {/* Added mt-4 to push it up */}
+          <div className="font-bold text-sm mb-1">BANK DETAILS</div>
+          <div className="text-sm">
+            <div>
+              <span className="font-bold">{data.bankDetails.bankName}</span>
+            </div>
+            <div>
+              <span className="font-semibold">Account Name:</span>{" "}
+              {data.bankDetails.accountName}
+            </div>
+            <div>
+              <span className="font-semibold">Account No:</span>{" "}
+              {data.bankDetails.accountNo}
+            </div>
+            <div>
+              <span className="font-semibold">IFSC Code:</span>{" "}
+              {data.bankDetails.ifscCode}
+            </div>
+            <div>
+              <span className="font-semibold">Branch:</span>{" "}
+              {data.bankDetails.branch}
+            </div>
+            <div className="text-[13px]">
+              <span className="font-semibold text-sm">Note:</span> Payment
+              Beyond 30 Days Will Attract 18% Interest
+            </div>
+          </div>
+        </div>
+
+        {/* Thank You with Geometric Design */}
+        <div className="pt-6">
+          <img
+            src="/images/signature.webp"
+            className="w-[325px]"
+            alt="Thank You"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
