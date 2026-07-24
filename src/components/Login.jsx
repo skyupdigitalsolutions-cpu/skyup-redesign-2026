@@ -129,6 +129,11 @@ export function Login() {
                       type="email"
                       name="email"
                       id="email"
+                      style={{
+                          color: "#111827",
+                          WebkitTextFillColor: "#111827",
+                          backgroundColor: "#ffffff",
+                           }}
                       className={`w-full pl-10 pr-4 py-3 border ${errors.email && touched.email ? "border-red-500 focus:ring-red-500 focus:border-red-500" : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"} rounded-lg transition duration-200 focus:ring-2 focus:outline-none`}
                       placeholder="admin@skyupdigitalsolutions.com"
                       autoComplete="email"
