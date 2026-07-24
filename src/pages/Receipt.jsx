@@ -307,7 +307,7 @@ function EditReceiptModal({ receipt, token, onClose, onSaved }) {
     finally { setSaving(false); }
   };
 
-  const ic = "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
+  const ic = "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
 
   return (
     <div className="fixed inset-0 z-[65] flex items-center justify-center"
@@ -1039,7 +1039,7 @@ export function Receipt() {
     setTimeout(() => { pw.print(); }, 250);
   };
 
-  const ic = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
+  const ic = "w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition";
 
   // Wait for auth session to restore — prevents "failed to fetch" on refresh
   if (authLoading) {
