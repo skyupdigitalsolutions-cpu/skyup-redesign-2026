@@ -185,10 +185,20 @@ export function Login() {
                       type="password"
                       name="password"
                       id="password"
-                      className={`w-full pl-10 pr-4 py-3 border ${errors.password && touched.password ? "border-red-500 focus:ring-red-500 focus:border-red-500" : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"} rounded-lg transition duration-200 focus:ring-2 focus:outline-none`}
-                      placeholder="Enter your password"
-                      autoComplete="current-password"
-                    />
+                      <Field
+  type="password"
+  name="password"
+  id="password"
+  style={{
+    color: "#111827",
+    WebkitTextFillColor: "#111827",
+    backgroundColor: "#ffffff",
+  }}
+  className={`w-full pl-10 pr-4 py-3 border ${errors.password && touched.password ? "border-red-500 focus:ring-red-500 focus:border-red-500" : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"} rounded-lg transition duration-200 focus:ring-2 focus:outline-none`}
+  placeholder="Enter your password"
+  autoComplete="current-password"
+/>
+                     
                   </div>
                   {errors.password && touched.password && (
                     <div className="text-red-600 text-sm mt-2 flex items-center gap-1">
@@ -259,19 +269,26 @@ export function Login() {
         </div>
       </div>
 
-      <style>{`
+     <style>{`
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-10px); }
     75% { transform: translateX(10px); }
   }
+
   .animate-shake {
     animation: shake 0.5s ease-in-out;
   }
-  
-  /* Fix Bootstrap conflict */
+
   input, textarea, select {
     box-sizing: border-box !important;
+  }
+
+  #email::placeholder,
+  #password::placeholder {
+    color: #9ca3af !important;
+    -webkit-text-fill-color: #9ca3af !important;
+    opacity: 1 !important;
   }
 `}</style>
     </div>
