@@ -69,9 +69,7 @@ export default function ContactDetails() {
 
   const handleSubmit = async (values, { setSubmitting, resetForm, setStatus }) => {
     try {
-      const apiBase =
-        import.meta.env.VITE_API_BASE_URL ||
-        "https://skyup-redesign-backend-2026-production.up.railway.app";
+      const apiBase = import.meta.env.VITE_API_BASE_URL;
 
       const res = await fetch(`${apiBase}/api/contacts`, {
         method: "POST",
