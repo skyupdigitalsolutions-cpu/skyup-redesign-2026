@@ -8,7 +8,7 @@ import React, { useState } from "react";
 // Backend base URL. Set VITE_API_BASE_URL in your Cloudflare build env to override.
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://skyup-redesign-backend-2026.onrender.com";
+  "https://skyup-redesign-backend-2026-production.up.railway.app";
 
 const INTERESTS = [
   "SEO",
