@@ -1957,6 +1957,7 @@ function Hero() {
     budget: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [duplicate, setDuplicate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -2035,6 +2036,14 @@ const handleSubmit = async (e) => {
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
+      // Backend returns 409 when this phone/email has already submitted.
+      // Treat it as a soft-success: show the "already submitted" confirmation
+      // instead of a scary red error.
+      if (res.status === 409 || data.duplicate) {
+        setDuplicate(true);
+        setSubmitted(true);
+        return;
+      }
       throw new Error(data.message || `Request failed (${res.status})`);
     }
     setSubmitted(true);
@@ -2057,9 +2066,16 @@ const handleSubmit = async (e) => {
     fontSize: "14px",
     background: "rgba(255,255,255,0.04)",
     color: "#EEF2FF",
+    colorScheme: "dark",
     transition: "border-color 0.2s, box-shadow 0.2s",
     fontFamily: "Poppins, sans-serif",
   };
+
+  // Solid, opaque styling for native <option> items. The select box itself is
+  // translucent, but the OS renders the dropdown popup with a light default
+  // background — inheriting the light text made the options wash out. Forcing a
+  // solid dark background + light text keeps every option readable everywhere.
+  const optionStyle = { background: "#0b1020", color: "#EEF2FF" };
 
   return (
     <section id="home" className="font-poppins" style={{ background: C.cream }}>
@@ -2228,7 +2244,9 @@ const handleSubmit = async (e) => {
                         fontWeight: 700,
                       }}
                     >
-                      Thanks, {form.name || "there"}!
+                      {duplicate
+                        ? "You're already on our list!"
+                        : `Thanks, ${form.name || "there"}!`}
                     </h3>
                     <p
                       style={{
@@ -2238,8 +2256,9 @@ const handleSubmit = async (e) => {
                         lineHeight: 1.7,
                       }}
                     >
-                      We've received your details. Our team will reach out
-                      shortly with your free growth plan.
+                      {duplicate
+                        ? "It looks like you've already submitted an enquiry with these details. No need to resend — our team will reach out to you shortly."
+                        : "We've received your details. Our team will reach out shortly with your free growth plan."}
                     </p>
                   </div>
                 ) : (
@@ -2339,9 +2358,11 @@ const handleSubmit = async (e) => {
                         onChange={handleChange}
                         style={inputStyle}
                       >
-                        <option value="">Select your budget (optional)</option>
+                        <option value="" style={optionStyle}>
+                          Select your budget (optional)
+                        </option>
                         {BUDGET_OPTIONS.map((opt) => (
-                          <option key={opt} value={opt}>
+                          <option key={opt} value={opt} style={optionStyle}>
                             {opt}
                           </option>
                         ))}
