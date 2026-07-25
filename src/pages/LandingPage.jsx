@@ -31,9 +31,7 @@ import {
    Replace API_BASE with your deployed Vercel URL.
    The lead form POSTs to `${API_BASE}/add-contact`.
 ══════════════════════════════════════════ */
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  "https://skyup-redesign-backend-2026-production.up.railway.app"; // ← prod URL (no trailing slash)
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 /* ══════════════════════════════════════════
    GLOBAL STYLES
