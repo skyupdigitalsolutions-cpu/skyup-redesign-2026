@@ -71,7 +71,7 @@ export default function ContactDetails() {
     try {
       const apiBase =
         import.meta.env.VITE_API_BASE_URL ||
-        "https://skyupredesign-backend.onrender.com";
+        "https://skyup-redesign-backend-2026-production.up.railway.app";
 
       const res = await fetch(`${apiBase}/api/contacts`, {
         method: "POST",
