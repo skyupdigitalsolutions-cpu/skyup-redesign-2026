@@ -33,7 +33,7 @@ import {
 ══════════════════════════════════════════ */
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://skyup-backend-3k9s.onrender.com"; // ← prod URL (no trailing slash)
+  "https://skyup-redesign-backend-2026-production.up.railway.app"; // ← prod URL (no trailing slash)
 
 /* ══════════════════════════════════════════
    GLOBAL STYLES
