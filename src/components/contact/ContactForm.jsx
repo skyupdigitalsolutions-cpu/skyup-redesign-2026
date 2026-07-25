@@ -59,6 +59,22 @@ export default function ContactForm() {
       message: f.message.trim() || "No message provided", // backend requires a non-empty message
     };
 
+    // ── CRM lead tracking (GTM path) ──────────────────────────────────────
+    // Pushes the lead into the GTM dataLayer only. The actual HTTP call to
+    // the CRM's /website-webhook endpoint is made by the GTM Custom HTML tag
+    // that fires on the `crm_lead` event — same tag used by the Hero form.
+    // Fired BEFORE the /api/contacts call so it's never blocked by an
+    // unrelated backend failure.
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event:        "crm_lead",
+      form_name:    payload.name,
+      form_mobile:  payload.phone,
+      form_email:   payload.email,
+      form_message: payload.message,
+      form_source:  "Skyup_contactform",
+    });
+
     setSubmitting(true);
     setSubmitError("");
     try {
