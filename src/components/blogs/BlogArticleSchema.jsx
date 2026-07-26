@@ -15,7 +15,7 @@ function toISO(d) {
 }
 
 /**
- * Emits Article JSON-LD (+ BreadcrumbList) for a blog post.
+ * Emits Article JSON-LD (+ BreadcrumbList, + FAQPage when the blog has faqs).
  * Additive only — renders nothing visible. Does not touch layout or content.
  */
 export default function BlogArticleSchema({ blog }) {
@@ -61,6 +61,20 @@ export default function BlogArticleSchema({ blog }) {
         { "@type": "ListItem", position: 3, name: (blog.title || "").trim(), item: url },
       ],
     },
+    // FAQPage — added when the blog carries a faqs array. This is the single
+    // biggest on-site GEO lever: AI engines extract Q&A pairs directly. Each
+    // answer must stand alone (the drafter enforces this).
+    ...(Array.isArray(blog.faqs) && blog.faqs.length
+      ? [{
+          "@type": "FAQPage",
+          "@id": `${url}/#faq`,
+          mainEntity: blog.faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }]
+      : []),
   ];
 
   const jsonLd = { "@context": "https://schema.org", "@graph": graph };
