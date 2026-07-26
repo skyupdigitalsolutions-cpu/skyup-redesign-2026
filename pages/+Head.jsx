@@ -48,9 +48,12 @@ export default function Head() {
   const ogTitle = pageTitle || DEFAULT_TITLE;
   const ogDesc = description || DEFAULT_DESC;
   const ogType = blogMatch ? "article" : "website";
-  const canonical = `${SITE}${
-    urlPathname === "/" ? "" : urlPathname.replace(/\/$/, "")
-  }`;
+  // Canonical: trailing slash on every URL to match trailingSlash:true in +config.js.
+  // Home → https://www.skyupdigitalsolutions.com/
+  // Other → https://www.skyupdigitalsolutions.com/about/ (not /about)
+  const canonical = urlPathname === "/"
+    ? `${SITE}/`
+    : `${SITE}${urlPathname.endsWith("/") ? urlPathname : urlPathname + "/"}`;
 
   return (
     <>

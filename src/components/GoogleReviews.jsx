@@ -40,9 +40,11 @@ export default function GoogleReviews() {
   const cfgRef = useRef({ mode: "fan", cardW: 320, SPACING: 320, RISE: 80, TILT: 14, MAXOFF: 1.05, OPFALL: 0.5, SCALEFALL: 0.22, MINSCALE: 0.55 });
   const curRef = useRef(0);
   const targetRef = useRef(0);
-  const [scoreText, setScoreText] = useState("0.0");
-  const [countText, setCountText] = useState("0");
-  const [starW, setStarW] = useState(0);
+  // Initialize with real values so the prerendered HTML shows correct data to crawlers.
+  // The count-up animation still runs on the client when the section enters the viewport.
+  const [scoreText, setScoreText] = useState(SUMMARY.rating.toFixed(1));
+  const [countText, setCountText] = useState(String(SUMMARY.count));
+  const [starW, setStarW] = useState((SUMMARY.rating / 5) * 100);
 
   useEffect(() => {
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

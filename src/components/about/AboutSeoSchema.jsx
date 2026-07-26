@@ -14,7 +14,7 @@ const schema = {
       "@id": `${SITE}/#organization`,
       name: "Skyup Digital Solutions",
       url: SITE,
-      logo: `${SITE}/images/intro/SKYUP_Logo.svg`,
+      logo: `${SITE}/images/skyup-logo.webp`,
       email: "contact@skyupdigitalsolutions.com",
       telephone: "+91 8867867775",
       description:
@@ -29,9 +29,10 @@ const schema = {
         addressCountry: "IN",
       },
       sameAs: [
-        "https://www.facebook.com/profile.php?id=61584820941998",
-        "https://www.instagram.com/skyupdigitalsolutions",
+        "https://www.facebook.com/people/SKYUP-Digital-Solutions/61584820941998/",
+        "https://www.instagram.com/skyupdigitalsolutions/",
         "https://www.linkedin.com/company/skyup-digital-solutions",
+        "https://www.youtube.com/@SKYUPDigitalSolutionsBengaluru",
       ],
     },
     {
