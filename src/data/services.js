@@ -423,7 +423,7 @@ export const SERVICES = [
       "Weekly optimisation & transparent reporting",
     ],
     heroHeadline: "PPC Company in Bangalore that turns ad spend into revenue",
-    heroSubline: "Skyup is a Bangalore PPC agency built for one goal: making every ad rupee count. We run Google Ads, Meta and LinkedIn campaigns focused on leads, conversions and revenue — not impressions, not guesswork.",
+   heroSubline: "Skyup is a Bangalore PPC agency built for one goal: making every ad rupee count. Our PPC campaigns have generated ₹38.6L+ in real client revenue — ₹20L+ for a real-estate developer and ₹18.6L+ for an education client's admissions.",
     // Stats removed pending real, verifiable figures (EEAT). Do not display client
     // counts, ad spend, ROAS, or CPL numbers until they can be substantiated.
     statsTitle: "Performance at a glance",
