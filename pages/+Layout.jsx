@@ -50,7 +50,11 @@ export default function Layout({ children }) {
       const lenis = new Lenis({
         duration: 1.15,
         smoothWheel: true,
-        touchMultiplier: 1.4,
+        // syncTouch: native touch scroll (finger-follows, no smooth interpolation on mobile).
+        // Prevents jumping to the next/previous section when swiping across large scroll
+        // sections like BulbIntro (330vh) and Street3D (260vh). Desktop wheel stays smooth.
+        syncTouch: true,
+        touchMultiplier: 1.0,  // was 1.4 — 40% overshoot on mobile caused section-jumping
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       });
       lenisRef.current = lenis;

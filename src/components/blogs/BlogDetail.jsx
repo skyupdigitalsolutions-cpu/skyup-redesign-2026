@@ -397,7 +397,7 @@ export default function BlogDetail() {
   return (
     <section className="w-full bg-[#04050C] font-['Poppins']">
       <Header />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 py-6 sm:py-10 flex">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 pt-24 pb-6 sm:pt-28 sm:pb-10 flex">
         {/* Article */}
         <div className="flex-1 max-w-4xl">
           <a
