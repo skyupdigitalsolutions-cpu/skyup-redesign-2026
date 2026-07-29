@@ -98,9 +98,10 @@ export default function Head() {
       {/* All fonts (Poppins, Geist, Cormorant Garamond) are self-hosted via @fontsource
           and bundled into index.css — no Google Fonts network requests needed at all. */}
 
-      {/* Icons + manifest */}
-      <link rel="icon" href="/favicon.svg" />
-      <link rel="apple-touch-icon" href="/favicon.svg" />
+      {/* Icons + manifest.
+          Single square favicon.ico (16/32/48/64) — satisfies Google Search's
+          1:1 requirement and works in every browser. */}
+      <link rel="icon" href="/favicon.ico" sizes="any" />
       <link rel="manifest" href="/manifest.json" />
       <meta name="theme-color" content="#0037CA" />
       <meta name="robots" content="index, follow" />
