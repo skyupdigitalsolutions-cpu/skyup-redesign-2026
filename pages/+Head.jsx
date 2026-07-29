@@ -101,6 +101,8 @@ export default function Head() {
       {/* Icons + manifest.
           Single square favicon.ico (16/32/48/64) — satisfies Google Search's
           1:1 requirement and works in every browser. */}
+      <link rel="icon" type="image/svg+xml" href="/images/skyup-icon.svg" />
+      <link rel="apple-touch-icon" href="/images/skyup-icon.svg" />
       <link rel="icon" href="/favicon.ico" sizes="any" />
       <link rel="manifest" href="/manifest.json" />
       <meta name="theme-color" content="#0037CA" />
