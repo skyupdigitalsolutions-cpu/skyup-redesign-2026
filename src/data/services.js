@@ -422,10 +422,8 @@ export const SERVICES = [
       "Landing pages — built for Quality Score & conversion",
       "Weekly optimisation & transparent reporting",
     ],
-    heroHeadline:
-      "Performance marketing that turns ad spend into measurable revenue",
-    heroSubline:
-      "We're built for one goal: making every ad rupee count. Our performance marketing is about action — clicks, leads, conversions, and revenue. Not impressions. Not guesswork. Results.",
+    heroHeadline: "PPC Company in Bangalore that turns ad spend into revenue",
+    heroSubline: "Skyup is a Bangalore PPC agency built for one goal: making every ad rupee count. We run Google Ads, Meta and LinkedIn campaigns focused on leads, conversions and revenue — not impressions, not guesswork.",
     // Stats removed pending real, verifiable figures (EEAT). Do not display client
     // counts, ad spend, ROAS, or CPL numbers until they can be substantiated.
     statsTitle: "Performance at a glance",
@@ -505,6 +503,22 @@ export const SERVICES = [
     ],
     faqTitle: "Frequently asked questions about performance marketing",
     faqs: [
+      {
+        q: "What does a PPC company in Bangalore do?",
+        a: "A PPC company in Bangalore plans, launches and optimises paid advertising campaigns on Google, Meta and LinkedIn to generate measurable leads and sales. At Skyup, this means keyword research, ad creation, landing page setup, conversion tracking, and weekly optimisation — so every rupee of ad spend is accountable to a result.",
+      },
+      {
+        q: "How much does PPC cost for a business in Bangalore?",
+        a: "PPC cost has two parts: your ad budget (paid to Google or Meta) and the management fee. Small Bangalore businesses often start with an ad budget of ₹500–₹2,000 per day, scaling as campaigns prove ROI. Management is typically a monthly retainer or a percentage of ad spend.",
+      },
+      {
+        q: "How is a PPC agency different from doing Google Ads myself?",
+        a: "A PPC agency brings structured keyword research, proper conversion tracking, A/B-tested creatives, and ongoing optimisation that most DIY campaigns miss. The result is usually a lower cost-per-lead and less wasted spend — the agency fee is offset by the efficiency gained.",
+      },
+      {
+        q: "How quickly can PPC generate leads?",
+        a: "Unlike SEO, PPC can generate leads within days of launching, because your ads appear immediately for relevant searches. The first 2–4 weeks are a learning phase; performance and cost-per-lead typically improve steadily after that as the campaign is optimised.",
+      },
       {
         q: "What are Google Ads?",
         a: "Paid advertisements that appear on Google Search, YouTube, the Display Network, and partner sites to generate leads, traffic, and sales.",
@@ -1571,9 +1585,8 @@ export const SERVICE_META = {
       "Results-driven SEO in Bangalore — technical SEO, content, and link building that grow organic traffic and qualified leads. No lock-in. Free SEO audit.",
   },
   "performance-marketing": {
-    title: "Performance Marketing Agency in Bangalore | Skyup",
-    description:
-      "Google, Meta and LinkedIn ads managed for measurable ROI — full attribution, weekly optimisation, and a free audit. Performance marketing in Bangalore.",
+    title: "PPC Company in Bangalore | Google & Meta Ads | Skyup",
+    description: "Skyup is a results-driven PPC company in Bangalore. Google Ads, Meta & LinkedIn campaigns managed for real leads — full tracking, weekly optimisation, free audit.",
   },
   "social-media-marketing": {
     title: "Social Media Marketing Agency in Bangalore | Skyup",
