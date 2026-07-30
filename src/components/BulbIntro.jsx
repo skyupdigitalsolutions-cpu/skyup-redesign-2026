@@ -11,6 +11,26 @@ const BULB = "/images/intro/bulb.webp";
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const map = (v, a, b, c, d) => c + (d - c) * clamp((v - a) / (b - a), 0, 1);
 
+// Once the scroll-pinned intro has played through in this tab session,
+// returning to Home (e.g. clicking "Home" from About/Service/Works) should
+// open already-resolved — lit bulb + tagline, no black-screen replay.
+// sessionStorage clears on tab close, so a fresh visit still gets the full intro.
+const SEEN_KEY = "skyup-bulb-intro-seen";
+function hasSeenIntro() {
+  try {
+    return sessionStorage.getItem(SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function markIntroSeen() {
+  try {
+    sessionStorage.setItem(SEEN_KEY, "1");
+  } catch {
+    /* sessionStorage unavailable (privacy mode etc.) — safe to ignore */
+  }
+}
+
 /**
  * BulbIntro — scroll-driven opening.
  *   1. Black screen, dim "invisible business" line
@@ -18,6 +38,10 @@ const map = (v, a, b, c, d) => c + (d - c) * clamp((v - a) / (b - a), 0, 1);
  *   3. It switches ON → warm light floods (bulb stays lit above, the constant)
  *   4. Gold Cormorant tagline zooms in beneath the bulb, holds, fades out
  *   5. Hands off smoothly into the next section (children)
+ *
+ * Plays in full only the first time Home mounts in a browser session.
+ * Navigating back to Home afterward (client-side routing) resolves instantly
+ * to the final lit frame instead of restarting from the black screen.
  *
  * SSR-safe (GSAP in isomorphic effect; DOM nodes are real).
  */
@@ -34,8 +58,9 @@ export default function BulbIntro({ children }) {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) {
-        // No pin runs under reduced-motion, so collapse the 330vh scroll space —
+      const alreadySeen = hasSeenIntro();
+      if (reduce || alreadySeen) {
+        // No pin runs here, so collapse the 330vh scroll space —
         // otherwise the sticky stage covers every section below it for 330vh.
         if (root.current) root.current.style.height = "100vh";
         if (bulbRef.current) { bulbRef.current.style.opacity = 1; bulbRef.current.style.transform = "translate(-50%, 0)"; bulbRef.current.style.filter = "brightness(1.25)"; }
@@ -44,6 +69,7 @@ export default function BulbIntro({ children }) {
         if (dimRef.current) dimRef.current.style.opacity = 0;
         if (stageRef.current) stageRef.current.style.opacity = 1;
         if (cueRef.current) cueRef.current.style.opacity = 0;
+        markIntroSeen();
         return;
       }
 
@@ -87,6 +113,10 @@ export default function BulbIntro({ children }) {
           }
 
           if (cueRef.current) cueRef.current.style.opacity = p < 0.08 ? 1 : 0;
+
+          // Tagline has fully zoomed in and held — the intro has resolved.
+          // Lock it in for the rest of the session so a later return to Home skips the replay.
+          if (p >= 0.78) markIntroSeen();
         },
       });
       return () => st.kill();
