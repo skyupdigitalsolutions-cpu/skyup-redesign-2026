@@ -205,6 +205,14 @@ const CSS = `
 .wf-card:hover .wf-seebtn{transform:translateX(-50%) translateY(-2px)}
 .wf-seebtn .wf-arw{transition:transform .35s cubic-bezier(.22,1,.36,1)}
 .wf-card:hover .wf-seebtn .wf-arw{transform:translateX(3px)}
+
+/* Desktop only: hide the front-face "Click to see case study" CTA.
+   Mobile / touch devices (hover: none) keep it, since the flip there is tap-driven
+   and this button is the primary affordance before a tap. */
+@media (hover: hover) {
+  .wf-seebtn { display: none; }
+}
+
 .wf-pname{font-weight:600;font-size:1.24rem;line-height:1.15;margin-top:12px;letter-spacing:-.01em}
 .wf-pclient{color:#9cc0ff;font-size:.82rem;margin-top:3px}
 .wf-view{display:inline-flex;align-items:center;gap:.5rem;margin-top:14px;font-family:ui-monospace,'Space Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:#8b93b2}
