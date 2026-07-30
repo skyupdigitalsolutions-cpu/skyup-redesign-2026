@@ -464,7 +464,7 @@ export default function AboutUniverse() {
           <div className="au-wrap au-center" data-reveal>
             <span className="au-kicker">Let&rsquo;s build your next growth story</span>
             <h2 className="au-h2 au-cta-h">Digital experiences that inspire trust and deliver results.</h2>
-            <a className="au-btn" href="/contact">Start Your Growth Journey →</a>
+            {/* <a className="au-btn" href="/contact">Start Your Growth Journey →</a> */}
           </div>
         </section>
       </main>
