@@ -5,6 +5,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import CustomSoftwareMap from "@/components/CustomSoftwareMap";
 
+// Backend base URL — set VITE_API_BASE_URL in your deployment environment variables.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3500";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[+]?[\d][\d\s-]{6,14}$/;
+
 const IMG = "/images/custom-software";
 const svg = (paths, opts = {}) => (
   <svg width={opts.w || 24} height={opts.h || 24} viewBox="0 0 24 24" fill={opts.fill || "none"}
@@ -80,6 +86,7 @@ const PROBLEMS = [
 const inputStyle = { fontSize: 14, fontWeight: 400, color: "#141420", padding: "13px 16px", border: "1px solid #e4e4f0", borderRadius: 10, outline: "none", background: "#fff", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins',sans-serif" };
 const labelSpan = { fontSize: 12.5, fontWeight: 500, color: "#6b6b8a" };
 const field = { display: "flex", flexDirection: "column", gap: 7 };
+const errText = { fontSize: 12, fontWeight: 500, color: "#d64545" };
 
 export default function CustomSoftwareLanding() {
   const [navOpen, setNavOpen] = useState(false);
@@ -88,6 +95,16 @@ export default function CustomSoftwareLanding() {
   const [whyActive, setWhyActive] = useState(1);
   const [modal, setModal] = useState("idle"); // idle | open | closing | done
   const timers = useRef({});
+
+  // ── Popup lead form ──
+  const [popupForm, setPopupForm] = useState({ name: "", phone: "", email: "", service: "Custom Software" });
+  const [popupErr, setPopupErr] = useState({});
+  const [popupStatus, setPopupStatus] = useState({ submitting: false, error: "", success: false });
+
+  // ── Main contact form ──
+  const [leadForm, setLeadForm] = useState({ name: "", company: "", phone: "", email: "", service: "Custom Software", message: "", budget: "2-5 Lakh", timeline: "Immediately" });
+  const [leadErr, setLeadErr] = useState({});
+  const [leadStatus, setLeadStatus] = useState({ submitting: false, error: "", success: false });
 
   useEffect(() => {
     const sync = () => {
@@ -111,6 +128,7 @@ export default function CustomSoftwareLanding() {
       window.removeEventListener("resize", sync);
       clearTimeout(timers.current.open);
       clearTimeout(timers.current.close);
+      clearTimeout(timers.current.popupSuccess);
     };
   }, []);
 
@@ -118,6 +136,83 @@ export default function CustomSoftwareLanding() {
     setModal("closing");
     timers.current.close = setTimeout(() => setModal("done"), 300);
   }, []);
+
+  // Popup form only collects name/phone/email/service — company, budget and
+  // message are required by the backend Contact model, so we fill sensible
+  // defaults for those.
+  const submitPopup = useCallback(async (ev) => {
+    ev.preventDefault();
+    const e = {};
+    if (!popupForm.name.trim()) e.name = "Name is required";
+    if (!popupForm.phone.trim()) e.phone = "Phone number is required";
+    else if (!PHONE_RE.test(popupForm.phone.trim())) e.phone = "Enter a valid phone number";
+    if (!popupForm.email.trim()) e.email = "Email is required";
+    else if (!EMAIL_RE.test(popupForm.email.trim())) e.email = "Enter a valid email";
+    setPopupErr(e);
+    if (Object.keys(e).length) return;
+
+    const payload = {
+      name: popupForm.name.trim(),
+      company: "Not specified",
+      email: popupForm.email.trim(),
+      phone: popupForm.phone.trim(),
+      service: popupForm.service,
+      budget: "Not specified",
+      message: `Requirement submitted via popup — interested in: ${popupForm.service}`,
+    };
+
+    setPopupStatus({ submitting: true, error: "", success: false });
+    try {
+      const res = await fetch(`${API_BASE}/api/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Something went wrong. Please try again.");
+      setPopupStatus({ submitting: false, error: "", success: true });
+      timers.current.popupSuccess = setTimeout(closeModal, 1500);
+    } catch (err) {
+      setPopupStatus({ submitting: false, error: err.message || "Could not submit. Please try again.", success: false });
+    }
+  }, [popupForm, closeModal]);
+
+  const submitLead = useCallback(async (ev) => {
+    ev.preventDefault();
+    const e = {};
+    if (!leadForm.name.trim()) e.name = "Name is required";
+    if (!leadForm.company.trim()) e.company = "Company name is required";
+    if (!leadForm.phone.trim()) e.phone = "Phone number is required";
+    else if (!PHONE_RE.test(leadForm.phone.trim())) e.phone = "Enter a valid phone number";
+    if (!leadForm.email.trim()) e.email = "Email is required";
+    else if (!EMAIL_RE.test(leadForm.email.trim())) e.email = "Enter a valid email";
+    setLeadErr(e);
+    if (Object.keys(e).length) return;
+
+    const payload = {
+      name: leadForm.name.trim(),
+      company: leadForm.company.trim(),
+      email: leadForm.email.trim(),
+      phone: leadForm.phone.trim(),
+      service: leadForm.service,
+      budget: leadForm.budget,
+      message: [leadForm.message.trim(), `Expected timeline: ${leadForm.timeline}`].filter(Boolean).join("\n"),
+    };
+
+    setLeadStatus({ submitting: true, error: "", success: false });
+    try {
+      const res = await fetch(`${API_BASE}/api/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Something went wrong. Please try again.");
+      setLeadStatus({ submitting: false, error: "", success: true });
+    } catch (err) {
+      setLeadStatus({ submitting: false, error: err.message || "Could not submit. Please try again.", success: false });
+    }
+  }, [leadForm]);
 
   const maxIdx = Math.max(0, STEPS.length - procCols);
   const pi = Math.max(0, Math.min(procIdx, maxIdx));
@@ -143,18 +238,41 @@ export default function CustomSoftwareLanding() {
               <h2 style={{ margin: 0, fontSize: "clamp(24px, 5vw, 30px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.14 }}>Discuss your software requirement</h2>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>Tell us what you want to automate or build — our team will recommend the right approach.</p>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <label style={field}><span style={labelSpan}>name*</span><input type="text" placeholder="full name" style={inputStyle} /></label>
-              <label style={field}><span style={labelSpan}>phone number*</span><input type="tel" placeholder="+91 00000 00000" style={inputStyle} /></label>
-              <label style={field}><span style={labelSpan}>business email*</span><input type="email" placeholder="example@email.com" style={inputStyle} /></label>
-              <label style={field}><span style={labelSpan}>what solution are you looking for?</span>
-                <select style={{ ...inputStyle, appearance: "none" }}>
-                  <option>Custom Software</option><option>CRM Solution</option><option>Business Automation</option><option>Web Application</option><option>Mobile Application</option><option>AI Solution</option><option>Other</option>
-                </select>
-              </label>
-            </div>
-            <button type="button" onClick={closeModal} style={{ marginTop: 20, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: "pointer", boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>Submit Requirement</button>
-            <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
+            {popupStatus.success ? (
+              <div style={{ padding: "30px 4px 8px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <div style={{ fontSize: 38 }}>✅</div>
+                <h3 style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "#141420" }}>Thank you!</h3>
+                <p style={{ margin: 0, fontSize: 13.5, fontWeight: 400, color: "#6b6b8a" }}>We've received your requirement and will reach out shortly.</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  <label style={field}>
+                    <span style={labelSpan}>name*</span>
+                    <input type="text" placeholder="full name" style={inputStyle} value={popupForm.name} onChange={(e) => setPopupForm((s) => ({ ...s, name: e.target.value }))} />
+                    {popupErr.name && <span style={errText}>{popupErr.name}</span>}
+                  </label>
+                  <label style={field}>
+                    <span style={labelSpan}>phone number*</span>
+                    <input type="tel" placeholder="+91 00000 00000" style={inputStyle} value={popupForm.phone} onChange={(e) => setPopupForm((s) => ({ ...s, phone: e.target.value }))} />
+                    {popupErr.phone && <span style={errText}>{popupErr.phone}</span>}
+                  </label>
+                  <label style={field}>
+                    <span style={labelSpan}>business email*</span>
+                    <input type="email" placeholder="example@email.com" style={inputStyle} value={popupForm.email} onChange={(e) => setPopupForm((s) => ({ ...s, email: e.target.value }))} />
+                    {popupErr.email && <span style={errText}>{popupErr.email}</span>}
+                  </label>
+                  <label style={field}><span style={labelSpan}>what solution are you looking for?</span>
+                    <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.service} onChange={(e) => setPopupForm((s) => ({ ...s, service: e.target.value }))}>
+                      <option>Custom Software</option><option>CRM Solution</option><option>Business Automation</option><option>Web Application</option><option>Mobile Application</option><option>AI Solution</option><option>Other</option>
+                    </select>
+                  </label>
+                </div>
+                {popupStatus.error && <p style={{ margin: "14px 0 0", fontSize: 13, fontWeight: 500, color: "#d64545", textAlign: "center" }}>{popupStatus.error}</p>}
+                <button type="button" onClick={submitPopup} disabled={popupStatus.submitting} style={{ marginTop: 20, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: popupStatus.submitting ? "not-allowed" : "pointer", opacity: popupStatus.submitting ? 0.7 : 1, boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>{popupStatus.submitting ? "Submitting…" : "Submit Requirement"}</button>
+                <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -441,26 +559,64 @@ export default function CustomSoftwareLanding() {
             <h2 style={{ margin: 0, fontSize: "clamp(31px, 4.8vw, 50px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.1 }}>Let's Get In Touch</h2>
             <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.7, maxWidth: 520 }}>Share your requirement and our team will get back with the right technology approach.</p>
           </div>
-          <div data-r="form-card" style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(14px)", border: "1px solid #fff", borderRadius: 22, padding: 34, boxShadow: "0 24px 60px rgba(20,20,32,0.10)" }}>
-            <div data-r="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-              <label style={field}><span style={labelSpan}>name*</span><input type="text" placeholder="full name" style={inputStyle} /></label>
-              <label style={field}><span style={labelSpan}>company name*</span><input type="text" placeholder="company" style={inputStyle} /></label>
-              <label style={field}><span style={labelSpan}>phone number*</span><input type="tel" placeholder="+91 00000 00000" style={inputStyle} /></label>
-              <label style={field}><span style={labelSpan}>business email*</span><input type="email" placeholder="example@email.com" style={inputStyle} /></label>
-              <label style={{ ...field, gridColumn: "span 2" }}><span style={labelSpan}>what solution are you looking for?</span>
-                <select style={{ ...inputStyle, appearance: "none" }}><option>Custom Software</option><option>CRM Solution</option><option>Business Automation</option><option>Web Application</option><option>Mobile Application</option><option>AI Solution</option><option>Other</option></select>
-              </label>
-              <label style={{ ...field, gridColumn: "span 2" }}><span style={labelSpan}>briefly describe your requirement</span><textarea rows={4} placeholder="write your message..." style={{ ...inputStyle, resize: "vertical" }} /></label>
-              <label style={field}><span style={labelSpan}>estimated investment</span>
-                <select style={{ ...inputStyle, appearance: "none" }}><option>2-5 Lakh</option><option>5-10 Lakh</option><option>10-20 Lakh</option><option>20-30 Lakh</option><option>30 Lakh+</option></select>
-              </label>
-              <label style={field}><span style={labelSpan}>expected timeline to start</span>
-                <select style={{ ...inputStyle, appearance: "none" }}><option>Immediately</option><option>Within 1 \u2013 15 Days</option><option>Within 15 \u2013 30 Days</option></select>
-              </label>
+          {leadStatus.success ? (
+            <div data-r="form-card" style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(14px)", border: "1px solid #fff", borderRadius: 22, padding: 48, boxShadow: "0 24px 60px rgba(20,20,32,0.10)", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+              <div style={{ fontSize: 44 }}>✅</div>
+              <h3 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#141420" }}>Thank you{leadForm.name ? `, ${leadForm.name.split(" ")[0]}` : ""}!</h3>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#6b6b8a", maxWidth: 420 }}>We've received your requirement and our team will get back to you shortly.</p>
+              <button type="button" onClick={() => { setLeadStatus({ submitting: false, error: "", success: false }); setLeadForm({ name: "", company: "", phone: "", email: "", service: "Custom Software", message: "", budget: "2-5 Lakh", timeline: "Immediately" }); }} style={{ marginTop: 10, fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 14, color: "#0037CA", background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "10px 24px", cursor: "pointer" }}>Submit another requirement</button>
             </div>
-            <button style={{ marginTop: 22, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: "pointer", boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>Submit Requirement</button>
-            <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
-          </div>
+          ) : (
+            <form data-r="form-card" onSubmit={submitLead} noValidate style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(14px)", border: "1px solid #fff", borderRadius: 22, padding: 34, boxShadow: "0 24px 60px rgba(20,20,32,0.10)" }}>
+              <div data-r="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <label style={field}>
+                  <span style={labelSpan}>name*</span>
+                  <input type="text" placeholder="full name" style={inputStyle} value={leadForm.name} onChange={(e) => setLeadForm((s) => ({ ...s, name: e.target.value }))} />
+                  {leadErr.name && <span style={errText}>{leadErr.name}</span>}
+                </label>
+                <label style={field}>
+                  <span style={labelSpan}>company name*</span>
+                  <input type="text" placeholder="company" style={inputStyle} value={leadForm.company} onChange={(e) => setLeadForm((s) => ({ ...s, company: e.target.value }))} />
+                  {leadErr.company && <span style={errText}>{leadErr.company}</span>}
+                </label>
+                <label style={field}>
+                  <span style={labelSpan}>phone number*</span>
+                  <input type="tel" placeholder="+91 00000 00000" style={inputStyle} value={leadForm.phone} onChange={(e) => setLeadForm((s) => ({ ...s, phone: e.target.value }))} />
+                  {leadErr.phone && <span style={errText}>{leadErr.phone}</span>}
+                </label>
+                <label style={field}>
+                  <span style={labelSpan}>business email*</span>
+                  <input type="email" placeholder="example@email.com" style={inputStyle} value={leadForm.email} onChange={(e) => setLeadForm((s) => ({ ...s, email: e.target.value }))} />
+                  {leadErr.email && <span style={errText}>{leadErr.email}</span>}
+                </label>
+                <label style={{ ...field, gridColumn: "span 2" }}>
+                  <span style={labelSpan}>what solution are you looking for?</span>
+                  <select style={{ ...inputStyle, appearance: "none" }} value={leadForm.service} onChange={(e) => setLeadForm((s) => ({ ...s, service: e.target.value }))}>
+                    <option>Custom Software</option><option>CRM Solution</option><option>Business Automation</option><option>Web Application</option><option>Mobile Application</option><option>AI Solution</option><option>Other</option>
+                  </select>
+                </label>
+                <label style={{ ...field, gridColumn: "span 2" }}>
+                  <span style={labelSpan}>briefly describe your requirement</span>
+                  <textarea rows={4} placeholder="write your message..." style={{ ...inputStyle, resize: "vertical" }} value={leadForm.message} onChange={(e) => setLeadForm((s) => ({ ...s, message: e.target.value }))} />
+                </label>
+                <label style={field}>
+                  <span style={labelSpan}>estimated investment</span>
+                  <select style={{ ...inputStyle, appearance: "none" }} value={leadForm.budget} onChange={(e) => setLeadForm((s) => ({ ...s, budget: e.target.value }))}>
+                    <option>2-5 Lakh</option><option>5-10 Lakh</option><option>10-20 Lakh</option><option>20-30 Lakh</option><option>30 Lakh+</option>
+                  </select>
+                </label>
+                <label style={field}>
+                  <span style={labelSpan}>expected timeline to start</span>
+                  <select style={{ ...inputStyle, appearance: "none" }} value={leadForm.timeline} onChange={(e) => setLeadForm((s) => ({ ...s, timeline: e.target.value }))}>
+                    <option>Immediately</option><option>Within 1 – 15 Days</option><option>Within 15 – 30 Days</option>
+                  </select>
+                </label>
+              </div>
+              {leadStatus.error && <p style={{ margin: "16px 0 0", fontSize: 13, fontWeight: 500, color: "#d64545", textAlign: "center" }}>{leadStatus.error}</p>}
+              <button type="submit" disabled={leadStatus.submitting} style={{ marginTop: 22, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: leadStatus.submitting ? "not-allowed" : "pointer", opacity: leadStatus.submitting ? 0.7 : 1, boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>{leadStatus.submitting ? "Submitting…" : "Submit Requirement"}</button>
+              <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
+            </form>
+          )}
         </div>
       </section>
 
