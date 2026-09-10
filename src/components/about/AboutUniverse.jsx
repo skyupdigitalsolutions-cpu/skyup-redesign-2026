@@ -13,16 +13,13 @@ import React, { useEffect, useRef } from "react";
 // Photos are the real files on disk: public/images/team/<file>.webp
 // `file` = exact filename. Order = display order → Roshan is 3rd.
 const TEAM = [
-  { name: "Bhojraj Rattigerimath",  role: "Social Media Manager", n: 1, file: "bhojraj" },
-  { name: "Harish Krishna Moger",   role: "UI/UX Designer",     n: 2, file: "harish" },
-  { name: "Roshan Prabhu",   role: "AI/ML Developer",         n: 3, file: "roshan" },   // ← 3rd
-  { name: "Lohith Ishwar Moger",   role: "Multimedia Designer",  n: 4, file: "lohith" },
-  { name: "Ismail Zabiulla",   role: "Sales Manager",        n: 5, file: "ismail" },
-  { name: "Jahnavi AK",  role: "Perfomance Marketer",        n: 6, file: "jahnavi" },
-  { name: "Pooja Kadwadi",    role: "Frontend Developer",   n: 7, file: "pooja" },
-  { name: "Shashikant S Bilgundi ",   role: "Full Stack Developer", n: 8, file: "shashi" },
-  { name: "Srinivas Sutar", role: "Backend Developer",    n: 9, file: "srinivas" },
-  { name: "Teja GS",     role: "Tele Sales Executive", n: 10, file: "teja" },
+  { name: "Harish Krishna Moger",   role: "UI/UX Designer",     n: 1, file: "harish" },
+  { name: "Roshan Prabhu",   role: "AI/ML Developer",         n: 2, file: "roshan" },
+  { name: "Lohith Ishwar Moger",   role: "Multimedia Designer",  n: 3, file: "lohith" },
+  { name: "Ismail Zabiulla",   role: "Sales Manager",        n: 4, file: "ismail" },
+  { name: "Jahnavi AK",  role: "Perfomance Marketer",        n: 5, file: "jahnavi" },
+  { name: "Pooja Kadwadi",    role: "Frontend Developer",   n: 6, file: "pooja" },
+  { name: "Shashikant S Bilgundi ",   role: "Full Stack Developer", n: 7, file: "shashi" },
 ];
 const VALUES = [
   { h: "Strategy Before Execution", p: "We understand your business, audience and goals before any activity starts." },
