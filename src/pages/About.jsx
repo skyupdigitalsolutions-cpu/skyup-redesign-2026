@@ -55,15 +55,12 @@ export default function About() {
             <h2 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.25rem", color: "#FA9F43" }}>Our Team</h2>
             <ul style={{ listStyle: "none", padding: 0, display: "flex", flexWrap: "wrap", gap: "1rem" }}>
               {[
-                { name: "Bhojraj Rattigerimath", role: "Social Media Manager" },
                 { name: "Harish Krishna Moger", role: "UI/UX Designer" },
                 { name: "Lohith Ishwar Moger", role: "Multimedia Designer" },
                 { name: "Ismail Zabiulla", role: "Sales Manager" },
                 { name: "Jahnavi AK", role: "Performance Marketer" },
                 { name: "Pooja Kadwadi", role: "Frontend Developer" },
                 { name: "Shashikant S Bilgundi", role: "Full Stack Developer" },
-                { name: "Srinivas Sutar", role: "Backend Developer" },
-                { name: "Teja GS", role: "Tele Sales Executive" },
               ].map((m) => (
                 <li key={m.name} style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "0.75rem 1rem", minWidth: "200px" }}>
                   <strong style={{ display: "block", color: "#fff", fontSize: "0.95rem" }}>{m.name}</strong>
