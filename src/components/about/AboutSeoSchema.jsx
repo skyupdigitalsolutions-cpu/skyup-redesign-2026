@@ -62,12 +62,6 @@ const schema = {
     },
     {
       "@type": "Person",
-      name: "Bhojraj",
-      jobTitle: "Social Media Manager",
-      worksFor: { "@id": `${SITE}/#organization` },
-    },
-    {
-      "@type": "Person",
       name: "Harish",
       jobTitle: "Graphic Designer",
       worksFor: { "@id": `${SITE}/#organization` },
@@ -82,12 +76,6 @@ const schema = {
       "@type": "Person",
       name: "Pooja",
       jobTitle: "Frontend Developer",
-      worksFor: { "@id": `${SITE}/#organization` },
-    },
-    {
-      "@type": "Person",
-      name: "Srinivas",
-      jobTitle: "Backend Developer",
       worksFor: { "@id": `${SITE}/#organization` },
     },
     {
