@@ -6,17 +6,18 @@ import SectionHeader from "./SectionHeader";
    Real files on disk: public/images/team/<name>.webp
    Order below = display order → Roshan is 3rd. High-contrast B&W, no text. */
 const MEMBERS = [
-  { name: "Bhojraj",  photo: "/images/team/bhojraj.webp" },
   { name: "Harish",   photo: "/images/team/harish.webp" },
-  { name: "Roshan",   photo: "/images/team/roshan.webp" },   // ← 3rd
+  { name: "Roshan",   photo: "/images/team/roshan.webp" },
   { name: "Lohith",   photo: "/images/team/lohith.webp" },
   { name: "Ismail",   photo: "/images/team/ismail.webp" },
   { name: "Jahnavi",  photo: "/images/team/jahnavi.webp" },
   { name: "Pooja",    photo: "/images/team/pooja.webp" },
   { name: "Shashi",   photo: "/images/team/shashi.webp" },
-  { name: "Srinivas", photo: "/images/team/srinivas.webp" },
-  { name: "Teja",     photo: "/images/team/teja.webp" },
 ];
+
+// Auto-rotation timing.
+const AUTOPLAY_MS = 4000;     // advance every 4s
+const RESUME_AFTER_MS = 6000; // resume autoplay 6s after the user last interacts
 
 function MemberCard({ photo, active }) {
   return (
@@ -60,6 +61,11 @@ export default function TeamSection() {
   const drag = useRef({ down: false, startX: 0, moved: 0 });
   const prevActive = useRef(active);
 
+  // Autoplay control.
+  const [paused, setPaused] = useState(false);
+  const resumeTimer = useRef(null);
+  const wheelCooldown = useRef(0);
+
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
     const set = () => setIsMobile(mq.matches);
@@ -77,7 +83,7 @@ export default function TeamSection() {
   const SIDE_SCALE = 0.9;
   const SPACING = isMobile ? 100 : 300;
   const STAGE_H = isMobile ? 470 : 560;
-  const THRESHOLD = 90;
+  const THRESHOLD = isMobile ? 45 : 60; // lower = more responsive swipe
 
   const wrap = (raw) => {
     let o = raw;
@@ -88,9 +94,28 @@ export default function TeamSection() {
 
   const go = useCallback((dir) => setActive((a) => (a + dir + n) % n), [n]);
 
+  // Pause autoplay now, and schedule it to resume after the user stops touching it.
+  const pauseThenResume = useCallback(() => {
+    setPaused(true);
+    clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => setPaused(false), RESUME_AFTER_MS);
+  }, []);
+
+  // ── Auto-rotation ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => go(1), AUTOPLAY_MS);
+    return () => clearInterval(id);
+  }, [paused, go]);
+
+  useEffect(() => () => clearTimeout(resumeTimer.current), []);
+
+  // ── Drag / swipe (mouse + touch via pointer events) ──────────────────────────
   const onDown = (e) => {
     drag.current = { down: true, startX: e.clientX, moved: 0 };
     e.currentTarget.setPointerCapture?.(e.pointerId);
+    setPaused(true); // hold autoplay while dragging
+    clearTimeout(resumeTimer.current);
   };
   const onMove = (e) => {
     if (!drag.current.down) return;
@@ -104,16 +129,29 @@ export default function TeamSection() {
     drag.current.down = false;
     setDragX(0);
     if (Math.abs(dx) > THRESHOLD) go(dx < 0 ? 1 : -1);
+    pauseThenResume(); // resume autoplay a few seconds later
+  };
+
+  // ── Horizontal trackpad / wheel swipe ────────────────────────────────────────
+  // Only reacts to horizontal intent (deltaX) so it never hijacks vertical
+  // page scrolling.
+  const onWheel = (e) => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // vertical → let the page scroll
+    const now = Date.now();
+    if (now < wheelCooldown.current) return;
+    wheelCooldown.current = now + 350; // throttle so one flick = one step
+    go(e.deltaX > 0 ? 1 : -1);
+    pauseThenResume();
   };
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === "ArrowLeft") go(-1);
-      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") { go(-1); pauseThenResume(); }
+      if (e.key === "ArrowRight") { go(1); pauseThenResume(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [go]);
+  }, [go, pauseThenResume]);
 
   return (
     <section className="overflow-hidden px-6 py-12 lg:px-[120px]">
@@ -132,6 +170,9 @@ export default function TeamSection() {
           onPointerUp={onUp}
           onPointerCancel={onUp}
           onPointerLeave={onUp}
+          onWheel={onWheel}
+          onMouseEnter={() => { setPaused(true); clearTimeout(resumeTimer.current); }}
+          onMouseLeave={() => pauseThenResume()}
         >
           {MEMBERS.map((m, i) => {
             const offset = wrap(i - active);
@@ -152,7 +193,11 @@ export default function TeamSection() {
             return (
               <div
                 key={i}
-                onClick={() => !drag.current.moved && setActive(i)}
+                onClick={() => {
+                  if (drag.current.moved) return;
+                  setActive(i);
+                  pauseThenResume();
+                }}
                 className={`absolute left-1/2 top-1/2 ${
                   animate ? "transition-all duration-500 ease-out" : ""
                 } ${isActive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
@@ -186,7 +231,7 @@ export default function TeamSection() {
 
         <div className="mt-6 flex items-center justify-center gap-6">
           <button
-            onClick={() => go(-1)}
+            onClick={() => { go(-1); pauseThenResume(); }}
             aria-label="Previous member"
             className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 backdrop-blur transition-colors hover:border-[#FA9F43] hover:bg-[#FA9F43] hover:text-[#160c00]"
           >
@@ -197,7 +242,7 @@ export default function TeamSection() {
             {MEMBERS.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setActive(i)}
+                onClick={() => { setActive(i); pauseThenResume(); }}
                 aria-label={`Go to member ${i + 1}`}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === active ? "w-6 bg-[#FA9F43]" : "w-2 bg-white/20 hover:bg-white/40"
@@ -207,7 +252,7 @@ export default function TeamSection() {
           </div>
 
           <button
-            onClick={() => go(1)}
+            onClick={() => { go(1); pauseThenResume(); }}
             aria-label="Next member"
             className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 backdrop-blur transition-colors hover:border-[#FA9F43] hover:bg-[#FA9F43] hover:text-[#160c00]"
           >
