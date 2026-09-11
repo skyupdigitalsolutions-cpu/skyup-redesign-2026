@@ -20,6 +20,8 @@ const TEAM = [
   { name: "Jahnavi AK",  role: "Perfomance Marketer",        n: 5, file: "jahnavi" },
   { name: "Pooja Kadwadi",    role: "Frontend Developer",   n: 6, file: "pooja" },
   { name: "Shashikant S Bilgundi ",   role: "Full Stack Developer", n: 7, file: "shashi" },
+  { name: "Siddaram B M",   role: "Fullstack Software Developer", n: 8, file: "siddaram" },
+  { name: "Bhavani Gowda",   role: "Full Stack Developer", n: 9, file: "bhavani" },
 ];
 const VALUES = [
   { h: "Strategy Before Execution", p: "We understand your business, audience and goals before any activity starts." },
@@ -294,7 +296,7 @@ export default function AboutUniverse() {
     const cards = [...cyl.querySelectorAll(".au-cycard")];
     const nm = nmRef.current, rl = rlRef.current, info = infoRef.current, dotsWrap = dotsRef.current;
     const N = cards.length;
-    const STEP = 40, RADIUS = 430, INTERVAL = 3000;
+    const STEP = 40, RADIUS = 430, INTERVAL = 3500;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let active = 0, timer = null, paused = false, infoT = 0;
 
@@ -313,9 +315,17 @@ export default function AboutUniverse() {
       if (info) { info.classList.remove("show"); clearTimeout(infoT); infoT = setTimeout(() => { if (nm) nm.textContent = TEAM[active].name; if (rl) rl.textContent = TEAM[active].role; info.classList.add("show"); }, 260); }
       if (dotsWrap) { const ds = dotsWrap.children; for (let d = 0; d < ds.length; d++) ds[d].classList.toggle("on", d === active); }
     };
-    const pushCam = () => { if (reduce) return; scene.classList.remove("push"); void scene.offsetWidth; scene.classList.add("push"); };
+    const pushCam = () => {
+      if (reduce) return;
+      // Retrigger the CSS animation WITHOUT a forced sync reflow (void offsetWidth
+      // caused a layout thrash every rotation — the main source of stutter).
+      scene.classList.remove("push");
+      requestAnimationFrame(() => requestAnimationFrame(() => scene.classList.add("push")));
+    };
     const next = () => { active = (active + 1) % N; render(); pushCam(); };
-    const start = () => { if (reduce || paused || timer) return; timer = setInterval(next, INTERVAL); };
+    // Autoplay runs regardless of reduced-motion — a slow photo rotation is gentle.
+    // (The 3D "camera push" flourish stays disabled for reduced-motion users above.)
+    const start = () => { if (paused || timer) return; timer = setInterval(next, INTERVAL); };
     const stop = () => { clearInterval(timer); timer = null; };
 
     // dots — clickable navigation. Each dot jumps the cylinder to that member; we also
@@ -333,14 +343,55 @@ export default function AboutUniverse() {
         dotsWrap.appendChild(s);
       }
     }
+    const prev = () => { active = (active - 1 + N) % N; render(); pushCam(); };
+
     render(); start();
     const onEnter = () => { paused = true; stop(); };
     const onLeave = () => { paused = false; start(); };
     const onVis = () => { if (document.hidden) stop(); else start(); };
     const onResize = () => render();
+
+    // ---- Swipe / drag navigation (mouse + touch) --------------------------------
+    // Drag the cylinder left → next member, right → previous. Pauses the auto-rotate
+    // while dragging and restarts it afterward so a swipe never fights the timer.
+    const SWIPE = 45; // px of horizontal travel needed to change member
+    let down = false, startX = 0, movedX = 0;
+    const dragStart = (e) => {
+      down = true; startX = e.clientX ?? (e.touches && e.touches[0]?.clientX) ?? 0; movedX = 0;
+      paused = true; stop();
+      cyl.setPointerCapture?.(e.pointerId);
+    };
+    const dragMove = (e) => {
+      if (!down) return;
+      const x = e.clientX ?? (e.touches && e.touches[0]?.clientX) ?? 0;
+      movedX = x - startX;
+    };
+    const dragEnd = () => {
+      if (!down) return;
+      down = false;
+      if (Math.abs(movedX) > SWIPE) { movedX < 0 ? next() : prev(); }
+      paused = false; stop(); start(); // resume auto-rotate
+    };
+    // wheel: horizontal trackpad swipe advances too (won't hijack vertical page scroll)
+    let wheelLock = 0;
+    const onWheel = (e) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      const t = Date.now(); if (t < wheelLock) return; wheelLock = t + 400;
+      e.deltaX > 0 ? next() : prev();
+      paused = true; stop(); clearTimeout(infoT);
+      setTimeout(() => { paused = false; start(); }, 1200);
+    };
+
     cyl.addEventListener("mouseenter", onEnter); cyl.addEventListener("mouseleave", onLeave);
+    cyl.addEventListener("pointerdown", dragStart);
+    cyl.addEventListener("pointermove", dragMove);
+    cyl.addEventListener("pointerup", dragEnd);
+    cyl.addEventListener("pointercancel", dragEnd);
+    cyl.addEventListener("wheel", onWheel, { passive: true });
+    cyl.style.touchAction = "pan-y"; // allow vertical page scroll, capture horizontal
+    cyl.style.cursor = "grab";
     document.addEventListener("visibilitychange", onVis); window.addEventListener("resize", onResize, { passive: true });
-    return () => { stop(); clearTimeout(infoT); cyl.removeEventListener("mouseenter", onEnter); cyl.removeEventListener("mouseleave", onLeave); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("resize", onResize); if (dotsWrap) dotsWrap.innerHTML = ""; };
+    return () => { stop(); clearTimeout(infoT); cyl.removeEventListener("mouseenter", onEnter); cyl.removeEventListener("mouseleave", onLeave); cyl.removeEventListener("pointerdown", dragStart); cyl.removeEventListener("pointermove", dragMove); cyl.removeEventListener("pointerup", dragEnd); cyl.removeEventListener("pointercancel", dragEnd); cyl.removeEventListener("wheel", onWheel); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("resize", onResize); if (dotsWrap) dotsWrap.innerHTML = ""; };
   }, []);
 
   const hideImg = (e) => { e.currentTarget.style.display = "none"; };
@@ -591,14 +642,14 @@ const CSS = `
 .au-team-head{ max-width:760px; margin:0 auto; padding:0 28px; }
 .au-team-head .au-h2{ margin-left:auto; margin-right:auto; }
 .au-cyscene{ position:relative; margin-top:5vh; height:60vh; min-height:470px; display:flex; align-items:center; justify-content:center; perspective:1100px; perspective-origin:50% 50%; overflow:hidden; }
-.au-cyscene.push{ animation:auCyPush 1300ms cubic-bezier(.66,0,.2,1); }
-@keyframes auCyPush{ 0%{ transform:scale(1);} 42%{ transform:scale(1.035);} 100%{ transform:scale(1);} }
-.au-cyl{ position:relative; width:300px; height:430px; transform-style:preserve-3d; transition:transform 1300ms cubic-bezier(.66,0,.2,1); will-change:transform; }
-.au-cycard{ position:absolute; left:0; top:0; width:300px; height:430px; border-radius:20px; overflow:hidden; background:radial-gradient(120% 120% at 50% 30%,#23356a,#0a1022); box-shadow:0 26px 40px -18px rgba(0,0,0,.6); backface-visibility:hidden; transition:opacity .9s ease, box-shadow .9s ease; }
+.au-cyscene.push{ animation:auCyPush 700ms cubic-bezier(.22,.61,.36,1); }
+@keyframes auCyPush{ 0%{ transform:scale(1);} 42%{ transform:scale(1.02);} 100%{ transform:scale(1);} }
+.au-cyl{ position:relative; width:300px; height:430px; transform-style:preserve-3d; transition:transform 700ms cubic-bezier(.22,.61,.36,1); will-change:transform; backface-visibility:hidden; }
+.au-cycard{ position:absolute; left:0; top:0; width:300px; height:430px; border-radius:20px; overflow:hidden; background:radial-gradient(120% 120% at 50% 30%,#23356a,#0a1022); box-shadow:0 26px 40px -18px rgba(0,0,0,.6); backface-visibility:hidden; transform:translateZ(0); transition:opacity .55s ease, box-shadow .55s ease; }
 .au-cycard.is-active{ box-shadow:0 34px 60px -22px rgba(0,0,0,.7),0 0 70px -24px rgba(91,140,255,.4); }
 .au-cyphoto{ position:relative; width:100%; height:100%; display:grid; place-items:center; }
-.au-cyphoto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 18%; filter:saturate(.9) contrast(.94) brightness(1.06) sepia(.08); }
-.au-cycard.is-active .au-cyphoto img{ filter:saturate(.95) contrast(.97) brightness(1.08) sepia(.06); }
+.au-cyphoto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 18%; transform:translateZ(0); }
+.au-cycard.is-active .au-cyphoto img{ filter:none; }
 .au-cyph{ display:none; }
 .au-cyinfo{ height:74px; margin-top:6px; }
 .au-cyname{ font-size:1.5rem; font-weight:700; color:#fff; opacity:0; transform:translateY(8px); transition:opacity .7s ease,transform .7s ease; }
