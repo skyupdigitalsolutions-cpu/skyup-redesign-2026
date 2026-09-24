@@ -1,55 +1,49 @@
 // src/components/CustomSoftwareMap.jsx
-// Interactive dotted India map with hoverable client-review pins.
+// Interactive dotted India map with a pin for every project location.
+// Desktop: hover/tap a pin → floating card. Mobile (<640px): the active card
+// renders in a panel under the map so it never covers the map.
 // SSR/prerender-safe: all D3/topojson work happens in useEffect (client only).
-// D3 + topojson are loaded from CDN on demand and cached on window.
 import React, { useEffect, useRef } from "react";
 
 const W = 1000;
 const H = 620;
 const ATLAS = "https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json";
+const MOBILE_BP = 640;
 
-// 10 cities across India. Bengaluru carries 3 reviews (paged inside its card).
-const CITIES = [
-  { city: "Mumbai", state: "Maharashtra", lon: 72.8777, lat: 19.076, reviews: [
-    { initials: "RM", name: "Rahul Mehta", role: "Director, Manufacturing", quote: "Our order and inventory tracking used to run on spreadsheets. The custom system now handles it end to end." },
+// Mirrors the PROJECTS cards on the landing page. `summary` lines are short
+// placeholders — edit them to match what was actually delivered.
+// Locations that share a pin (Bengaluru) are paged inside one card.
+const LOCATIONS = [
+  { label: "Haryana", region: "India", lon: 76.0856, lat: 29.0588, projects: [
+    { client: "Natraj Home Furnishing", system: "Field Management System", summary: "Custom system to manage field teams, visits and on-ground operations." },
   ] },
-  { city: "Pune", state: "Maharashtra", lon: 73.8567, lat: 18.5204, reviews: [
-    { initials: "VD", name: "Vikram Deshpande", role: "COO, Auto Components", quote: "Approvals that took days now clear in hours. The automation paid for itself in a quarter." },
+  { label: "Dubai", region: "UAE", lon: 55.2708, lat: 25.2048, offMap: true, projects: [
+    { client: "Spotek", system: "CRM + Invoice Software", summary: "Lead management and invoicing combined in one custom platform." },
   ] },
-  { city: "New Delhi", state: "Delhi NCR", lon: 77.209, lat: 28.6139, reviews: [
-    { initials: "AN", name: "Anita Nair", role: "Head of Sales, B2B Services", quote: "The CRM was built around our follow-up process instead of forcing us into someone else\u2019s." },
+  { label: "Bengaluru", region: "Karnataka", lon: 77.5946, lat: 12.9716, projects: [
+    { client: "Sarathi", system: "Finance CRM", summary: "CRM tailored to finance workflows, follow-ups and reporting." },
+    { client: "Ashwika Enterprises", system: "AI Voice Agent", summary: "AI voice agent that handles customer calls and enquiries." },
+    { client: "Logistics Business", system: "AI Summary Software", summary: "AI software that summarises logistics data and documents." },
   ] },
-  { city: "Jaipur", state: "Rajasthan", lon: 75.7873, lat: 26.9124, reviews: [
-    { initials: "PS", name: "Pooja Sharma", role: "Founder, Retail Chain", quote: "One dashboard for every store. We finally see stock and sales in real time." },
-  ] },
-  { city: "Ahmedabad", state: "Gujarat", lon: 72.5714, lat: 23.0225, reviews: [
-    { initials: "HP", name: "Harsh Patel", role: "MD, Textiles", quote: "They understood our production floor before writing code. The software actually fits how we work." },
-  ] },
-  { city: "Kolkata", state: "West Bengal", lon: 88.3639, lat: 22.5726, reviews: [
-    { initials: "SB", name: "Sourav Banerjee", role: "Director, Logistics", quote: "Live shipment tracking cut our customer-support calls by half." },
-  ] },
-  { city: "Hyderabad", state: "Telangana", lon: 78.4867, lat: 17.385, reviews: [
-    { initials: "KR", name: "Kavya Reddy", role: "VP Ops, Healthcare", quote: "Patient scheduling and billing in one system \u2014 no more double entry." },
-  ] },
-  { city: "Bengaluru", state: "Karnataka", lon: 77.5946, lat: 12.9716, reviews: [
-    { initials: "SK", name: "Sandeep Kulkarni", role: "Founder, Logistics", quote: "They understood how our operations actually work before writing any code \u2014 that made it usable." },
-    { initials: "MG", name: "Meera Gowda", role: "CEO, EdTech", quote: "From idea to launch in ten weeks. The team felt like our own engineering department." },
-    { initials: "AV", name: "Arjun Verma", role: "Head of Product, SaaS", quote: "Scalable from day one \u2014 we tripled users without touching the architecture." },
-  ] },
-  { city: "Chennai", state: "Tamil Nadu", lon: 80.2707, lat: 13.0827, reviews: [
-    { initials: "LS", name: "Lakshmi Subramanian", role: "Director, Exports", quote: "Custom reporting gave us numbers our old tools never could." },
-  ] },
-  { city: "Kochi", state: "Kerala", lon: 76.2673, lat: 9.9312, reviews: [
-    { initials: "TJ", name: "Thomas Joseph", role: "Owner, Hospitality", quote: "Bookings, staff and inventory in one place. Simple enough that everyone actually uses it." },
+  { label: "Karnataka", region: "India", lon: 75.7139, lat: 15.3173, projects: [
+    { client: "Abhi Cabs", system: "Transport ERP", summary: "ERP for managing transport operations, fleet and bookings." },
   ] },
 ];
 
+const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+
 function loadScript(src) {
   return new Promise((resolve, reject) => {
-    if ([...document.scripts].some((s) => s.src === src)) return resolve();
+    const existing = [...document.scripts].find((s) => s.src === src);
+    if (existing) {
+      if (existing.dataset.loaded === "1") return resolve();
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", reject);
+      return;
+    }
     const el = document.createElement("script");
     el.src = src;
-    el.onload = () => resolve();
+    el.onload = () => { el.dataset.loaded = "1"; resolve(); };
     el.onerror = reject;
     document.head.appendChild(el);
   });
@@ -62,17 +56,16 @@ export default function CustomSoftwareMap() {
     let cancelled = false;
     const host = hostRef.current;
     if (!host) return;
+    const disposers = [];
 
     (async () => {
       try {
-        await loadScript("https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js");
-        await loadScript("https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js");
-      } catch (_) { /* offline: dots-only fallback below */ }
+        if (!window.d3) await loadScript("https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js");
+        if (!window.topojson) await loadScript("https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js");
+      } catch (_) { /* offline: pins-only fallback below */ }
       if (cancelled || !hostRef.current) return;
 
       const d3 = window.d3;
-      host.innerHTML = "";
-
       let india = null;
       if (d3 && window.topojson) {
         try {
@@ -83,13 +76,21 @@ export default function CustomSoftwareMap() {
       }
       if (cancelled) return;
 
+      host.innerHTML = "";
+      const isMobile = () => host.clientWidth < MOBILE_BP;
+
       const wrap = document.createElement("div");
       wrap.style.cssText = "position:relative;width:100%;";
       host.appendChild(wrap);
 
+      // Panel under the map that holds the active card on mobile
+      const panel = document.createElement("div");
+      panel.style.cssText = "position:relative;width:100%;margin-top:14px;";
+      host.appendChild(panel);
+
       let projection = null;
       if (india && d3) {
-        projection = d3.geoMercator().fitExtent([[40, 30], [W - 40, H - 30]], india);
+        projection = d3.geoMercator().fitExtent([[60, 30], [W - 40, H - 30]], india);
         const path = d3.geoPath(projection);
         const svg = d3.select(wrap).append("svg")
           .attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%")
@@ -105,59 +106,77 @@ export default function CustomSoftwareMap() {
           .attr("cx", (d) => d[0]).attr("cy", (d) => d[1]).attr("r", r)
           .attr("fill", "#c9c9dd").attr("opacity", 0.85);
       } else {
-        wrap.style.minHeight = "420px";
+        wrap.style.aspectRatio = `${W} / ${H}`;
       }
 
       const layer = document.createElement("div");
       layer.style.cssText = "position:absolute; inset:0;";
       wrap.appendChild(layer);
 
-      // Cluster pins that would visually overlap (pixel-space, responsive).
-      const hit = window.matchMedia("(max-width: 991px)").matches ? 44 : 24;
-      const layerPx = wrap.clientWidth || W;
-      const MIN_GAP = Math.max(30, hit * (W / layerPx) * 1.1);
-      const groups = [];
-      CITIES.forEach((city, ci) => {
-        const p = projection ? projection([city.lon, city.lat]) : [W * (0.2 + ci * 0.07), H * (0.25 + ci * 0.06)];
-        const near = groups.find((g) => Math.hypot(g.x - p[0], g.y - p[1]) < MIN_GAP);
-        const entries = city.reviews.map((rv) => ({ ...rv, city: city.city, state: city.state }));
-        if (near) { near.reviews.push(...entries); near.cities.push(city.city); }
-        else groups.push({ x: p[0], y: p[1], cities: [city.city], reviews: entries });
+      const hit = window.matchMedia("(max-width: 991px)").matches ? 40 : 26;
+      const groups = LOCATIONS.map((loc, li) => {
+        let p = projection ? projection([loc.lon, loc.lat]) : [W * (0.3 + li * 0.15), H * (0.3 + li * 0.12)];
+        // Off-map locations (Dubai) sit on the west edge with a label chip
+        if (loc.offMap) p = [Math.max(46, Math.min(p[0], 90)), p[1]];
+        return { ...loc, x: p[0], y: p[1] };
       });
 
       const cards = [];
-      const glow = ["#F1891A", "#22c3f0", "#ff4fa3"];
-      const glow2 = ["#ffd58a", "#7b3ff2", "#F1891A"];
+      const glow = ["#F1891A", "#22c3f0", "#ff4fa3", "#7b3ff2"];
+      const glow2 = ["#ffd58a", "#7b3ff2", "#F1891A", "#22c3f0"];
 
       groups.forEach((c, i) => {
         const lx = (c.x / W) * 100, ly = (c.y / H) * 100;
         let ri = 0;
+        let hideTimer = null;
+        const where = c.offMap ? `${c.label}, ${c.region}` : c.label;
 
         const dot = document.createElement("button");
         dot.type = "button";
-        dot.setAttribute("aria-label", `Reviews from ${c.cities.join(" and ")} (${c.reviews.length})`);
-        dot.style.cssText = `position:absolute; left:${lx}%; top:${ly}%; transform:translate(-50%,-50%); width:${hit}px; height:${hit}px; padding:0; border:none; background:transparent; cursor:pointer; z-index:3;`;
-        dot.innerHTML = `<span style="position:absolute; inset:0; border-radius:9999px; background:rgba(241,137,26,0.22); transform:scale(0.55); transition:transform .22s ease, background .22s ease;"></span><span style="position:absolute; left:50%; top:50%; width:13px; height:13px; margin:-6.5px 0 0 -6.5px; border-radius:9999px; background:#F1891A; box-shadow:0 2px 8px rgba(241,137,26,0.55); transition:transform .22s ease;"></span>`;
+        dot.setAttribute("aria-label", `Projects in ${where} (${c.projects.length})`);
+        dot.style.cssText = `position:absolute; left:${lx}%; top:${ly}%; transform:translate(-50%,-50%); width:${hit}px; height:${hit}px; padding:0; border:none; background:transparent; cursor:pointer; z-index:3; font-family:inherit;`;
+        dot.innerHTML =
+          `<span style="position:absolute; inset:0; border-radius:9999px; background:rgba(241,137,26,0.22); transform:scale(0.6); transition:transform .22s ease, background .22s ease;"></span>` +
+          `<span style="position:absolute; left:50%; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:9999px; background:#F1891A; border:2px solid #fff; box-sizing:border-box; box-shadow:0 2px 8px rgba(241,137,26,0.55); transition:transform .22s ease;"></span>` +
+          (c.projects.length > 1 ? `<span style="position:absolute; top:-4px; right:-6px; min-width:17px; height:17px; padding:0 4px; box-sizing:border-box; border-radius:9999px; background:#0037CA; color:#fff; font-size:10px; font-weight:700; line-height:17px; text-align:center; pointer-events:none;">${c.projects.length}</span>` : "") +
+          `<span style="position:absolute; left:calc(100% + 2px); top:50%; transform:translateY(-50%); white-space:nowrap; font-size:11.5px; font-weight:600; color:#141420; background:rgba(255,255,255,0.92); border:1px solid #ebebf4; border-radius:9999px; padding:3px 9px; pointer-events:none; box-shadow:0 4px 12px rgba(20,20,32,0.08);">${c.offMap ? "\u2190 " : ""}${where}</span>`;
+        const ring = dot.children[0], core = dot.children[1];
 
         const card = document.createElement("div");
-        const cardW = Math.max(210, Math.min(290, (wrap.clientWidth || 320) - 40));
-        card.style.cssText = `position:absolute; left:0; top:0; width:${cardW}px; box-sizing:border-box; z-index:4; pointer-events:none; transform:translateY(6px); opacity:0; transition:opacity .2s ease, transform .24s ease; background:#fff; border-radius:20px; padding:22px 22px 26px; overflow:hidden; box-shadow:0 22px 54px rgba(20,20,32,0.16);`;
+        card.style.cssText = `position:absolute; left:0; top:0; box-sizing:border-box; z-index:4; pointer-events:none; transform:translateY(6px); opacity:0; transition:opacity .2s ease, transform .24s ease; background:#fff; border-radius:20px; padding:22px 22px 24px; overflow:hidden; box-shadow:0 22px 54px rgba(20,20,32,0.16);`;
 
         const renderCard = () => {
-          const rv = c.reviews[ri];
-          const pager = c.reviews.length > 1
-            ? `<div style="display:flex; align-items:center; gap:6px; margin-top:4px;">${c.reviews.map((_, k) => `<span style="width:${k === ri ? 18 : 6}px; height:6px; border-radius:9999px; background:${k === ri ? "#F1891A" : "#e0e0ec"}; transition:width .2s;"></span>`).join("")}<span style="margin-left:auto; font-size:11px; font-weight:600; color:#0037CA; cursor:pointer;" data-next>Next \u2192</span></div>`
+          const pr = c.projects[ri];
+          const pager = c.projects.length > 1
+            ? `<div style="display:flex; align-items:center; gap:6px; margin-top:2px;">${c.projects.map((_, k) => `<span style="width:${k === ri ? 18 : 6}px; height:6px; border-radius:9999px; background:${k === ri ? "#F1891A" : "#e0e0ec"}; transition:width .2s;"></span>`).join("")}<span style="margin-left:8px; font-size:11px; color:#6b6b8a;">${ri + 1} / ${c.projects.length}</span><button type="button" data-next style="margin-left:auto; font-family:inherit; font-size:12px; font-weight:600; color:#0037CA; background:none; border:none; padding:6px 0; cursor:pointer;">Next \u2192</button></div>`
             : "";
-          card.innerHTML = `<div style="position:absolute; bottom:-58px; left:-24px; right:-24px; height:190px; filter:blur(40px); opacity:0.8; background:radial-gradient(52% 62% at 60% 80%, ${glow[i % 3]} 0%, transparent 72%), radial-gradient(46% 56% at 24% 92%, ${glow2[i % 3]} 0%, transparent 74%);"></div><div style="position:relative; display:flex; flex-direction:column; gap:16px;"><div style="display:flex; align-items:center; gap:8px; white-space:nowrap;"><span style="font-size:11px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#F1891A;">${rv.city}</span><span style="font-size:11.5px; font-weight:400; color:#6b6b8a;">${rv.state}</span></div><p style="margin:0; font-size:16px; font-weight:400; color:#141420; line-height:1.5; letter-spacing:-0.01em;">\u201C${rv.quote}\u201D</p><div style="display:flex; align-items:center; gap:11px;"><span style="width:38px; height:38px; border-radius:9999px; background:#f5f5fa; border:1px solid #ebebf4; color:#0037CA; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center;">${rv.initials}</span><span style="display:flex; flex-direction:column;"><span style="font-size:14px; font-weight:500; color:#141420;">${rv.name}</span><span style="font-size:12px; font-weight:400; color:#6b6b8a;">${rv.role}</span></span></div>${pager}</div>`;
+          card.innerHTML =
+            `<div style="position:absolute; bottom:-58px; left:-24px; right:-24px; height:170px; filter:blur(40px); opacity:0.7; background:radial-gradient(52% 62% at 60% 80%, ${glow[i % 4]} 0%, transparent 72%), radial-gradient(46% 56% at 24% 92%, ${glow2[i % 4]} 0%, transparent 74%);"></div>` +
+            `<div style="position:relative; display:flex; flex-direction:column; gap:14px;">` +
+              `<div style="display:flex; align-items:center; gap:8px; white-space:nowrap;"><span style="font-size:11px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#F1891A;">${c.label}</span><span style="font-size:11.5px; font-weight:400; color:#6b6b8a;">${c.region}</span></div>` +
+              `<div style="display:flex; align-items:center; gap:12px;"><span style="width:42px; height:42px; flex-shrink:0; border-radius:12px; background:#f5f5fa; border:1px solid #ebebf4; color:#0037CA; font-size:13.5px; font-weight:700; display:flex; align-items:center; justify-content:center;">${initials(pr.client)}</span><span style="display:flex; flex-direction:column; gap:2px; min-width:0;"><span style="font-size:16px; font-weight:600; color:#141420; letter-spacing:-0.01em;">${pr.client}</span><span style="font-size:13.5px; font-weight:600; color:#0037CA;">${pr.system}</span></span></div>` +
+              `<p style="margin:0; font-size:14px; font-weight:400; color:#3b3b57; line-height:1.6;">${pr.summary}</p>` +
+              pager +
+            `</div>`;
           const nx = card.querySelector("[data-next]");
-          if (nx) nx.addEventListener("click", (e) => { e.stopPropagation(); ri = (ri + 1) % c.reviews.length; renderCard(); });
+          if (nx) nx.addEventListener("click", (e) => { e.stopPropagation(); ri = (ri + 1) % c.projects.length; renderCard(); place(); });
         };
-        renderCard();
 
         const place = () => {
+          if (isMobile()) {
+            if (card.parentNode !== panel) panel.appendChild(card);
+            card.style.position = "relative";
+            card.style.left = "0"; card.style.top = "0";
+            card.style.width = "100%";
+            return;
+          }
+          if (card.parentNode !== layer) layer.insertBefore(card, layer.firstChild);
+          card.style.position = "absolute";
           const lw = layer.clientWidth, lh = layer.clientHeight;
+          const cw = Math.max(220, Math.min(300, lw - 40));
+          card.style.width = cw + "px";
           const px = (lx / 100) * lw, py = (ly / 100) * lh;
-          const cw = card.offsetWidth || cardW, ch = card.offsetHeight || 200;
+          const ch = card.offsetHeight || 200;
           let left = px + 24;
           if (left + cw > lw - 8) left = px - 24 - cw;
           left = Math.max(8, Math.min(left, Math.max(8, lw - cw - 8)));
@@ -168,42 +187,85 @@ export default function CustomSoftwareMap() {
           card.style.top = top + "px";
         };
         const show = () => {
-          cards.forEach((o) => o.hide());
+          clearTimeout(hideTimer);
+          cards.forEach((o) => { if (o.card !== card) o.hide(); });
+          card.style.display = "block";
           place();
           card.style.opacity = "1";
           card.style.transform = "translateY(0)";
+          card.style.pointerEvents = "auto";
           dot.style.zIndex = "5";
-          dot.firstElementChild.style.transform = "scale(1)";
-          dot.firstElementChild.style.background = "rgba(241,137,26,0.3)";
-          dot.lastElementChild.style.transform = "scale(1.15)";
+          ring.style.transform = "scale(1)";
+          ring.style.background = "rgba(241,137,26,0.32)";
+          core.style.transform = "scale(1.15)";
+          active = card;
         };
         const hide = () => {
+          clearTimeout(hideTimer);
           card.style.opacity = "0";
           card.style.transform = "translateY(6px)";
+          card.style.pointerEvents = "none";
+          if (card.parentNode === panel) card.style.display = "none";
           dot.style.zIndex = "3";
-          dot.firstElementChild.style.transform = "scale(0.55)";
-          dot.firstElementChild.style.background = "rgba(241,137,26,0.22)";
-          dot.lastElementChild.style.transform = "scale(1)";
+          ring.style.transform = "scale(0.6)";
+          ring.style.background = "rgba(241,137,26,0.22)";
+          core.style.transform = "scale(1)";
         };
-        cards.push({ hide });
-
-        dot.addEventListener("mouseenter", show);
-        dot.addEventListener("focus", show);
-        dot.addEventListener("click", show);
-        dot.addEventListener("mouseleave", () => setTimeout(() => { if (!card.matches(":hover")) hide(); }, 90));
-        card.style.pointerEvents = "auto";
-        card.addEventListener("mouseenter", show);
-
+        const scheduleHide = () => {
+          if (isMobile()) return; // mobile keeps the last tapped card in the panel
+          clearTimeout(hideTimer);
+          hideTimer = setTimeout(() => { if (!card.matches(":hover") && !dot.matches(":hover")) hide(); }, 120);
+        };
+        cards.push({ card, hide, show, place });
+        renderCard();
+        card.style.display = "none";
         layer.appendChild(card);
         layer.appendChild(dot);
-        window.addEventListener("resize", () => { if (card.style.opacity === "1") place(); });
-        if (window.ResizeObserver) new ResizeObserver(() => { if (card.style.opacity === "1") place(); }).observe(layer);
-        if (i === 0) setTimeout(show, 400);
+
+        dot.addEventListener("mouseenter", () => { if (!isMobile()) show(); });
+        dot.addEventListener("focus", show);
+        dot.addEventListener("click", show);
+        dot.addEventListener("mouseleave", scheduleHide);
+        card.addEventListener("mouseenter", () => { if (!isMobile()) show(); });
+        card.addEventListener("mouseleave", scheduleHide);
+        disposers.push(() => clearTimeout(hideTimer));
       });
+
+      let active = null;
+      // Open Bengaluru first (most projects), else the first pin
+      const first = cards[groups.findIndex((g) => g.label === "Bengaluru")] || cards[0];
+      const t = setTimeout(() => first && first.show(), 400);
+      disposers.push(() => clearTimeout(t));
+
+      // Re-place the open card on resize (also switches desktop ↔ mobile mode)
+      const onResize = () => {
+        const open = cards.find((o) => o.card === active && o.card.style.opacity === "1");
+        if (open) open.place();
+        cards.forEach((o) => { if (o !== open) o.hide(); });
+      };
+      window.addEventListener("resize", onResize);
+      disposers.push(() => window.removeEventListener("resize", onResize));
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(onResize);
+        ro.observe(host);
+        disposers.push(() => ro.disconnect());
+      }
+
+      // Desktop: click outside closes the card
+      const onOutside = (e) => {
+        if (isMobile() || host.contains(e.target) && e.target !== layer) return;
+        cards.forEach((o) => o.hide());
+      };
+      document.addEventListener("pointerdown", onOutside);
+      disposers.push(() => document.removeEventListener("pointerdown", onOutside));
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      disposers.forEach((fn) => fn());
+      host.innerHTML = "";
+    };
   }, []);
 
-  return <div ref={hostRef} style={{ width: "100%" }} />;
+  return <div ref={hostRef} style={{ width: "100%", minHeight: 220 }} />;
 }
