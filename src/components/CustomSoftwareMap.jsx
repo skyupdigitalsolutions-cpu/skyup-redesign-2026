@@ -1,9 +1,9 @@
 // src/components/CustomSoftwareMap.jsx
 // Dotted world map with a pin for every project location.
 // • Auto-plays: cycles through every project on its own (pin by pin, and through
-//   every project on a shared pin). Pauses on hover, tap, when scrolled off-screen
-//   or via the Pause button; resumes automatically.
-// • "Region" view (Middle East + South Asia, default) and full "World" view.
+//   every project on a shared pin). Pauses on hover, tap, or when scrolled
+//   off-screen; resumes automatically.
+// • View is set by DEFAULT_VIEW: "region" (Middle East + South Asia) or "world".
 // • Desktop: card floats next to the active pin. Mobile (<640px): card sits in a
 //   panel under the map so it never covers it.
 // SSR/prerender-safe: all D3/topojson work happens in useEffect (client only).
@@ -88,42 +88,10 @@ export default function CustomSoftwareMap() {
       const isMobile = () => host.clientWidth < MOBILE_BP;
 
       // ── State ──
-      let view = DEFAULT_VIEW, groups = [], pins = [], layer = null, gi = 0, ri = 0;
-      let userPaused = false, hoverPaused = false, tempPaused = false, inView = true;
+      const view = DEFAULT_VIEW; let groups = [], pins = [], layer = null, gi = 0, ri = 0;
+      let hoverPaused = false, tempPaused = false, inView = true;
       let timer = null, resumeTimer = null, barAnim = null;
       const dotCache = {};
-
-      // ── Controls: view toggle + play/pause ──
-      const bar = document.createElement("div");
-      bar.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;";
-      const seg = document.createElement("div");
-      seg.setAttribute("role", "group");
-      seg.setAttribute("aria-label", "Map view");
-      seg.style.cssText = "display:inline-flex;gap:2px;background:#fff;border:1px solid #ebebf4;border-radius:9999px;padding:4px;box-shadow:0 4px 14px rgba(20,20,32,0.06);";
-      const pill = "font-family:inherit;font-size:13px;font-weight:600;border:none;border-radius:9999px;padding:8px 16px;cursor:pointer;transition:background .2s,color .2s;";
-      const viewBtns = {};
-      Object.entries(VIEWS).forEach(([k, v]) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.textContent = v.label;
-        b.style.cssText = pill;
-        on(b, "click", () => { if (view !== k) { view = k; gi = 0; ri = 0; build(); } });
-        viewBtns[k] = b;
-        seg.appendChild(b);
-      });
-      const playBtn = document.createElement("button");
-      playBtn.type = "button";
-      playBtn.style.cssText = pill + "background:#fff;color:#141420;border:1px solid #ebebf4;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(20,20,32,0.06);";
-      const renderPlay = () => {
-        playBtn.innerHTML = userPaused
-          ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="#0037CA"><path d="M7 4v16l13-8z"/></svg>Play tour`
-          : `<svg width="12" height="12" viewBox="0 0 24 24" fill="#0037CA"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>Pause tour`;
-        playBtn.setAttribute("aria-pressed", userPaused ? "true" : "false");
-      };
-      on(playBtn, "click", () => { userPaused = !userPaused; tempPaused = false; renderPlay(); schedule(); });
-      renderPlay();
-      bar.append(seg, playBtn);
-      host.appendChild(bar);
 
       const mapBox = document.createElement("div");
       mapBox.style.cssText = "position:relative;width:100%;";
@@ -234,7 +202,7 @@ export default function CustomSoftwareMap() {
       };
 
       // ── Auto-play ──
-      const running = () => !userPaused && !hoverPaused && !tempPaused && inView && !document.hidden;
+      const running = () => !hoverPaused && !tempPaused && inView && !document.hidden;
       const stopBar = () => { if (barAnim) { barAnim.cancel(); barAnim = null; } };
       const startBar = () => {
         const b = card.querySelector("[data-bar]");
@@ -301,11 +269,6 @@ export default function CustomSoftwareMap() {
       const build = () => {
         clearTimeout(timer);
         stopBar();
-        Object.entries(viewBtns).forEach(([k, b]) => {
-          b.style.background = k === view ? "#141420" : "transparent";
-          b.style.color = k === view ? "#fff" : "#4a4a66";
-          b.setAttribute("aria-pressed", k === view ? "true" : "false");
-        });
         if (card.parentNode) card.parentNode.removeChild(card);
         mapBox.innerHTML = "";
 
