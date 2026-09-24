@@ -3,7 +3,7 @@
 // Self-contained: its own header/footer/nav, one-time lead popup, review map,
 // process carousel and hover-expand "Why us" cards. No global Header/Footer.
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import CustomSoftwareMap from "@/components/CustomSoftwareMap";
+
 
 // Backend base URL — set VITE_API_BASE_URL in your deployment environment variables.
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3500";
@@ -38,10 +38,17 @@ const ICON = {
   code: [P("m9 8-5 4 5 4", "a"), P("m15 8 5 4-5 4", "b")],
   shield: [P("M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z", "a"), P("m9 12 2 2 4-4", "b")],
   rocket: [P("M5 15c-1 2-1 5-1 5s3 0 5-1", "a"), P("M9 15l-3-3a10 10 0 0 1 8-9 10 10 0 0 1 5 5 10 10 0 0 1-9 8l-1-1z", "b"), <circle key="c" cx="14.5" cy="9.5" r="1.5" />],
+  support: [P("M4 15v-3a8 8 0 0 1 16 0v3", "a"), <rect key="b" x="2" y="14" width="5" height="7" rx="2" />, <rect key="c" x="17" y="14" width="5" height="7" rx="2" />],
+  chart: [P("M3 21h18", "a"), <rect key="b" x="5" y="11" width="3" height="7" rx="1" />, <rect key="c" x="10.5" y="6" width="3" height="12" rx="1" />, <rect key="d" x="16" y="13" width="3" height="5" rx="1" />],
+  doc: [P("M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z", "a"), P("M14 2v5h5", "b"), P("m9 14 2 2 4-4", "c")],
+  cloud: [P("M7 18a5 5 0 0 1-.6-9.96A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9H7z", "a")],
+  pin: [P("M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z", "a"), <circle key="b" cx="12" cy="9.5" r="2.5" />],
 };
 
 const CHECK = svg([<circle key="a" cx="12" cy="12" r="9.5" stroke="#e4eaff" strokeWidth="2" />, P("M8.5 12l2.5 2.5 4.5-5", "b")], { w: 19, h: 19, stroke: "#0037CA", sw: 2.5, style: { flexShrink: 0 } });
 const STAR = <svg width="13" height="13" viewBox="0 0 24 24" fill="#F1891A"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>;
+
+const SERVICE_OPTIONS = ["Custom Software", "CRM Solution", "Business Automation", "Web / Mobile Application", "ERP / Management System", "AI Solution", "Other"];
 
 const CLIENT_LOGOS = [
   { name: "Vidyakunj", src: `${IMG}/logo-vidyakunj.png`, h: 58 },
@@ -53,34 +60,47 @@ const CLIENT_LOGOS = [
   { name: "Rathna Bhoomi Developers", src: `${IMG}/logo-rathnabhoomi.png`, h: 40 },
 ];
 const SERVICES = [
-  { title: "Custom Business Software", body: "Designed specifically around your company's processes, users, and operational requirements.", icon: "software" },
-  { title: "Custom CRM Solutions", body: "Manage leads, customers, follow-ups, sales activities, and team performance in one system.", icon: "crm" },
-  { title: "Business Automation", body: "Automate repetitive workflows, notifications, approvals, data entry, and reporting.", icon: "automation" },
-  { title: "Custom Web Applications", body: "Secure and scalable web-based applications accessible across your organization.", icon: "web" },
-  { title: "Mobile Applications", body: "Customer-facing and internal mobile applications built for your business requirements.", icon: "mobile" },
-  { title: "AI-Powered Solutions", body: "Integrate AI into your workflows to automate tasks and support better decision-making.", icon: "ai" },
-  { title: "ERP & Management Systems", body: "Integrated systems to manage operations, inventory, employees, customers, and reporting.", icon: "erp" },
+  { title: "Custom Business Software", body: "Software designed around your processes, users and operational requirements.", icon: "software" },
+  { title: "Custom CRM Solutions", body: "Lead management, customer workflows, follow-ups, reporting and automation.", icon: "crm" },
+  { title: "Business Automation", body: "Automate repetitive processes, approvals, notifications and data workflows.", icon: "automation" },
+  { title: "Custom Web & Mobile Applications", body: "Business applications built for internal teams, customers and field operations.", icon: "mobile" },
+  { title: "ERP & Management Systems", body: "Connected systems for managing operations, finance, inventory, employees and reporting.", icon: "erp" },
+];
+const PROJECTS = [
+  { client: "Natraj Home Furnishing", system: "Field Management System", location: "Haryana" },
+  { client: "Spotek", system: "CRM + Invoice Software", location: "Dubai, UAE" },
+  { client: "Sarathi", system: "Finance CRM", location: "Bengaluru, Karnataka" },
+  { client: "Abhi Cabs", system: "Transport ERP", location: "Karnataka, India" },
+  { client: "Ashik Enterprises", system: "AI Voice Agent", location: "Bengaluru, Karnataka" },
+  { client: "Logistics Business", system: "AI Summary Software", location: "Bengaluru, Karnataka" },
 ];
 const REASONS = [
-  { num: "01.", title: "Business-Focused Approach", body: "We understand your challenges and objectives before designing the right technology solution — the requirement leads, the technology follows.", icon: "target", art: `${IMG}/why-1-target.png` },
-  { num: "02.", title: "Fully Customized Solutions", body: "No fixed templates. Your software is built according to your specific business requirements, workflows and the way your team already works.", icon: "puzzle", art: `${IMG}/why-2-cubes.png` },
-  { num: "03.", title: "Professional Development Process", body: "From planning and design to development, testing, deployment and support — every stage is handled systematically and reviewed with you.", icon: "layers", art: `${IMG}/why-3-layers.png` },
-  { num: "04.", title: "Scalable Technology", body: "Build a solution that can grow as your business expands — more users, more data and more processes without a rebuild.", icon: "trend", art: `${IMG}/why-4-growth.png` },
+  { num: "01.", title: "Business-First", body: "We understand your workflow, challenges and objectives before defining the solution.", icon: "target", art: `${IMG}/why-1-target.png` },
+  { num: "02.", title: "Fully Customized", body: "Your software is designed around your processes — not a fixed template.", icon: "puzzle", art: `${IMG}/why-2-cubes.png` },
+  { num: "03.", title: "Structured Development", body: "From business analysis and process mapping through development, testing and deployment.", icon: "layers", art: `${IMG}/why-3-layers.png` },
+  { num: "04.", title: "Built To Evolve", body: "The solution can grow with your users, workflows, integrations and future requirements.", icon: "trend", art: `${IMG}/why-4-growth.png` },
 ];
 const STEPS = [
-  { num: "01", title: "Understand", body: "We understand your business, workflow, challenges, users, and requirements.", icon: "search" },
-  { num: "02", title: "Plan", body: "Our team defines the solution, functionality, technology requirements, and development roadmap.", icon: "map" },
-  { num: "03", title: "Design", body: "We create an intuitive interface based on how your team will actually use the system.", icon: "pen" },
-  { num: "04", title: "Develop", body: "Our developers build the software according to the approved requirements.", icon: "code" },
-  { num: "05", title: "Test", body: "We test functionality, usability, performance, and security before deployment.", icon: "shield" },
-  { num: "06", title: "Launch & Support", body: "We deploy the solution and provide ongoing improvements and support as required.", icon: "rocket" },
+  { num: "01", title: "Understand", body: "Business workflows, pain points and requirements.", icon: "search" },
+  { num: "02", title: "Plan", body: "Solution architecture, features and development roadmap.", icon: "map" },
+  { num: "03", title: "Design", body: "Interfaces and user experience around your team's workflow.", icon: "pen" },
+  { num: "04", title: "Develop", body: "Software development, integrations and automation.", icon: "code" },
+  { num: "05", title: "Test & Deploy", body: "QA, UAT, deployment and monitoring.", icon: "rocket" },
+  { num: "06", title: "Support & Improve", body: "Training, handover and ongoing improvements.", icon: "support" },
+];
+const CAPABILITIES = [
+  { label: "CRM & Workflow Automation", icon: "crm" },
+  { label: "AI & Intelligent Automation", icon: "ai" },
+  { label: "Business Analytics & Dashboards", icon: "chart" },
+  { label: "Document & Approval Automation", icon: "doc" },
+  { label: "Cloud & API Integrations", icon: "cloud" },
 ];
 const AUDIENCES = ["Small and medium businesses", "Growing companies", "Enterprises requiring customized systems", "Businesses replacing manual processes with technology"];
 const PROBLEMS = [
-  { n: "01", t: "Manual processes", b: "Time-consuming operations that still depend on spreadsheets, paperwork and repeated data entry.", side: "right" },
-  { n: "02", t: "Disconnected tools", b: "Multiple systems that do not talk to each other, so the same information is entered twice.", side: "right" },
-  { n: "03", t: "Workflows out of view", b: "Leads, customers and follow-ups tracked across tools, with no single reliable view of the pipeline.", side: "left" },
-  { n: "04", t: "Growth held back", b: "Software limits that decide what your team can and cannot do as the business expands.", side: "left" },
+  { n: "01", t: "Manual processes", b: "Spreadsheets, paperwork and repetitive data entry slowing your team down.", side: "right" },
+  { n: "02", t: "Disconnected systems", b: "Different tools holding different pieces of your business information.", side: "right" },
+  { n: "03", t: "Unclear workflows", b: "Leads, approvals, follow-ups and operations difficult to track.", side: "left" },
+  { n: "04", t: "Software limitations", b: "Existing software forcing your team to change the way they work.", side: "left" },
 ];
 
 const inputStyle = { fontSize: 14, fontWeight: 400, color: "#141420", padding: "13px 16px", border: "1px solid #e4e4f0", borderRadius: 10, outline: "none", background: "#fff", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins',sans-serif" };
@@ -236,7 +256,7 @@ export default function CustomSoftwareLanding() {
                 <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>Free Consultation</span>
               </div>
               <h2 style={{ margin: 0, fontSize: "clamp(24px, 5vw, 30px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.14 }}>Discuss your software requirement</h2>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>Tell us what you want to automate or build — our team will recommend the right approach.</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>Tell us what you're trying to automate, improve or build — we'll understand your requirement and discuss the right solution.</p>
             </div>
             {popupStatus.success ? (
               <div style={{ padding: "30px 4px 8px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -264,7 +284,7 @@ export default function CustomSoftwareLanding() {
                   </label>
                   <label style={field}><span style={labelSpan}>what solution are you looking for?</span>
                     <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.service} onChange={(e) => setPopupForm((s) => ({ ...s, service: e.target.value }))}>
-                      <option>Custom Software</option><option>CRM Solution</option><option>Business Automation</option><option>Web Application</option><option>Mobile Application</option><option>AI Solution</option><option>Other</option>
+                      {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
                     </select>
                   </label>
                 </div>
@@ -294,17 +314,19 @@ export default function CustomSoftwareLanding() {
             </button>
           </header>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 26, padding: "16px 0 8px" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "rgba(255,255,255,0.78)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.9)", color: "#141420", fontWeight: 600, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", padding: "8px 18px", borderRadius: 9999 }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />Custom Software Solutions
+            <div data-r="trust" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: "6px 12px", background: "rgba(255,255,255,0.78)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.9)", color: "#141420", fontWeight: 600, fontSize: 13, padding: "9px 20px", borderRadius: 9999 }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>{svg(ICON.pin, { w: 15, h: 15, stroke: "#F1891A", sw: 2.2 })}Bangalore-Based Technology Partner</span>
+              <span aria-hidden="true" style={{ width: 1, height: 14, background: "#c9c9dc" }} />
+              <span style={{ fontWeight: 500, color: "#4a4a66" }}>Serving Businesses Across India</span>
             </div>
-            <h1 style={{ margin: 0, maxWidth: 920, fontSize: "clamp(34px, 7.2vw, 76px)", fontWeight: 700, lineHeight: 1.06, color: "#141420", letterSpacing: "-0.035em", textWrap: "balance" }}>Build Software That Works The Way Your Business Works</h1>
-            <p style={{ margin: 0, maxWidth: 660, fontSize: "clamp(15.5px, 1.6vw, 18px)", fontWeight: 500, color: "#3b3b57", lineHeight: 1.62, textWrap: "pretty" }}>Customized software solutions designed to automate processes, improve efficiency, and help your business scale.</p>
+            <h1 style={{ margin: 0, maxWidth: 920, fontSize: "clamp(34px, 7.2vw, 76px)", fontWeight: 700, lineHeight: 1.06, color: "#141420", letterSpacing: "-0.035em", textWrap: "balance" }}>Custom Software Built Around Your Business</h1>
+            <p style={{ margin: 0, maxWidth: 700, fontSize: "clamp(15.5px, 1.6vw, 18px)", fontWeight: 500, color: "#3b3b57", lineHeight: 1.62, textWrap: "pretty" }}>We design and develop customized software, CRM, automation and business applications around your workflows — helping you streamline operations, improve visibility and scale.</p>
             <div data-r="hero-cta" style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 15, color: "#fff", background: "#141420", borderRadius: 10, padding: "16px 34px", boxShadow: "0 14px 34px rgba(20,20,32,0.28)" }}>Discuss Your Requirement</a>
+              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 15, color: "#fff", background: "#141420", borderRadius: 10, padding: "16px 34px", boxShadow: "0 14px 34px rgba(20,20,32,0.28)" }}>Discuss Your Software Requirement</a>
             </div>
             <div data-r="hero-price" style={{ display: "inline-flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "center", textAlign: "center", background: "rgba(255,255,255,0.7)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 9999, padding: "9px 10px 9px 20px", marginTop: 6 }}>
-              <span style={{ fontSize: 14, fontWeight: 500, color: "#4a4a66" }}>Custom software projects starting from</span>
-              <span style={{ display: "inline-flex", alignItems: "center", fontSize: 14, fontWeight: 700, color: "#fff", background: "#F1891A", borderRadius: 9999, padding: "6px 14px", boxShadow: "0 4px 12px rgba(241,137,26,0.32)" }}>2 Lakh</span>
+              <span style={{ fontSize: 14, fontWeight: 500, color: "#4a4a66" }}>Projects starting from</span>
+              <span style={{ display: "inline-flex", alignItems: "center", fontSize: 14, fontWeight: 700, color: "#fff", background: "#F1891A", borderRadius: 9999, padding: "6px 14px", boxShadow: "0 4px 12px rgba(241,137,26,0.32)" }}>₹2 Lakh</span>
             </div>
           </div>
         </div>
@@ -335,6 +357,7 @@ export default function CustomSoftwareLanding() {
               <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>The Problem</span>
             </div>
             <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, lineHeight: 1.12, color: "#141420", letterSpacing: "-0.035em", textWrap: "pretty" }}>Your business has unique challenges. Your software should too.</h2>
+            <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7 }}>Is your business relying on:</p>
           </div>
           <div data-r="problem-grid" style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 48, alignItems: "center" }}>
             <div data-r="prob-col" style={{ display: "flex", flexDirection: "column", gap: 64, alignItems: "flex-end" }}>
@@ -355,8 +378,8 @@ export default function CustomSoftwareLanding() {
               {[["12.3%", "12.3%", "top", "right"], ["12.3%", "12.3%", "top", "left"], ["12.3%", "12.3%", "bottom", "left"], ["12.3%", "12.3%", "bottom", "right"]].map((d, i) => (
                 <div key={i} style={{ position: "absolute", [d[2]]: d[0], [d[3]]: d[1], width: 22, height: 22, borderRadius: 9999, background: "#F1891A", boxShadow: "0 4px 14px rgba(241,137,26,0.5)" }} />
               ))}
-              <div data-r="orbit-disc" style={{ position: "relative", boxSizing: "border-box", width: 270, height: 270, borderRadius: 9999, background: "#0037CA", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 30, textAlign: "center", boxShadow: "0 24px 60px rgba(0,55,202,0.34)" }}>
-                <p style={{ margin: 0, fontSize: 17, fontWeight: 500, color: "#fff", lineHeight: 1.5, letterSpacing: "-0.015em" }}>Ready-made software may not match the way your business operates.</p>
+              <div data-r="orbit-disc" style={{ position: "relative", boxSizing: "border-box", width: 290, height: 290, borderRadius: 9999, background: "#0037CA", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 30, textAlign: "center", boxShadow: "0 24px 60px rgba(0,55,202,0.34)" }}>
+                <p data-r="orbit-text" style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#fff", lineHeight: 1.5, letterSpacing: "-0.01em" }}>We build software around your workflow — instead of asking your business to adapt to generic software.</p>
                 <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 13.5, color: "#0037CA", background: "#fff", borderRadius: 9999, padding: "11px 22px" }}>Talk To Our Team</a>
               </div>
             </div>
@@ -385,39 +408,51 @@ export default function CustomSoftwareLanding() {
               <span style={{ width: 44, height: 44, borderRadius: 9999, background: "#141420", display: "flex", alignItems: "center", justifyContent: "center" }}>{svg([P("M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z", "a"), P("M14 2v5h5", "b")], { w: 20, h: 20, stroke: "#fff", sw: 2 })}</span>
               <span style={{ fontSize: "clamp(18px, 2.4vw, 22px)", fontWeight: 600, color: "#141420", letterSpacing: "-0.02em" }}>What We Build</span>
             </div>
-            <p style={{ margin: 0, maxWidth: 560, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7 }}>Customized software solutions for growing businesses — designed around your processes, not a template.</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(228px, 1fr))", gap: 18 }}>
+          {/* 5 cards: flex-wrap so the second row (2 cards) centres instead of leaving a hole */}
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 18 }}>
             {SERVICES.map((s) => (
-              <div key={s.title} className="svc-card" style={{ background: "linear-gradient(155deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.34) 100%)", backdropFilter: "blur(24px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: "30px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14, minHeight: 236, boxShadow: "0 18px 44px rgba(20,20,32,0.10), inset 0 1px 0 rgba(255,255,255,0.85)", transition: "0.2s ease" }}>
+              <div key={s.title} className="svc-card" style={{ flex: "1 1 300px", maxWidth: 372, background: "linear-gradient(155deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.34) 100%)", backdropFilter: "blur(24px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: "30px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14, minHeight: 236, boxSizing: "border-box", boxShadow: "0 18px 44px rgba(20,20,32,0.10), inset 0 1px 0 rgba(255,255,255,0.85)", transition: "0.2s ease" }}>
                 <div style={{ width: 58, height: 58, borderRadius: 9999, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(20,20,32,0.12)" }}>{svg(ICON[s.icon], { w: 24, h: 24 })}</div>
                 <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: "#141420", lineHeight: 1.32, letterSpacing: "-0.01em" }}>{s.title}</h3>
                 <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#3b3b57", lineHeight: 1.65 }}>{s.body}</p>
               </div>
             ))}
           </div>
+          <p style={{ margin: "36px auto 0", textAlign: "center", fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7 }}>
+            Need something more specific?{" "}
+            <a href="#form" style={{ fontWeight: 600, color: "#0037CA", textDecoration: "underline", textUnderlineOffset: 4 }}>We can design the solution around your requirements.</a>
+          </p>
         </div>
       </section>
 
-      {/* ── Reviews / map ── */}
+      {/* ── Real businesses / map ── */}
       <section id="reviews" style={{ position: "relative", padding: "32px 0 84px", overflow: "hidden" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
-          <div data-r="rev-grid" style={{ display: "grid", gridTemplateColumns: "0.82fr 1.18fr", gap: 56, alignItems: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 18 }}>
+          <div data-r="rev-grid" style={{ display: "grid", gridTemplateColumns: "1fr", justifyItems: "center", textAlign: "center", gap: 56, alignItems: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, maxWidth: 640 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "10px 20px", whiteSpace: "nowrap", boxShadow: "0 8px 24px rgba(20,20,32,0.07)" }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: "#141420" }}>4.9</span>
                 <div style={{ display: "flex", gap: 2 }}>{[0, 1, 2, 3, 4].map((k) => <span key={k}>{STAR}</span>)}</div>
                 <span style={{ fontSize: 14, fontWeight: 500, color: "#6b6b8a" }}>from business owners</span>
               </div>
-              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1, textWrap: "pretty" }}>Businesses across India build with us</h2>
-              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, maxWidth: 400 }}>Hover any city on the map to read what the team there says about the software we built for them.</p>
-              <div style={{ display: "flex", gap: 32, marginTop: 4 }}>
-                <div><div style={{ fontSize: 28, fontWeight: 700, color: "#141420", letterSpacing: "-0.03em" }}>12</div><div style={{ fontSize: 14, fontWeight: 500, color: "#6b6b8a" }}>Client reviews</div></div>
-                <div><div style={{ fontSize: 28, fontWeight: 700, color: "#0037CA", letterSpacing: "-0.03em" }}>10</div><div style={{ fontSize: 14, fontWeight: 500, color: "#6b6b8a" }}>Cities served</div></div>
-              </div>
+              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1, textWrap: "pretty" }}>Real businesses. Real workflows. Software built around them.</h2>
+              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, maxWidth: 440 }}>From CRM and ERP to field management, automation and AI solutions, we build software around the way businesses actually operate.</p>
               <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#141420", borderRadius: 9999, padding: "14px 28px", marginTop: 4, boxShadow: "0 12px 30px rgba(20,20,32,0.24)" }}>Discuss Your Requirement</a>
             </div>
-            <div data-r="map-hold" style={{ position: "relative" }}><CustomSoftwareMap /></div>
+         
+          </div>
+
+          <div data-r="proj-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 48 }}>
+            {PROJECTS.map((p) => (
+              <div key={p.client} style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: "22px 24px", display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 8px 24px rgba(20,20,32,0.05)" }}>
+                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 600, color: "#141420", letterSpacing: "-0.01em" }}>{p.client}</h3>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#0037CA" }}>{p.system}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 13.5, fontWeight: 500, color: "#6b6b8a" }}>
+                  {svg(ICON.pin, { w: 15, h: 15, stroke: "#F1891A", sw: 2.2 })}{p.location}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -432,11 +467,11 @@ export default function CustomSoftwareLanding() {
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
                 <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>Why Us</span>
               </div>
-              <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.6vw, 48px)", fontWeight: 700, lineHeight: 1.1, color: "#141420", letterSpacing: "-0.035em", maxWidth: 520, textWrap: "pretty" }}>Why businesses choose us</h2>
+              <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.6vw, 48px)", fontWeight: 700, lineHeight: 1.1, color: "#141420", letterSpacing: "-0.035em", maxWidth: 620, textWrap: "pretty" }}>We understand your business before we build your software</h2>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-start" }}>
-              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.72 }}>More than software development — we understand your business before we design the technology. Hover a card to read how we work.</p>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#141420", borderRadius: 9999, padding: "14px 28px", boxShadow: "0 12px 30px rgba(20,20,32,0.26)" }}>Explore More</a>
+              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.72 }}>Every project starts with your workflow, not a template. Hover a card to read how we work.</p>
+              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#141420", borderRadius: 9999, padding: "14px 28px", boxShadow: "0 12px 30px rgba(20,20,32,0.26)" }}>Discuss Your Requirement</a>
             </div>
           </div>
           <div data-r="why-row" style={{ display: "flex", gap: 18, alignItems: "center", minHeight: 520 }}>
@@ -482,7 +517,7 @@ export default function CustomSoftwareLanding() {
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
                 <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#141420" }}>How We Work</span>
               </div>
-              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1 }}>Our development process</h2>
+              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1 }}>How we build your solution</h2>
               <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#4a4a66", maxWidth: 540, lineHeight: 1.7 }}>Every stage handled systematically — from the first conversation to long-term support.</p>
             </div>
             <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, marginBottom: 22 }}>
@@ -514,22 +549,46 @@ export default function CustomSoftwareLanding() {
         </div>
       </section>
 
-      {/* ── Investment ── */}
+      {/* ── Capabilities ── */}
+      <section id="capabilities" style={{ padding: "0 0 104px" }}>
+        <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
+          <div data-r="cap-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 28, padding: "52px 48px", display: "grid", gridTemplateColumns: "0.9fr 1.1fr", gap: 48, alignItems: "center", boxShadow: "0 16px 44px rgba(20,20,32,0.07)" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "#f5f5fa", borderRadius: 9999, padding: "7px 16px", width: "fit-content", whiteSpace: "nowrap" }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
+                <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>More Than Software Development</span>
+              </div>
+              <h2 style={{ margin: 0, fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 700, lineHeight: 1.12, color: "#141420", letterSpacing: "-0.035em", textWrap: "pretty" }}>Built-in capabilities when your business needs them</h2>
+              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.72 }}>We combine customized development with automation and AI where it creates real business value.</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {CAPABILITIES.map((c) => (
+                <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 16, background: "#f5f5fa", borderRadius: 16, padding: "14px 18px" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 13, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 6px 16px rgba(20,20,32,0.10)" }}>{svg(ICON[c.icon], { w: 20, h: 20, stroke: "#0037CA" })}</div>
+                  <span style={{ fontSize: 15.5, fontWeight: 600, color: "#141420" }}>{c.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Location + investment ── */}
       <section id="investment" style={{ padding: "0 0 104px" }}>
         <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "0.72fr 1.28fr", gap: 32, alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.12 }}>Investment</h2>
-            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Every solution is scoped to your requirement. Here is where custom projects typically begin.</p>
+            <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.12 }}>Looking for a serious software solution?</h2>
+            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Custom software requires understanding your business, designing the right solution and building it around your requirements.</p>
             <div style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 26, display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 2px 10px rgba(20,20,32,0.04)" }}>
-              <h3 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#141420", lineHeight: 1.28, letterSpacing: "-0.02em" }}>Let's discuss your business challenge</h3>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>Tell us what you want to automate, improve, or build. Our team will recommend the right technology approach.</p>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 20px", boxShadow: "0 10px 26px rgba(0,55,202,0.26)" }}>Get A Software Consultation</a>
+              <div style={{ width: 42, height: 42, borderRadius: 13, background: "#f5f5fa", display: "flex", alignItems: "center", justifyContent: "center" }}>{svg(ICON.pin, { w: 20, h: 20, stroke: "#F1891A", sw: 2.1 })}</div>
+              <h3 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#141420", lineHeight: 1.28, letterSpacing: "-0.02em" }}>Based in Bangalore. Serving businesses across India.</h3>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>SkyUp Digital Solutions works with businesses across India to design and develop customized software solutions. Our Bangalore team is available for discussions and in-person meetings when required.</p>
             </div>
           </div>
           <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 24, boxShadow: "0 10px 34px rgba(20,20,32,0.07)" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <h3 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#141420", letterSpacing: "-0.02em" }}>Built For Long-Term Solutions</h3>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7, maxWidth: 560 }}>Whether you need a CRM, automation system, internal application, or complete business software — we help transform your requirements into a reliable digital solution.</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7, maxWidth: 560 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's discuss your requirements.</p>
             </div>
             <div data-r="aud-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 32px" }}>
               {AUDIENCES.map((a) => (
@@ -538,13 +597,12 @@ export default function CustomSoftwareLanding() {
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#f5f5fa", borderRadius: 14, padding: "24px 28px", flexWrap: "wrap" }}>
               <div>
-                <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6b8a" }}>Custom solutions starting from</div>
+                <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6b8a" }}>Projects typically start from</div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
-                  <span style={{ fontSize: "clamp(32px, 4vw, 42px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em" }}>2 Lakh</span>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: "#6b6b8a" }}>onwards</span>
+                  <span style={{ fontSize: "clamp(32px, 4vw, 42px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em" }}>₹2 Lakh+</span>
                 </div>
               </div>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", width: 52, height: 52, borderRadius: 9999, background: "#141420", color: "#fff", fontSize: 20 }}>{"\u2192"}</a>
+              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 24px", boxShadow: "0 10px 26px rgba(0,55,202,0.26)" }}>Discuss Your Requirement</a>
             </div>
           </div>
         </div>
@@ -555,9 +613,9 @@ export default function CustomSoftwareLanding() {
         <div style={{ position: "absolute", bottom: -160, left: "50%", transform: "translateX(-50%)", width: 1000, height: 520, filter: "blur(100px)", opacity: 0.7, background: "radial-gradient(36% 44% at 26% 40%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(40% 48% at 52% 52%, #7b3ff2 0%, rgba(123,63,242,0) 72%), radial-gradient(36% 44% at 76% 40%, #F1891A 0%, rgba(241,137,26,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 760, margin: "0 auto", padding: "0 32px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 12, marginBottom: 34 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0037CA" }}>Have A Software Requirement?</div>
-            <h2 style={{ margin: 0, fontSize: "clamp(31px, 4.8vw, 50px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.1 }}>Let's Get In Touch</h2>
-            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.7, maxWidth: 520 }}>Share your requirement and our team will get back with the right technology approach.</p>
+            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0037CA" }}>Let's Get In Touch</div>
+            <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.6vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.12, textWrap: "balance" }}>Have a business problem that software can solve?</h2>
+            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.7, maxWidth: 540 }}>Tell us what you're trying to automate, improve or build. We'll understand your requirement and discuss the right solution.</p>
           </div>
           {leadStatus.success ? (
             <div data-r="form-card" style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(14px)", border: "1px solid #fff", borderRadius: 22, padding: 48, boxShadow: "0 24px 60px rgba(20,20,32,0.10)", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
@@ -592,12 +650,12 @@ export default function CustomSoftwareLanding() {
                 <label style={{ ...field, gridColumn: "span 2" }}>
                   <span style={labelSpan}>what solution are you looking for?</span>
                   <select style={{ ...inputStyle, appearance: "none" }} value={leadForm.service} onChange={(e) => setLeadForm((s) => ({ ...s, service: e.target.value }))}>
-                    <option>Custom Software</option><option>CRM Solution</option><option>Business Automation</option><option>Web Application</option><option>Mobile Application</option><option>AI Solution</option><option>Other</option>
+                    {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
                   </select>
                 </label>
                 <label style={{ ...field, gridColumn: "span 2" }}>
-                  <span style={labelSpan}>briefly describe your requirement</span>
-                  <textarea rows={4} placeholder="write your message..." style={{ ...inputStyle, resize: "vertical" }} value={leadForm.message} onChange={(e) => setLeadForm((s) => ({ ...s, message: e.target.value }))} />
+                  <span style={labelSpan}>what are you trying to automate, improve or build?</span>
+                  <textarea rows={4} placeholder="e.g. our sales team tracks leads in Excel and follow-ups get missed" style={{ ...inputStyle, resize: "vertical" }} value={leadForm.message} onChange={(e) => setLeadForm((s) => ({ ...s, message: e.target.value }))} />
                 </label>
                 <label style={field}>
                   <span style={labelSpan}>estimated investment</span>
@@ -613,7 +671,7 @@ export default function CustomSoftwareLanding() {
                 </label>
               </div>
               {leadStatus.error && <p style={{ margin: "16px 0 0", fontSize: 13, fontWeight: 500, color: "#d64545", textAlign: "center" }}>{leadStatus.error}</p>}
-              <button type="submit" disabled={leadStatus.submitting} style={{ marginTop: 22, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: leadStatus.submitting ? "not-allowed" : "pointer", opacity: leadStatus.submitting ? 0.7 : 1, boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>{leadStatus.submitting ? "Submitting…" : "Submit Requirement"}</button>
+              <button type="submit" disabled={leadStatus.submitting} style={{ marginTop: 22, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: leadStatus.submitting ? "not-allowed" : "pointer", opacity: leadStatus.submitting ? 0.7 : 1, boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>{leadStatus.submitting ? "Submitting…" : "Discuss Your Software Requirement"}</button>
               <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
             </form>
           )}
@@ -626,7 +684,7 @@ export default function CustomSoftwareLanding() {
           <div data-r="foot-grid" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 22, padding: "36px 40px", display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "start", boxShadow: "0 16px 44px rgba(20,20,32,0.08)" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 420 }}>
               <img src={`${IMG}/SKYUP-Logo.svg`} alt="SKYUP Digital Solutions" style={{ height: 36, alignSelf: "flex-start" }} />
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.75 }}>Ready to replace manual processes with technology? Contact us today and we will help transform your requirement into a reliable digital solution.</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.75 }}>Based in Bangalore. Serving businesses across India. Tell us what you want to automate, improve or build, and we'll help turn it into a reliable software solution.</p>
             </div>
             <div data-r="foot-right" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 20 }}>
               <div data-r="foot-links" style={{ display: "flex", gap: 26, flexWrap: "wrap" }}>
@@ -654,6 +712,7 @@ const CSS = `
   [data-r="problem-grid"] { gap:28px !important; }
   [data-r="rev-grid"] { gap:36px !important; }
   [data-r="proc-card"] { padding:48px 32px 44px !important; }
+  [data-r="cap-card"] { padding:44px 32px !important; gap:36px !important; }
 }
 @media (max-width:991px) {
   [data-r="nav"], [data-r="nav-cta"] { display:none !important; }
@@ -666,8 +725,11 @@ const CSS = `
   [data-r="prob-col"] > div { text-align:left !important; align-items:flex-start !important; }
   [data-r="prob-col"] > div > div { flex-direction:row !important; }
   [data-r="orbit"] { width:min(420px, 86vw) !important; height:min(420px, 86vw) !important; order:-1; }
-  [data-r="orbit-disc"] { width:60% !important; height:60% !important; padding:22px !important; }
-  [data-r="rev-grid"], [data-r="why-head"], [data-r="inv-grid"], [data-r="foot-grid"] { grid-template-columns:1fr !important; }
+  [data-r="orbit-disc"] { width:66% !important; height:66% !important; padding:22px !important; gap:10px !important; }
+  [data-r="orbit-text"] { font-size:14px !important; }
+  [data-r="rev-grid"], [data-r="why-head"], [data-r="inv-grid"], [data-r="foot-grid"], [data-r="cap-card"] { grid-template-columns:1fr !important; }
+  [data-r="map-hold"] { display:none !important; }
+  [data-r="proj-grid"] { grid-template-columns:repeat(2, 1fr) !important; }
   [data-r="why-head"] { align-items:start !important; gap:20px !important; margin-bottom:32px !important; }
   [data-r="foot-grid"] { gap:28px !important; }
   [data-r="foot-right"] { align-items:flex-start !important; }
@@ -683,16 +745,20 @@ const CSS = `
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:18px !important; padding-right:18px !important; }
   [data-r="sect"] { padding-bottom:72px !important; }
   [data-r="hero"] { padding-bottom:64px !important; }
+  [data-r="trust"] { border-radius:18px !important; flex-direction:column !important; padding:10px 18px !important; }
+  [data-r="trust"] > span[aria-hidden] { display:none !important; }
   [data-r="hero-cta"] { flex-direction:column !important; align-items:stretch !important; width:100%; }
-  [data-r="hero-cta"] > a { width:100%; padding:17px 20px !important; }
+  [data-r="hero-cta"] > a { width:100%; padding:17px 20px !important; white-space:normal !important; }
   [data-r="hero-price"] { border-radius:18px !important; padding:12px 18px !important; }
   [data-r="proc-card"] { padding:36px 20px 32px !important; border-radius:22px !important; }
+  [data-r="cap-card"] { padding:32px 20px !important; border-radius:22px !important; }
+  [data-r="proj-grid"] { grid-template-columns:1fr !important; }
   [data-r="aud-grid"], [data-r="form-grid"] { grid-template-columns:1fr !important; }
   [data-r="form-grid"] > label { grid-column:span 1 !important; }
   [data-r="foot-grid"] { padding:28px 22px !important; }
   [data-r="foot-links"] { gap:4px !important; flex-direction:column !important; }
   [data-r="foot-links"] > a { padding:11px 0 !important; }
-  [data-r="why-art"] { height:190px !important; }
+ [data-r="map-hold"] { display:none !important; }
 }
 @media (max-width:479px) {
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:14px !important; padding-right:14px !important; }
@@ -703,6 +769,7 @@ const CSS = `
   [data-r="map-hold"] { min-height:300px !important; }
   [data-r="inv-card"], [data-r="form-card"] { padding:20px !important; }
   [data-r="logos-card"] { border-radius:16px !important; }
+  [data-r="orbit-text"] { font-size:12.5px !important; }
 }
 @keyframes skyup-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 @keyframes skyup-drift { 0%,100% { transform:translate3d(0,0,0) scale(1); } 50% { transform:translate3d(0,-24px,0) scale(1.06); } }
