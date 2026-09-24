@@ -3,6 +3,7 @@
 // Self-contained: its own header/footer/nav, one-time lead popup, review map,
 // process carousel and hover-expand "Why us" cards. No global Header/Footer.
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import CustomSoftwareMap from "../components/CustomSoftwareMap";
 
 
 // Backend base URL — set VITE_API_BASE_URL in your deployment environment variables.
@@ -97,11 +98,10 @@ const CAPABILITIES = [
   { label: "AI & Data", items: ["Generative AI", "NLP", "Computer Vision", "Analytics"], icon: "ai" },
 ];
 const AUDIENCES = ["Small and medium businesses", "Growing companies", "Enterprises requiring customized systems", "Businesses replacing manual processes with technology"];
-// "right" = text aligned right (left column), "left" = text aligned left (right column)
 const PROBLEMS = [
-  { n: "01", t: "Complex Workflows", b: "Specific roles, approvals, reports, automations and processes that standard software may not support.", side: "right" },
-  { n: "02", t: "Disconnected Systems", b: "Business information spread across different tools, teams and processes.", side: "right" },
-  { n: "03", t: "Growing Complexity", b: "More users, data, branches, integrations and operational requirements.", side: "left" },
+  { n: "01", t: "Complex Workflows", b: "Specific roles, approvals, reports, automations and processes that standard software may not support.", icon: "automation", pos: "tl", area: "p1" },
+  { n: "02", t: "Disconnected Systems", b: "Business information spread across different tools, teams and processes.", icon: "erp", pos: "tr", area: "p2" },
+  { n: "03", t: "Growing Complexity", b: "More users, data, branches, integrations and operational requirements.", icon: "trend", pos: "b", area: "p3" },
 ];
 
 const inputStyle = { fontSize: 14, fontWeight: 400, color: "#141420", padding: "13px 16px", border: "1px solid #e4e4f0", borderRadius: 10, outline: "none", background: "#fff", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins',sans-serif" };
@@ -357,50 +357,48 @@ export default function CustomSoftwareLanding() {
       {/* ── Problem ── */}
       <section data-r="sect" style={{ padding: "0 0 104px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 56, maxWidth: 640 }}>
+          <div data-r="prob-head" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 16, margin: "0 auto 64px", maxWidth: 900 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "7px 16px", width: "fit-content", whiteSpace: "nowrap" }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
               <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>The Problem</span>
             </div>
-            <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, lineHeight: 1.12, color: "#141420", letterSpacing: "-0.035em", textWrap: "pretty" }}>When Your Business Outgrows Off-the-Shelf Software</h2>
-            <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7 }}>Standard software works well when your processes are standard. But growing businesses often need more flexibility.</p>
+            <h2 data-r="prob-title" style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, lineHeight: 1.14, color: "#141420", letterSpacing: "-0.035em", textWrap: "balance" }}>
+              When Your Business Outgrows <span style={{ whiteSpace: "nowrap" }}>Off-the-Shelf</span> Software
+            </h2>
+            <p style={{ margin: 0, maxWidth: 620, fontSize: 16, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, textWrap: "pretty" }}>Standard software works well when your processes are standard. But growing businesses often need more flexibility.</p>
           </div>
-          <div data-r="problem-grid" style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 48, alignItems: "center" }}>
-            <div data-r="prob-col" style={{ display: "flex", flexDirection: "column", gap: 64, alignItems: "flex-end" }}>
-              {PROBLEMS.filter((p) => p.side === "right").map((p) => (
-                <div key={p.n} style={{ display: "flex", flexDirection: "column", gap: 8, textAlign: "right", alignItems: "flex-end" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 9, flexDirection: "row-reverse" }}>
-                    <span style={{ width: 9, height: 9, borderRadius: 9999, background: "#F1891A", display: "inline-block", flexShrink: 0 }} />
-                    <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6b6b8a" }}>{p.n}</span>
-                  </div>
-                  <h3 style={{ margin: 0, fontSize: 19, fontWeight: 600, color: "#141420", lineHeight: 1.34, letterSpacing: "-0.015em", maxWidth: 280 }}>{p.t}</h3>
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#3b3b57", lineHeight: 1.7, maxWidth: 280 }}>{p.b}</p>
-                </div>
-              ))}
-            </div>
-            <div data-r="orbit" style={{ position: "relative", width: 460, height: 460, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, margin: "0 auto" }}>
+
+          {/* Desktop: 01 top-left, 02 top-right, 03 below — each tied to an orbit dot.
+              Mobile: orbit on top, three stacked cards. */}
+          <div data-r="prob-stage" style={{ display: "grid", gridTemplateColumns: "1fr 440px 1fr", gridTemplateAreas: '"p1 orbit p2" "p3 p3 p3"', columnGap: 40, alignItems: "start" }}>
+            <div data-r="orbit" style={{ gridArea: "orbit", position: "relative", width: 440, height: 440, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
               <div style={{ position: "absolute", inset: 0, borderRadius: 9999, border: "1px solid #d8d8e8" }} />
               <div style={{ position: "absolute", inset: -46, borderRadius: 9999, filter: "blur(60px)", opacity: 0.5, background: "radial-gradient(38% 44% at 28% 30%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(36% 42% at 72% 34%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(40% 46% at 50% 78%, #0037CA 0%, rgba(0,55,202,0) 72%)" }} />
-              {[["12.3%", "12.3%", "top", "right"], ["12.3%", "12.3%", "top", "left"], ["12.3%", "12.3%", "bottom", "left"], ["12.3%", "12.3%", "bottom", "right"]].map((d, i) => (
-                <div key={i} style={{ position: "absolute", [d[2]]: d[0], [d[3]]: d[1], width: 22, height: 22, borderRadius: 9999, background: "#F1891A", boxShadow: "0 4px 14px rgba(241,137,26,0.5)" }} />
+              {[{ top: "12.3%", left: "12.3%", n: "01" }, { top: "12.3%", right: "12.3%", n: "02" }, { bottom: 0, left: "50%", n: "03" }].map((d) => (
+                <div key={d.n} data-r="orbit-dot" style={{ position: "absolute", top: d.top, left: d.left, right: d.right, bottom: d.bottom, transform: `translate(${d.right ? "50%" : "-50%"}, ${d.bottom === 0 ? "50%" : "-50%"})`, width: 30, height: 30, borderRadius: 9999, background: "#F1891A", color: "#fff", fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 6px rgba(241,137,26,0.16), 0 6px 16px rgba(241,137,26,0.45)", zIndex: 2 }}>{d.n}</div>
               ))}
-              <div data-r="orbit-disc" style={{ position: "relative", boxSizing: "border-box", width: 290, height: 290, borderRadius: 9999, background: "#0037CA", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 30, textAlign: "center", boxShadow: "0 24px 60px rgba(0,55,202,0.34)" }}>
-                <p data-r="orbit-text" style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#fff", lineHeight: 1.5, letterSpacing: "-0.01em" }}>When your business processes are unique, your software should be designed around them.</p>
-                <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 13.5, color: "#0037CA", background: "#fff", borderRadius: 9999, padding: "11px 22px" }}>Talk To Our Team</a>
+              <div data-r="orbit-disc" style={{ position: "relative", boxSizing: "border-box", width: 280, height: 280, borderRadius: 9999, background: "radial-gradient(120% 120% at 30% 20%, #1a55e8 0%, #0037CA 55%, #002a9e 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 32, textAlign: "center", boxShadow: "0 24px 60px rgba(0,55,202,0.34)" }}>
+                <p data-r="orbit-text" style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#fff", lineHeight: 1.5, letterSpacing: "-0.01em" }}>When your business processes are unique, your software should be designed around them.</p>
+                <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 13.5, color: "#0037CA", background: "#fff", borderRadius: 9999, padding: "11px 22px", boxShadow: "0 8px 20px rgba(0,0,0,0.14)" }}>Talk To Our Team</a>
               </div>
             </div>
-            <div data-r="prob-col" style={{ display: "flex", flexDirection: "column", gap: 64, alignItems: "flex-start" }}>
-              {PROBLEMS.filter((p) => p.side === "left").map((p) => (
-                <div key={p.n} style={{ display: "flex", flexDirection: "column", gap: 8, textAlign: "left", alignItems: "flex-start" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                    <span style={{ width: 9, height: 9, borderRadius: 9999, background: "#F1891A", display: "inline-block", flexShrink: 0 }} />
-                    <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6b6b8a" }}>{p.n}</span>
+
+            {PROBLEMS.map((p) => (
+              <div key={p.n} data-r={`prob-${p.pos}`} style={{ gridArea: p.area, position: "relative", justifySelf: p.pos === "tl" ? "end" : p.pos === "tr" ? "start" : "center", width: "100%", maxWidth: 330, marginTop: p.pos === "b" ? 44 : 0 }}>
+                {/* dashed connector to the matching orbit dot (desktop only) */}
+                <span data-r="prob-link" aria-hidden="true" style={p.pos === "b"
+                  ? { position: "absolute", top: -44, left: "50%", height: 44, borderLeft: "1.5px dashed #c9c9dc" }
+                  : { position: "absolute", top: 54, [p.pos === "tl" ? "right" : "left"]: -94, width: 94, borderTop: "1.5px dashed #c9c9dc" }} />
+                <div className="prob-card" data-r="prob-card" style={{ position: "relative", display: "flex", gap: 16, alignItems: "flex-start", background: "linear-gradient(155deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.66) 100%)", backdropFilter: "blur(18px)", border: "1px solid #fff", borderRadius: 20, padding: "22px 22px 24px", boxShadow: "0 16px 40px rgba(20,20,32,0.08)", transition: "transform .25s ease, box-shadow .25s ease" }}>
+                  <div style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, background: "#fff4e8", display: "flex", alignItems: "center", justifyContent: "center" }}>{svg(ICON[p.icon], { w: 22, h: 22, stroke: "#F1891A", sw: 2 })}</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", color: "#F1891A" }}>{p.n}</span>
+                    <h3 style={{ margin: 0, fontSize: 18.5, fontWeight: 600, color: "#141420", lineHeight: 1.3, letterSpacing: "-0.015em" }}>{p.t}</h3>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#4a4a66", lineHeight: 1.65 }}>{p.b}</p>
                   </div>
-                  <h3 style={{ margin: 0, fontSize: 19, fontWeight: 600, color: "#141420", lineHeight: 1.34, letterSpacing: "-0.015em", maxWidth: 280 }}>{p.t}</h3>
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#3b3b57", lineHeight: 1.7, maxWidth: 280 }}>{p.b}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -436,16 +434,24 @@ export default function CustomSoftwareLanding() {
       <section id="reviews" style={{ position: "relative", padding: "32px 0 84px", overflow: "hidden" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div data-r="rev-grid" style={{ display: "grid", gridTemplateColumns: "1fr", justifyItems: "center", textAlign: "center", gap: 56, alignItems: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, maxWidth: 640 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, maxWidth: 1000 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "10px 20px", whiteSpace: "nowrap", boxShadow: "0 8px 24px rgba(20,20,32,0.07)" }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: "#141420" }}>4.9</span>
                 <div style={{ display: "flex", gap: 2 }}>{[0, 1, 2, 3, 4].map((k) => <span key={k}>{STAR}</span>)}</div>
                 <span style={{ fontSize: 14, fontWeight: 500, color: "#6b6b8a" }}>from business owners</span>
               </div>
-              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1, textWrap: "pretty" }}>Real Businesses. Real Workflows. Software Built Around Them.</h2>
-              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, maxWidth: 440 }}>From CRM and ERP to field management, automation and AI solutions, we build software around the way businesses actually operate.</p>
+              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1, textWrap: "balance" }}>
+                <span data-r="rev-line">Real Businesses. Real Workflows.</span>{" "}
+                <span data-r="rev-line">Software Built Around Them.</span>
+              </h2>
+              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, maxWidth: 760, textWrap: "balance" }}>From CRM and ERP to field management, automation and AI solutions, we build software around the way businesses actually operate.</p>
               <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#141420", borderRadius: 9999, padding: "14px 28px", marginTop: 4, boxShadow: "0 12px 30px rgba(20,20,32,0.24)" }}>Discuss Your Requirement</a>
             </div>
+          </div>
+
+          {/* Interactive India map with client-review pins */}
+          <div data-r="map-hold" style={{ position: "relative", maxWidth: 860, margin: "48px auto 0" }}>
+            <CustomSoftwareMap />
           </div>
 
           <div data-r="proj-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 48 }}>
@@ -719,11 +725,19 @@ export default function CustomSoftwareLanding() {
 const CSS = `
 #solutions a:hover, #why a:hover, #process a:hover, #investment a:hover { opacity:.9; }
 [data-r="foot-links"] a:hover { color:#0037CA; }
+[data-r="rev-line"] { display:block; white-space:nowrap; }
+.prob-card:hover { transform:translateY(-4px); box-shadow:0 24px 52px rgba(20,20,32,0.13) !important; }
 .svc-card:hover { transform:translateY(-6px); box-shadow:0 26px 60px rgba(20,20,32,0.16), inset 0 1px 0 rgba(255,255,255,0.9); }
 
 @media (max-width:1199px) {
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:24px !important; padding-right:24px !important; }
-  [data-r="problem-grid"] { gap:28px !important; }
+  [data-r="prob-stage"] { grid-template-columns:1fr 380px 1fr !important; column-gap:28px !important; }
+  [data-r="orbit"] { width:380px !important; height:380px !important; }
+  [data-r="orbit-disc"] { width:250px !important; height:250px !important; padding:26px !important; }
+  [data-r="orbit-text"] { font-size:14.5px !important; }
+  [data-r="prob-tl"] [data-r="prob-link"], [data-r="prob-tr"] [data-r="prob-link"] { width:75px !important; top:47px !important; }
+  [data-r="prob-tl"] [data-r="prob-link"] { right:-75px !important; }
+  [data-r="prob-tr"] [data-r="prob-link"] { left:-75px !important; }
   [data-r="rev-grid"] { gap:36px !important; }
   [data-r="proc-card"] { padding:48px 32px 44px !important; }
   [data-r="cap-card"] { padding:44px 32px !important; gap:36px !important; }
@@ -734,13 +748,14 @@ const CSS = `
   [data-r="nav"][data-open="true"] { display:flex !important; flex-direction:column !important; gap:4px !important; position:absolute !important; top:64px; right:0; left:auto; width:min(280px, calc(100vw - 48px)); border-radius:20px !important; padding:12px !important; z-index:60; }
   [data-r="nav"][data-open="true"] > a { justify-content:flex-start; padding:13px 18px !important; font-size:15px !important; }
   [data-r="header"] { margin-bottom:48px !important; }
-  [data-r="problem-grid"] { grid-template-columns:1fr !important; gap:36px !important; }
-  [data-r="prob-col"] { align-items:flex-start !important; gap:32px !important; }
-  [data-r="prob-col"] > div { text-align:left !important; align-items:flex-start !important; }
-  [data-r="prob-col"] > div > div { flex-direction:row !important; }
-  [data-r="orbit"] { width:min(420px, 86vw) !important; height:min(420px, 86vw) !important; order:-1; }
-  [data-r="orbit-disc"] { width:66% !important; height:66% !important; padding:22px !important; gap:10px !important; }
+  [data-r="rev-line"] { display:inline; white-space:normal; }
+  [data-r="prob-head"] { margin-bottom:40px !important; }
+  [data-r="prob-stage"] { grid-template-columns:1fr !important; grid-template-areas:"orbit" "p1" "p2" "p3" !important; row-gap:14px !important; max-width:560px; margin:0 auto; }
+  [data-r="orbit"] { width:min(380px, 84vw) !important; height:min(380px, 84vw) !important; margin-bottom:34px !important; }
+  [data-r="orbit-disc"] { width:66% !important; height:66% !important; padding:22px !important; gap:12px !important; }
   [data-r="orbit-text"] { font-size:14px !important; }
+  [data-r="prob-tl"], [data-r="prob-tr"], [data-r="prob-b"] { justify-self:stretch !important; max-width:none !important; margin-top:0 !important; }
+  [data-r="prob-link"] { display:none !important; }
   [data-r="rev-grid"], [data-r="why-head"], [data-r="inv-grid"], [data-r="foot-grid"], [data-r="cap-card"] { grid-template-columns:1fr !important; }
   [data-r="proj-grid"] { grid-template-columns:repeat(2, 1fr) !important; }
   [data-r="why-head"] { align-items:start !important; gap:20px !important; margin-bottom:32px !important; }
@@ -782,6 +797,10 @@ const CSS = `
   [data-r="inv-card"], [data-r="form-card"] { padding:20px !important; }
   [data-r="logos-card"] { border-radius:16px !important; }
   [data-r="orbit-text"] { font-size:12.5px !important; }
+  [data-r="orbit-dot"] { width:26px !important; height:26px !important; font-size:9.5px !important; }
+  [data-r="prob-card"] { padding:18px 18px 20px !important; gap:14px !important; border-radius:18px !important; }
+  [data-r="prob-card"] h3 { font-size:17px !important; }
+  [data-r="prob-card"] p { font-size:13.5px !important; }
 }
 @keyframes skyup-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 @keyframes skyup-drift { 0%,100% { transform:translate3d(0,0,0) scale(1); } 50% { transform:translate3d(0,-24px,0) scale(1.06); } }
