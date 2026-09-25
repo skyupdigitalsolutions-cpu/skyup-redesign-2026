@@ -1,7 +1,18 @@
 // src/pages/CustomSoftwareLanding.jsx
 // Custom Software Development landing page — ported from the standalone design.
-// Self-contained: its own header/footer/nav, one-time lead popup, review map,
-// process carousel and hover-expand "Why us" cards. No global Header/Footer.
+// Self-contained: its own header/footer/nav, scroll-triggered lead popup, review map,
+// process marquee and hover-expand "Why us" cards. No global Header/Footer.
+//
+// Section order:
+//   1. Hero  (+ trust logos strip)
+//   2. Real Businesses / world map      (#reviews)
+//   3. What We Build                    (#solutions)
+//   4. How We Work — process marquee    (#process)
+//   5. Why Us                           (#why)
+//   6. The Problem                      (#problem)
+//   7. Our Tech Stack                   (#capabilities)
+//   8. CTA / Investment                 (#investment)
+//   9. Contact form                     (#form)
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import CustomSoftwareMap from "../components/CustomSoftwareMap";
 
@@ -87,7 +98,7 @@ const CAPABILITIES = [
   { label: "Web & Backend", items: ["React.js", "Next.js", "Node.js", "Python", "Java"], icon: "code" },
   { label: "Mobile", items: ["Flutter", "React Native", "Android", "iOS"], icon: "mobile" },
   { label: "Cloud & Infrastructure", items: ["AWS", "Azure", "Google Cloud", "Docker"], icon: "cloud" },
-  { label: "AI & Data", items: ["Generative AI", "NLP", "Computer Vision", "Analytics"], icon: "ai" },
+  { label: "AI & ML", items: ["Generative AI", "NLP", "Computer Vision", "Analytics"], icon: "ai" },
 ];
 const AUDIENCES = ["Small and medium businesses", "Growing companies", "Enterprises requiring customized systems", "Businesses replacing manual processes with technology"];
 const PROBLEMS = [
@@ -101,13 +112,14 @@ const labelSpan = { fontSize: 12.5, fontWeight: 500, color: "#6b6b8a" };
 const field = { display: "flex", flexDirection: "column", gap: 7 };
 const errText = { fontSize: 12, fontWeight: 500, color: "#d64545" };
 
+const procCardStyle = { background: "linear-gradient(155deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.26) 100%)", backdropFilter: "blur(22px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: 28, display: "flex", flexDirection: "column", gap: 16, boxSizing: "border-box", minHeight: 236, boxShadow: "0 18px 40px rgba(20,20,32,0.12), inset 0 1px 0 rgba(255,255,255,0.9)" };
+
 export default function CustomSoftwareLanding() {
   const [navOpen, setNavOpen] = useState(false);
-  const [procIdx, setProcIdx] = useState(0);
-  const [procCols, setProcCols] = useState(3);
   const [whyActive, setWhyActive] = useState(1);
   const [modal, setModal] = useState("idle"); // idle | open | closing | done
   const timers = useRef({});
+  const mapRef = useRef(null);
 
   // ── Popup lead form ──
   const [popupForm, setPopupForm] = useState({ name: "", phone: "", email: "", service: "Custom Software" });
@@ -119,27 +131,33 @@ export default function CustomSoftwareLanding() {
   const [leadErr, setLeadErr] = useState({});
   const [leadStatus, setLeadStatus] = useState({ submitting: false, error: "", success: false });
 
+  // Close the mobile nav on desktop resize; open the lead popup the first time
+  // the world map scrolls into view (once per browser, gated by localStorage).
   useEffect(() => {
-    const sync = () => {
-      const w = window.innerWidth;
-      const cols = w <= 767 ? 1 : w <= 1199 ? 2 : 3;
-      setProcCols(cols);
-      setProcIdx((p) => Math.min(p, 6 - cols));
-      if (w > 991) setNavOpen(false);
-    };
-    sync();
-    window.addEventListener("resize", sync);
-    try {
-      if (!localStorage.getItem("skyup-lead-modal-seen")) {
-        timers.current.open = setTimeout(() => {
-          localStorage.setItem("skyup-lead-modal-seen", "1");
-          setModal("open");
-        }, 1400);
-      }
-    } catch (_) { /* storage blocked */ }
+    const onResize = () => { if (window.innerWidth > 991) setNavOpen(false); };
+    window.addEventListener("resize", onResize);
+
+    let seen = false;
+    try { seen = !!localStorage.getItem("skyup-lead-modal-seen"); } catch (_) { /* storage blocked */ }
+
+    let observer;
+    if (!seen && mapRef.current && typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            try { localStorage.setItem("skyup-lead-modal-seen", "1"); } catch (_) { /* ignore */ }
+            setModal("open");
+            observer.disconnect();
+            break;
+          }
+        }
+      }, { threshold: 0.4 });
+      observer.observe(mapRef.current);
+    }
+
     return () => {
-      window.removeEventListener("resize", sync);
-      clearTimeout(timers.current.open);
+      window.removeEventListener("resize", onResize);
+      if (observer) observer.disconnect();
       clearTimeout(timers.current.close);
       clearTimeout(timers.current.popupSuccess);
     };
@@ -227,15 +245,11 @@ export default function CustomSoftwareLanding() {
     }
   }, [leadForm]);
 
-  const maxIdx = Math.max(0, STEPS.length - procCols);
-  const pi = Math.max(0, Math.min(procIdx, maxIdx));
-  const view = STEPS.slice(pi, pi + procCols);
-
   return (
     <div style={{ background: "#f5f5fa", overflow: "hidden", fontFamily: "'Poppins',sans-serif" }}>
       <style>{CSS}</style>
 
-      {/* ── Lead popup ── */}
+      {/* ── Lead popup (opens on world-map scroll) ── */}
       {(modal === "open" || modal === "closing") && (
         <div data-r="modal" style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "rgba(20,20,32,0.5)", backdropFilter: "blur(6px)", opacity: modal === "open" ? 1 : 0, transition: "opacity .28s ease" }}>
           <div style={{ position: "absolute", inset: 0 }} onClick={closeModal} />
@@ -291,7 +305,7 @@ export default function CustomSoftwareLanding() {
       )}
 
       {/* ── Hero ── */}
-      <section data-r="hero" style={{ position: "relative", padding: "24px 0 96px", overflow: "hidden" }}>
+      <section id="top" data-r="hero" style={{ position: "relative", padding: "24px 0 96px", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -40, left: "50%", transform: "translateX(-50%)", width: 1100, height: 620, filter: "blur(90px)", opacity: 0.92, animation: "skyup-drift 16s ease-in-out infinite", background: "radial-gradient(38% 46% at 22% 34%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(34% 42% at 44% 22%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(40% 48% at 62% 42%, #7b3ff2 0%, rgba(123,63,242,0) 72%), radial-gradient(44% 52% at 40% 62%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(30% 36% at 76% 66%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <header data-r="header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, marginBottom: 72, position: "relative" }}>
@@ -330,8 +344,8 @@ export default function CustomSoftwareLanding() {
         </div>
       </section>
 
-      {/* ── Trusted-by logos ── */}
-      <section data-r="sect" style={{ padding: "0 0 104px" }}>
+      {/* ── Trusted-by logos (trust strip) ── */}
+      <section data-r="sect" style={{ padding: "0 0 96px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div data-r="logos-card" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid #fff", borderRadius: 20, padding: "26px 0", overflow: "hidden", boxShadow: "0 4px 20px rgba(20,20,32,0.05)" }}>
             <div style={{ textAlign: "center", fontSize: 11.5, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#6b6b8a", marginBottom: 20 }}>Trusted by growing businesses across India</div>
@@ -346,56 +360,32 @@ export default function CustomSoftwareLanding() {
         </div>
       </section>
 
-      {/* ── Problem ── */}
-      <section data-r="sect" style={{ padding: "0 0 104px" }}>
+      {/* ══ 2. Real Businesses / world map ══ */}
+      <section id="reviews" style={{ position: "relative", padding: "8px 0 84px", overflow: "hidden" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
-          <div data-r="prob-head" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 16, margin: "0 auto 64px", maxWidth: 900 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "7px 16px", width: "fit-content", whiteSpace: "nowrap" }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
-              <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>The Problem</span>
+          <div data-r="rev-grid" style={{ display: "grid", gridTemplateColumns: "1fr", justifyItems: "center", textAlign: "center", gap: 56, alignItems: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, maxWidth: 1000 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "10px 20px", whiteSpace: "nowrap", boxShadow: "0 8px 24px rgba(20,20,32,0.07)" }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#141420" }}>4.9</span>
+                <div style={{ display: "flex", gap: 2 }}>{[0, 1, 2, 3, 4].map((k) => <span key={k}>{STAR}</span>)}</div>
+                <span style={{ fontSize: 14, fontWeight: 500, color: "#6b6b8a" }}>from business owners</span>
+              </div>
+              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1, textWrap: "balance" }}>
+                <span data-r="rev-line">Real Businesses. Real Workflows.</span>{" "}
+                <span data-r="rev-line">Software Built Around Them.</span>
+              </h2>
+              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, maxWidth: 760, textWrap: "balance" }}>From CRM and ERP to field management, automation and AI solutions, we build software around the way businesses actually operate.</p>
             </div>
-            <h2 data-r="prob-title" style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, lineHeight: 1.14, color: "#141420", letterSpacing: "-0.035em", textWrap: "balance" }}>
-              When Your Business Outgrows <span style={{ whiteSpace: "nowrap" }}>Off-the-Shelf</span> Software
-            </h2>
-            <p style={{ margin: 0, maxWidth: 620, fontSize: 16, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, textWrap: "pretty" }}>Standard software works well when your processes are standard. But growing businesses often need more flexibility.</p>
           </div>
 
-          {/* Desktop: 01 top-left, 02 top-right, 03 below — each tied to an orbit dot.
-              Mobile: orbit on top, three stacked cards. */}
-          <div data-r="prob-stage" style={{ display: "grid", gridTemplateColumns: "1fr 440px 1fr", gridTemplateAreas: '"p1 orbit p2" "p3 p3 p3"', columnGap: 40, alignItems: "start" }}>
-            <div data-r="orbit" style={{ gridArea: "orbit", position: "relative", width: 440, height: 440, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
-              <div style={{ position: "absolute", inset: 0, borderRadius: 9999, border: "1px solid #d8d8e8" }} />
-              <div style={{ position: "absolute", inset: -46, borderRadius: 9999, filter: "blur(60px)", opacity: 0.5, background: "radial-gradient(38% 44% at 28% 30%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(36% 42% at 72% 34%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(40% 46% at 50% 78%, #0037CA 0%, rgba(0,55,202,0) 72%)" }} />
-              {[{ top: "12.3%", left: "12.3%", n: "01" }, { top: "12.3%", right: "12.3%", n: "02" }, { bottom: 0, left: "50%", n: "03" }].map((d) => (
-                <div key={d.n} data-r="orbit-dot" style={{ position: "absolute", top: d.top, left: d.left, right: d.right, bottom: d.bottom, transform: `translate(${d.right ? "50%" : "-50%"}, ${d.bottom === 0 ? "50%" : "-50%"})`, width: 30, height: 30, borderRadius: 9999, background: "#F1891A", color: "#fff", fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 6px rgba(241,137,26,0.16), 0 6px 16px rgba(241,137,26,0.45)", zIndex: 2 }}>{d.n}</div>
-              ))}
-              <div data-r="orbit-disc" style={{ position: "relative", boxSizing: "border-box", width: 280, height: 280, borderRadius: 9999, background: "radial-gradient(120% 120% at 30% 20%, #1a55e8 0%, #0037CA 55%, #002a9e 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 32, textAlign: "center", boxShadow: "0 24px 60px rgba(0,55,202,0.34)" }}>
-                <p data-r="orbit-text" style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#fff", lineHeight: 1.5, letterSpacing: "-0.01em" }}>When your business processes are unique, your software should be designed around them.</p>
-                <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 13.5, color: "#0037CA", background: "#fff", borderRadius: 9999, padding: "11px 22px", boxShadow: "0 8px 20px rgba(0,0,0,0.14)" }}>Talk To Our Team</a>
-              </div>
-            </div>
-
-            {PROBLEMS.map((p) => (
-              <div key={p.n} data-r={`prob-${p.pos}`} style={{ gridArea: p.area, position: "relative", justifySelf: p.pos === "tl" ? "end" : p.pos === "tr" ? "start" : "center", width: "100%", maxWidth: 330, marginTop: p.pos === "b" ? 44 : 0 }}>
-                {/* dashed connector to the matching orbit dot (desktop only) */}
-                <span data-r="prob-link" aria-hidden="true" style={p.pos === "b"
-                  ? { position: "absolute", top: -44, left: "50%", height: 44, borderLeft: "1.5px dashed #c9c9dc" }
-                  : { position: "absolute", top: 54, [p.pos === "tl" ? "right" : "left"]: -94, width: 94, borderTop: "1.5px dashed #c9c9dc" }} />
-                <div className="prob-card" data-r="prob-card" style={{ position: "relative", display: "flex", gap: 16, alignItems: "flex-start", background: "linear-gradient(155deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.66) 100%)", backdropFilter: "blur(18px)", border: "1px solid #fff", borderRadius: 20, padding: "22px 22px 24px", boxShadow: "0 16px 40px rgba(20,20,32,0.08)", transition: "transform .25s ease, box-shadow .25s ease" }}>
-                  <div style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, background: "#fff4e8", display: "flex", alignItems: "center", justifyContent: "center" }}>{svg(ICON[p.icon], { w: 22, h: 22, stroke: "#F1891A", sw: 2 })}</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
-                    <span style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", color: "#F1891A" }}>{p.n}</span>
-                    <h3 style={{ margin: 0, fontSize: 18.5, fontWeight: 600, color: "#141420", lineHeight: 1.3, letterSpacing: "-0.015em" }}>{p.t}</h3>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#4a4a66", lineHeight: 1.65 }}>{p.b}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Interactive India map — scrolling into view opens the lead popup */}
+          <div ref={mapRef} data-r="map-hold" style={{ position: "relative", maxWidth: 860, margin: "48px auto 0" }}>
+            <CustomSoftwareMap />
           </div>
         </div>
       </section>
 
-      {/* ── Solutions ── */}
+      {/* ══ 3. What We Build ══ */}
       <section id="solutions" style={{ position: "relative", padding: "32px 0 104px", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 40, left: "50%", transform: "translateX(-50%)", width: 1240, height: 820, filter: "blur(100px)", opacity: 0.62, background: "radial-gradient(32% 34% at 18% 28%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(34% 36% at 50% 20%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(32% 34% at 82% 30%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(38% 38% at 30% 78%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(30% 32% at 74% 80%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
@@ -422,32 +412,51 @@ export default function CustomSoftwareLanding() {
         </div>
       </section>
 
-      {/* ── Real businesses ── */}
-      <section id="reviews" style={{ position: "relative", padding: "32px 0 84px", overflow: "hidden" }}>
+      {/* ══ 4. How We Work — process marquee ══ */}
+      <section id="process" style={{ padding: "0 0 104px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
-          <div data-r="rev-grid" style={{ display: "grid", gridTemplateColumns: "1fr", justifyItems: "center", textAlign: "center", gap: 56, alignItems: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, maxWidth: 1000 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "10px 20px", whiteSpace: "nowrap", boxShadow: "0 8px 24px rgba(20,20,32,0.07)" }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#141420" }}>4.9</span>
-                <div style={{ display: "flex", gap: 2 }}>{[0, 1, 2, 3, 4].map((k) => <span key={k}>{STAR}</span>)}</div>
-                <span style={{ fontSize: 14, fontWeight: 500, color: "#6b6b8a" }}>from business owners</span>
+          <div data-r="proc-card" style={{ position: "relative", background: "linear-gradient(135deg,#f2e4e6 0%,#f9c7c8 22%,#efb4d4 44%,#d3c3f2 68%,#c6cff8 100%)", borderRadius: 28, padding: "56px 0 52px", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: -140, left: "50%", transform: "translateX(-50%)", width: 1100, height: 760, filter: "blur(80px)", opacity: 0.55, background: "radial-gradient(30% 34% at 18% 24%, #ffffff 0%, rgba(255,255,255,0) 70%), radial-gradient(26% 30% at 62% 14%, #ffd9c2 0%, rgba(255,217,194,0) 70%), radial-gradient(30% 34% at 88% 46%, #b9c6ff 0%, rgba(185,198,255,0) 70%), radial-gradient(32% 36% at 34% 88%, #ffc0dd 0%, rgba(255,192,221,0) 72%)" }} />
+            <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 62%, rgba(255,255,255,0.22) 100%)" }} />
+            <div data-r="proc-head" style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center", marginBottom: 40, padding: "0 24px" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 9999, padding: "7px 20px", whiteSpace: "nowrap" }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
+                <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#141420" }}>How We Work</span>
               </div>
-              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1, textWrap: "balance" }}>
-                <span data-r="rev-line">Real Businesses. Real Workflows.</span>{" "}
-                <span data-r="rev-line">Software Built Around Them.</span>
-              </h2>
-              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, maxWidth: 760, textWrap: "balance" }}>From CRM and ERP to field management, automation and AI solutions, we build software around the way businesses actually operate.</p>
+              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1 }}>Our Software Development Process</h2>
+              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#4a4a66", maxWidth: 560, lineHeight: 1.7 }}>A structured SDLC with Agile development practices, from requirement analysis through deployment and ongoing support.</p>
             </div>
-          </div>
 
-          {/* Interactive India map with client-review pins */}
-          <div data-r="map-hold" style={{ position: "relative", maxWidth: 860, margin: "48px auto 0" }}>
-            <CustomSoftwareMap />
+            {/* auto-scrolling marquee of the 6 process steps (pauses on hover) */}
+            <div data-r="proc-marquee">
+              <div className="proc-track">
+                {[...STEPS, ...STEPS].map((st, i) => (
+                  <div className="proc-step" key={i} aria-hidden={i >= STEPS.length ? "true" : undefined}>
+                    <div className="proc-step-card" style={procCardStyle}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 14, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 10px 22px rgba(20,20,32,0.14)" }}>{svg(ICON[st.icon], { w: 22, h: 22 })}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#0037CA", letterSpacing: "0.12em" }}>{st.num}</div>
+                      </div>
+                      <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#141420", letterSpacing: "-0.015em" }}>{st.title}</h3>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#3b3b57", lineHeight: 1.7 }}>{st.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div data-r="proc-practices" style={{ position: "relative", display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 10, marginTop: 36, padding: "0 24px" }}>
+              {PROCESS_PRACTICES.map((p) => (
+                <span key={p} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 600, color: "#141420", background: "rgba(255,255,255,0.6)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.85)", borderRadius: 9999, padding: "9px 18px", whiteSpace: "nowrap" }}>
+                  <span style={{ width: 6, height: 6, borderRadius: 9999, background: "#0037CA", display: "inline-block" }} />{p}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Why us ── */}
+      {/* ══ 5. Why Us ══ */}
       <section id="why" style={{ position: "relative", padding: "24px 0 104px", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 1240, height: 760, filter: "blur(100px)", opacity: 0.5, background: "radial-gradient(34% 40% at 16% 30%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(32% 36% at 48% 22%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(32% 36% at 84% 34%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(32% 36% at 70% 82%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(28% 32% at 24% 84%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
@@ -496,57 +505,56 @@ export default function CustomSoftwareLanding() {
         </div>
       </section>
 
-      {/* ── Process carousel ── */}
-      <section id="process" style={{ padding: "0 0 104px" }}>
+      {/* ══ 6. The Problem ══ */}
+      <section id="problem" data-r="sect" style={{ padding: "0 0 104px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
-          <div data-r="proc-card" style={{ position: "relative", background: "linear-gradient(135deg,#f2e4e6 0%,#f9c7c8 22%,#efb4d4 44%,#d3c3f2 68%,#c6cff8 100%)", borderRadius: 28, padding: "60px 48px 56px", overflow: "hidden" }}>
-            <div style={{ position: "absolute", top: -140, left: "50%", transform: "translateX(-50%)", width: 1100, height: 760, filter: "blur(80px)", opacity: 0.55, background: "radial-gradient(30% 34% at 18% 24%, #ffffff 0%, rgba(255,255,255,0) 70%), radial-gradient(26% 30% at 62% 14%, #ffd9c2 0%, rgba(255,217,194,0) 70%), radial-gradient(30% 34% at 88% 46%, #b9c6ff 0%, rgba(185,198,255,0) 70%), radial-gradient(32% 36% at 34% 88%, #ffc0dd 0%, rgba(255,192,221,0) 72%)" }} />
-            <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 62%, rgba(255,255,255,0.22) 100%)" }} />
-            <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center", marginBottom: 44 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 9999, padding: "7px 20px", whiteSpace: "nowrap" }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
-                <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#141420" }}>How We Work</span>
-              </div>
-              <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1 }}>Our Software Development Process</h2>
-              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#4a4a66", maxWidth: 560, lineHeight: 1.7 }}>A structured SDLC with Agile development practices, from requirement analysis through deployment and ongoing support.</p>
+          <div data-r="prob-head" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 16, margin: "0 auto 64px", maxWidth: 900 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "7px 16px", width: "fit-content", whiteSpace: "nowrap" }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
+              <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>The Problem</span>
             </div>
-            <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, marginBottom: 22 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {Array.from({ length: maxIdx + 1 }, (_, i) => (
-                  <button key={i} type="button" onClick={() => setProcIdx(i)} aria-label={`Show steps ${i + 1} to ${i + procCols}`} style={{ height: 44, padding: "0 3px", border: "none", background: "none", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                    <span style={{ display: "block", width: i === pi ? 30 : 7, height: 7, borderRadius: 9999, background: i === pi ? "#F1891A" : "rgba(20,20,32,0.22)", transition: "width .3s ease, background .3s ease" }} />
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <button type="button" onClick={() => setProcIdx((p) => Math.max(0, p - 1))} aria-label="Previous steps" style={{ width: 46, height: 46, borderRadius: 9999, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.85)", color: "#141420", opacity: pi === 0 ? 0.35 : 1, transition: "background .2s, opacity .2s" }}>{svg([P("M15 6l-6 6 6 6", "a")], { w: 18, h: 18, stroke: "currentColor", sw: 2 })}</button>
-                <button type="button" onClick={() => setProcIdx((p) => Math.min(maxIdx, p + 1))} aria-label="Next steps" style={{ width: 46, height: 46, borderRadius: 9999, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.85)", color: "#141420", opacity: pi === maxIdx ? 0.35 : 1, transition: "background .2s, opacity .2s" }}>{svg([P("M9 6l6 6-6 6", "a")], { w: 18, h: 18, stroke: "currentColor", sw: 2 })}</button>
+            <h2 data-r="prob-title" style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, lineHeight: 1.14, color: "#141420", letterSpacing: "-0.035em", textWrap: "balance" }}>
+              When Your Business Outgrows <span style={{ whiteSpace: "nowrap" }}>Off-the-Shelf</span> Software
+            </h2>
+            <p style={{ margin: 0, maxWidth: 620, fontSize: 16, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, textWrap: "pretty" }}>Standard software works well when your processes are standard. But growing businesses often need more flexibility.</p>
+          </div>
+
+          {/* Desktop: 01 top-left, 02 top-right, 03 below — each tied to an orbit dot.
+              Mobile: orbit on top, three stacked cards. */}
+          <div data-r="prob-stage" style={{ display: "grid", gridTemplateColumns: "1fr 440px 1fr", gridTemplateAreas: '"p1 orbit p2" "p3 p3 p3"', columnGap: 40, alignItems: "start" }}>
+            <div data-r="orbit" style={{ gridArea: "orbit", position: "relative", width: 440, height: 440, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
+              <div style={{ position: "absolute", inset: 0, borderRadius: 9999, border: "1px solid #d8d8e8" }} />
+              <div style={{ position: "absolute", inset: -46, borderRadius: 9999, filter: "blur(60px)", opacity: 0.5, background: "radial-gradient(38% 44% at 28% 30%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(36% 42% at 72% 34%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(40% 46% at 50% 78%, #0037CA 0%, rgba(0,55,202,0) 72%)" }} />
+              {[{ top: "12.3%", left: "12.3%", n: "01" }, { top: "12.3%", right: "12.3%", n: "02" }, { bottom: 0, left: "50%", n: "03" }].map((d) => (
+                <div key={d.n} data-r="orbit-dot" style={{ position: "absolute", top: d.top, left: d.left, right: d.right, bottom: d.bottom, transform: `translate(${d.right ? "50%" : "-50%"}, ${d.bottom === 0 ? "50%" : "-50%"})`, width: 30, height: 30, borderRadius: 9999, background: "#F1891A", color: "#fff", fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 6px rgba(241,137,26,0.16), 0 6px 16px rgba(241,137,26,0.45)", zIndex: 2 }}>{d.n}</div>
+              ))}
+              <div data-r="orbit-disc" style={{ position: "relative", boxSizing: "border-box", width: 280, height: 280, borderRadius: 9999, background: "radial-gradient(120% 120% at 30% 20%, #1a55e8 0%, #0037CA 55%, #002a9e 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 32, textAlign: "center", boxShadow: "0 24px 60px rgba(0,55,202,0.34)" }}>
+                <p data-r="orbit-text" style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#fff", lineHeight: 1.5, letterSpacing: "-0.01em" }}>When your business processes are unique, your software should be designed around them.</p>
+                <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 13.5, color: "#0037CA", background: "#fff", borderRadius: 9999, padding: "11px 22px", boxShadow: "0 8px 20px rgba(0,0,0,0.14)" }}>Talk To Our Team</a>
               </div>
             </div>
-            <div data-r="proc-grid" style={{ position: "relative", display: "grid", gridTemplateColumns: `repeat(${procCols},1fr)`, gap: 18 }}>
-              {view.map((st) => (
-                <div key={st.num} style={{ background: "linear-gradient(155deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.26) 100%)", backdropFilter: "blur(22px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: 28, display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 18px 40px rgba(20,20,32,0.12), inset 0 1px 0 rgba(255,255,255,0.9)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 14, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 10px 22px rgba(20,20,32,0.14)" }}>{svg(ICON[st.icon], { w: 22, h: 22 })}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "#0037CA", letterSpacing: "0.12em" }}>{st.num}</div>
+
+            {PROBLEMS.map((p) => (
+              <div key={p.n} data-r={`prob-${p.pos}`} style={{ gridArea: p.area, position: "relative", justifySelf: p.pos === "tl" ? "end" : p.pos === "tr" ? "start" : "center", width: "100%", maxWidth: 330, marginTop: p.pos === "b" ? 44 : 0 }}>
+                {/* dashed connector to the matching orbit dot (desktop only) */}
+                <span data-r="prob-link" aria-hidden="true" style={p.pos === "b"
+                  ? { position: "absolute", top: -44, left: "50%", height: 44, borderLeft: "1.5px dashed #c9c9dc" }
+                  : { position: "absolute", top: 54, [p.pos === "tl" ? "right" : "left"]: -94, width: 94, borderTop: "1.5px dashed #c9c9dc" }} />
+                <div className="prob-card" data-r="prob-card" style={{ position: "relative", display: "flex", gap: 16, alignItems: "flex-start", background: "linear-gradient(155deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.66) 100%)", backdropFilter: "blur(18px)", border: "1px solid #fff", borderRadius: 20, padding: "22px 22px 24px", boxShadow: "0 16px 40px rgba(20,20,32,0.08)", transition: "transform .25s ease, box-shadow .25s ease" }}>
+                  <div style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, background: "#fff4e8", display: "flex", alignItems: "center", justifyContent: "center" }}>{svg(ICON[p.icon], { w: 22, h: 22, stroke: "#F1891A", sw: 2 })}</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", color: "#F1891A" }}>{p.n}</span>
+                    <h3 style={{ margin: 0, fontSize: 18.5, fontWeight: 600, color: "#141420", lineHeight: 1.3, letterSpacing: "-0.015em" }}>{p.t}</h3>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#4a4a66", lineHeight: 1.65 }}>{p.b}</p>
                   </div>
-                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#141420", letterSpacing: "-0.015em" }}>{st.title}</h3>
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#3b3b57", lineHeight: 1.7 }}>{st.body}</p>
                 </div>
-              ))}
-            </div>
-            <div data-r="proc-practices" style={{ position: "relative", display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 10, marginTop: 32 }}>
-              {PROCESS_PRACTICES.map((p) => (
-                <span key={p} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 600, color: "#141420", background: "rgba(255,255,255,0.6)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.85)", borderRadius: 9999, padding: "9px 18px", whiteSpace: "nowrap" }}>
-                  <span style={{ width: 6, height: 6, borderRadius: 9999, background: "#0037CA", display: "inline-block" }} />{p}
-                </span>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Technology & Capabilities ── */}
+      {/* ══ 7. Our Tech Stack ══ */}
       <section id="capabilities" style={{ padding: "0 0 104px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div data-r="cap-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 28, padding: "52px 48px", display: "grid", gridTemplateColumns: "0.9fr 1.1fr", gap: 48, alignItems: "center", boxShadow: "0 16px 44px rgba(20,20,32,0.07)" }}>
@@ -573,7 +581,7 @@ export default function CustomSoftwareLanding() {
         </div>
       </section>
 
-      {/* ── Location + investment ── */}
+      {/* ══ 8. CTA / Investment ══ */}
       <section id="investment" style={{ padding: "0 0 104px" }}>
         <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "0.72fr 1.28fr", gap: 32, alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -603,7 +611,7 @@ export default function CustomSoftwareLanding() {
         </div>
       </section>
 
-      {/* ── Contact form ── */}
+      {/* ══ 9. Contact form ══ */}
       <section id="form" style={{ position: "relative", padding: "0 0 96px", overflow: "hidden" }}>
         <div style={{ position: "absolute", bottom: -160, left: "50%", transform: "translateX(-50%)", width: 1000, height: 520, filter: "blur(100px)", opacity: 0.7, background: "radial-gradient(36% 44% at 26% 40%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(40% 48% at 52% 52%, #7b3ff2 0%, rgba(123,63,242,0) 72%), radial-gradient(36% 44% at 76% 40%, #F1891A 0%, rgba(241,137,26,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 760, margin: "0 auto", padding: "0 32px" }}>
@@ -676,18 +684,71 @@ export default function CustomSoftwareLanding() {
       {/* ── Footer ── */}
       <footer style={{ padding: "0 0 40px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
-          <div data-r="foot-grid" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 22, padding: "36px 40px", display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "start", boxShadow: "0 16px 44px rgba(20,20,32,0.08)" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 420 }}>
-              <img src={`${IMG}/SKYUP-Logo.svg`} alt="SKYUP Digital Solutions" style={{ height: 36, alignSelf: "flex-start" }} />
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.75 }}>Based in Bangalore. Serving businesses across India. Tell us what you want to automate, improve or build, and we'll help turn it into a reliable software solution.</p>
-            </div>
-            <div data-r="foot-right" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 20 }}>
-              <div data-r="foot-links" style={{ display: "flex", gap: 26, flexWrap: "wrap" }}>
-                {[["Solutions", "#solutions"], ["Why Us", "#why"], ["Process", "#process"], ["Investment", "#investment"], ["Contact", "#form"]].map(([l, h]) => (
-                  <a key={l} href={h} style={{ fontSize: 14, fontWeight: 500, color: "#5c5c7a" }}>{l}</a>
+          <div data-r="foot-grid" style={{ position: "relative", overflow: "hidden", background: "linear-gradient(160deg,#181a2b 0%,#101120 60%,#0c0d18 100%)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 26, padding: "48px 48px 32px", display: "grid", gridTemplateColumns: "1.5fr 1fr 1.3fr", gap: 48, alignItems: "start", boxShadow: "0 24px 60px rgba(20,20,32,0.30)" }}>
+            {/* soft brand glow */}
+            <div aria-hidden="true" style={{ position: "absolute", top: -120, left: -60, width: 520, height: 320, filter: "blur(90px)", opacity: 0.4, pointerEvents: "none", background: "radial-gradient(40% 50% at 30% 40%, #0037CA 0%, rgba(0,55,202,0) 70%), radial-gradient(40% 50% at 70% 60%, #FA9F43 0%, rgba(250,159,67,0) 72%)" }} />
+
+            {/* Brand + socials */}
+            <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 20, maxWidth: 400 }}>
+              <a href="#top" className="foot-logo" style={{ alignSelf: "flex-start", display: "inline-flex", background: "#fff", borderRadius: 12, padding: "10px 14px", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>
+                <img src={`${IMG}/SKYUP-Logo.svg`} alt="SKYUP Digital Solutions" style={{ height: 32, display: "block" }} />
+              </a>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#a6a6c2", lineHeight: 1.75 }}>Based in Bangalore. Serving businesses across India. Tell us what you want to automate, improve or build, and we'll help turn it into a reliable software solution.</p>
+              {/* NOTE: replace LinkedIn / Instagram hrefs with your real profile URLs */}
+              <div style={{ display: "flex", gap: 12 }}>
+                {[
+                  { label: "LinkedIn", href: "https://www.linkedin.com/company/skyupdigitalsolutions", icon: [P("M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z", "a"), <rect key="b" x="2" y="9" width="4" height="12" />, <circle key="c" cx="4" cy="4" r="2" />] },
+                  { label: "Instagram", href: "https://www.instagram.com/skyupdigitalsolutions", icon: [<rect key="a" x="2" y="2" width="20" height="20" rx="5" />, <circle key="b" cx="12" cy="12" r="4" />, P("M17.5 6.5h.01", "c")] },
+                  { label: "Email", href: "mailto:contact@skyupdigitalsolutions.com", icon: [<rect key="a" x="2" y="4" width="20" height="16" rx="2" />, P("m22 6-10 7L2 6", "b")] },
+                ].map((s) => (
+                  <a key={s.label} href={s.href} target={s.href.startsWith("http") ? "_blank" : undefined} rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined} aria-label={s.label} title={s.label} className="foot-soc" style={{ width: 44, height: 44, borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)" }}>
+                    {svg(s.icon, { w: 19, h: 19, stroke: "currentColor", sw: 1.9 })}
+                  </a>
                 ))}
               </div>
-              <div style={{ fontSize: 12.5, fontWeight: 400, color: "#6b6b8a" }}>© 2026 SKYUP Digital Solutions</div>
+            </div>
+
+            {/* Explore */}
+            <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#6f6f92" }}>Explore</div>
+              <div data-r="foot-links" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {[["What We Build", "#solutions"], ["How We Work", "#process"], ["Why Us", "#why"], ["Tech Stack", "#capabilities"], ["Investment", "#investment"], ["Contact", "#form"]].map(([l, h]) => (
+                  <a key={l} href={h} className="foot-a" style={{ display: "inline-flex", alignItems: "center", gap: 8, width: "fit-content", fontSize: 14, fontWeight: 500, color: "#a6a6c2" }}>
+                    <span style={{ color: "#FA9F43" }}>{svg([P("M9 6l6 6-6 6", "a")], { w: 13, h: 13, stroke: "currentColor", sw: 2.4 })}</span>{l}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Get in touch */}
+            <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#6f6f92" }}>Get In Touch</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {[
+                  { label: "contact@skyupdigitalsolutions.com", href: "mailto:contact@skyupdigitalsolutions.com", icon: [<rect key="a" x="2" y="4" width="20" height="16" rx="2" />, P("m22 6-10 7L2 6", "b")] },
+                  { label: "skyupdigitalsolutions.com", href: "https://skyupdigitalsolutions.com", icon: ICON.web },
+                  { label: "Bangalore, India", href: "https://maps.google.com/?q=Bengaluru,Karnataka,India", icon: ICON.pin },
+                ].map((c) => (
+                  <a key={c.label} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined} className="foot-chip" style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 14px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)", color: "#d4d4e6", fontSize: 13.5, fontWeight: 500 }}>
+                    <span style={{ width: 30, height: 30, borderRadius: 9, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(250,159,67,0.14)", color: "#FA9F43" }}>{svg(c.icon, { w: 16, h: 16, stroke: "currentColor", sw: 1.9 })}</span>
+                    <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{c.label}</span>
+                  </a>
+                ))}
+              </div>
+              <a href="#form" className="foot-cta" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 2, fontWeight: 600, fontSize: 14.5, color: "#141420", background: "#FA9F43", borderRadius: 10, padding: "13px 22px", boxShadow: "0 12px 26px rgba(250,159,67,0.30)" }}>
+                Start Your Project{svg([P("M5 12h14", "a"), P("m13 6 6 6-6 6", "b")], { w: 17, h: 17, stroke: "currentColor", sw: 2.2 })}
+              </a>
+            </div>
+
+            {/* Bottom bar */}
+            <div data-r="foot-bottom" style={{ position: "relative", gridColumn: "1 / -1", marginTop: 12, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 12.5, fontWeight: 400, color: "#8686a6" }}>© 2026 SKYUP Digital Solutions LLP · All rights reserved</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: "#8686a6" }}>{svg(ICON.pin, { w: 13, h: 13, stroke: "#FA9F43", sw: 2.2 })}Designed &amp; built in Bangalore</span>
+                <a href="#top" className="foot-top" aria-label="Back to top" title="Back to top" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 600, color: "#d4d4e6", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 9999, padding: "8px 14px" }}>
+                  Back to top{svg([P("M12 19V5", "a"), P("m5 12 7-7 7 7", "b")], { w: 15, h: 15, stroke: "currentColor", sw: 2.2 })}
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -698,10 +759,28 @@ export default function CustomSoftwareLanding() {
 
 const CSS = `
 #solutions a:hover, #why a:hover, #process a:hover, #investment a:hover { opacity:.9; }
-[data-r="foot-links"] a:hover { color:#0037CA; }
+.foot-logo { transition:transform .2s ease; }
+.foot-logo:hover { transform:translateY(-2px); }
+.foot-a { transition:color .18s ease, transform .18s ease; }
+.foot-a:hover { color:#fff !important; transform:translateX(3px); }
+.foot-chip { transition:background .2s ease, border-color .2s ease, transform .2s ease; }
+.foot-chip:hover { background:rgba(255,255,255,0.09) !important; border-color:rgba(250,159,67,0.55) !important; color:#fff !important; transform:translateY(-2px); }
+.foot-soc { transition:background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease; }
+.foot-soc:hover { background:#FA9F43 !important; border-color:#FA9F43 !important; color:#141420 !important; transform:translateY(-3px); }
+.foot-cta { transition:transform .2s ease, box-shadow .2s ease, background .2s ease; }
+.foot-cta:hover { transform:translateY(-2px); background:#ffb15f !important; box-shadow:0 16px 34px rgba(250,159,67,0.42) !important; }
+.foot-top { transition:background .2s ease, transform .2s ease; }
+.foot-top:hover { background:rgba(255,255,255,0.14) !important; transform:translateY(-2px); }
 [data-r="rev-line"] { display:block; white-space:nowrap; }
 .prob-card:hover { transform:translateY(-4px); box-shadow:0 24px 52px rgba(20,20,32,0.13) !important; }
 .svc-card:hover { transform:translateY(-6px); box-shadow:0 26px 60px rgba(20,20,32,0.16), inset 0 1px 0 rgba(255,255,255,0.9); }
+
+/* How-we-work marquee */
+[data-r="proc-marquee"] { position:relative; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.proc-track { display:flex; width:max-content; animation:skyup-marquee 46s linear infinite; }
+[data-r="proc-marquee"]:hover .proc-track { animation-play-state:paused; }
+.proc-step { padding:0 9px; flex-shrink:0; box-sizing:border-box; }
+.proc-step-card { width:330px; }
 
 @media (max-width:1199px) {
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:24px !important; padding-right:24px !important; }
@@ -713,7 +792,6 @@ const CSS = `
   [data-r="prob-tl"] [data-r="prob-link"] { right:-75px !important; }
   [data-r="prob-tr"] [data-r="prob-link"] { left:-75px !important; }
   [data-r="rev-grid"] { gap:36px !important; }
-  [data-r="proc-card"] { padding:48px 32px 44px !important; }
   [data-r="cap-card"] { padding:44px 32px !important; gap:36px !important; }
 }
 @media (max-width:991px) {
@@ -733,7 +811,6 @@ const CSS = `
   [data-r="rev-grid"], [data-r="why-head"], [data-r="inv-grid"], [data-r="foot-grid"], [data-r="cap-card"] { grid-template-columns:1fr !important; }
   [data-r="why-head"] { align-items:start !important; gap:20px !important; margin-bottom:32px !important; }
   [data-r="foot-grid"] { gap:28px !important; }
-  [data-r="foot-right"] { align-items:flex-start !important; }
   [data-r="why-row"] { flex-direction:column !important; min-height:0 !important; align-items:stretch !important; }
   [data-r="why-card"] { flex:none !important; min-height:0 !important; }
   [data-r="why-art"] { height:220px !important; opacity:1 !important; }
@@ -744,26 +821,36 @@ const CSS = `
 }
 @media (max-width:767px) {
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:18px !important; padding-right:18px !important; }
-  [data-r="sect"] { padding-bottom:72px !important; }
-  [data-r="hero"] { padding-bottom:64px !important; }
+  [data-r="sect"] { padding-bottom:60px !important; }
+  [data-r="hero"] { padding-bottom:56px !important; }
+  #reviews, #solutions, #why, #process, #capabilities, #investment { padding-bottom:64px !important; }
+  #solutions { padding-top:16px !important; }
+  #reviews [data-r="map-hold"] { margin-top:32px !important; }
   [data-r="trust"] { border-radius:18px !important; flex-direction:column !important; padding:10px 18px !important; }
   [data-r="trust"] > span[aria-hidden] { display:none !important; }
   [data-r="hero-cta"] { flex-direction:column !important; align-items:stretch !important; width:100%; }
   [data-r="hero-cta"] > a { width:100%; padding:17px 20px !important; white-space:normal !important; }
   [data-r="hero-price"] { border-radius:18px !important; padding:12px 18px !important; }
-  [data-r="proc-card"] { padding:36px 20px 32px !important; border-radius:22px !important; }
+  [data-r="proc-card"] { padding-top:36px !important; padding-bottom:32px !important; border-radius:22px !important; }
+  [data-r="proc-head"] { margin-bottom:28px !important; padding:0 18px !important; }
+  [data-r="proc-practices"] { padding:0 18px !important; }
   [data-r="proc-practices"] > span { font-size:12.5px !important; padding:8px 14px !important; }
   [data-r="cap-card"] { padding:32px 20px !important; border-radius:22px !important; }
   [data-r="aud-grid"], [data-r="form-grid"] { grid-template-columns:1fr !important; }
   [data-r="form-grid"] > label { grid-column:span 1 !important; }
-  [data-r="foot-grid"] { padding:28px 22px !important; }
-  [data-r="foot-links"] { gap:4px !important; flex-direction:column !important; }
-  [data-r="foot-links"] > a { padding:11px 0 !important; }
+  [data-r="foot-grid"] { padding:32px 22px 24px !important; gap:32px !important; }
+  [data-r="foot-links"] > a { padding:2px 0 !important; }
+  [data-r="foot-bottom"] { flex-direction:column !important; align-items:flex-start !important; gap:16px !important; }
+  [data-r="foot-bottom"] > div:last-child { flex-wrap:wrap !important; }
 }
 @media (max-width:479px) {
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:14px !important; padding-right:14px !important; }
   [data-r="brand"] { height:32px !important; }
-  [data-r="sect"] { padding-bottom:60px !important; }
+  [data-r="sect"] { padding-bottom:56px !important; }
+  #reviews, #solutions, #why, #process, #capabilities, #investment { padding-bottom:56px !important; }
+  .proc-step { padding:0 7px !important; }
+  .proc-step-card { width:270px !important; }
+  .proc-step-card { padding:22px !important; min-height:214px !important; }
   [data-r="why-card"] { padding:20px !important; border-radius:22px !important; }
   [data-r="why-art"] { height:164px !important; }
   [data-r="inv-card"], [data-r="form-card"] { padding:20px !important; }
@@ -775,5 +862,4 @@ const CSS = `
   [data-r="prob-card"] p { font-size:13.5px !important; }
 }
 @keyframes skyup-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
- 
 `;
