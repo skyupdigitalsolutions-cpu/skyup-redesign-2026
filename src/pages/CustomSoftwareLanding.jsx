@@ -306,7 +306,7 @@ export default function CustomSoftwareLanding() {
               </div>
             ) : (
               <>
-                <div data-r="modal-fields" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <div data-r="modal-fields" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14 }}>
                   <label style={field}>
                     <span style={labelSpan}>name*</span>
                     <input type="text" placeholder="full name" style={inputStyle} value={popupForm.name} onChange={(e) => setPopupForm((s) => ({ ...s, name: e.target.value }))} />
@@ -826,6 +826,8 @@ img, svg { max-width:100%; }
 [data-r="map-hold"] { overflow:hidden; }
 [data-r="map-hold"] svg, [data-r="map-hold"] img, [data-r="map-hold"] canvas { max-width:100% !important; height:auto; }
 [data-r="modal-card"] input, [data-r="modal-card"] select { height:46px; box-sizing:border-box; }
+[data-r="modal-fields"] > label { min-width:0; }
+[data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { min-width:0; width:100%; box-sizing:border-box; }
 #solutions a:hover, #why a:hover, #process a:hover, #investment a:hover { opacity:.9; }
 .foot-logo { transition:transform .2s ease; }
 .foot-logo:hover { transform:translateY(-2px); }
@@ -932,7 +934,7 @@ img, svg { max-width:100%; }
   [data-r="why-stats"] > div > div:first-child { font-size:22px !important; }
   [data-r="why-stats"] > div > div:last-child { font-size:12px !important; line-height:1.3 !important; }
   [data-r="modal-head"] { margin-bottom:16px !important; }
-  [data-r="modal-fields"] { gap:10px !important; }
+  [data-r="modal-fields"] { grid-template-columns:1fr !important; gap:12px !important; }
   [data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { padding:11px 14px !important; }
 }
 @media (max-width:479px) {
