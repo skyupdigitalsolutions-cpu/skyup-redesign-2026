@@ -123,7 +123,7 @@ export default function CustomSoftwareLanding() {
   const shownRef = useRef(false);
 
   // ── Popup lead form ──
-  const [popupForm, setPopupForm] = useState({ name: "", phone: "", email: "", service: "Custom Software" });
+  const [popupForm, setPopupForm] = useState({ name: "", company: "", phone: "", email: "", service: "Custom Software", message: "", budget: "2-5 Lakh", timeline: "Immediately" });
   const [popupErr, setPopupErr] = useState({});
   const [popupStatus, setPopupStatus] = useState({ submitting: false, error: "", success: false });
 
@@ -188,13 +188,12 @@ export default function CustomSoftwareLanding() {
     timers.current.close = setTimeout(() => setModal("done"), 300);
   }, []);
 
-  // Popup form only collects name/phone/email/service — company, budget and
-  // message are required by the backend Contact model, so we fill sensible
-  // defaults for those.
+  // Popup collects the same fields as the main contact form.
   const submitPopup = useCallback(async (ev) => {
     ev.preventDefault();
     const e = {};
     if (!popupForm.name.trim()) e.name = "Name is required";
+    if (!popupForm.company.trim()) e.company = "Company name is required";
     if (!popupForm.phone.trim()) e.phone = "Phone number is required";
     else if (!PHONE_RE.test(popupForm.phone.trim())) e.phone = "Enter a valid phone number";
     if (!popupForm.email.trim()) e.email = "Email is required";
@@ -204,12 +203,12 @@ export default function CustomSoftwareLanding() {
 
     const payload = {
       name: popupForm.name.trim(),
-      company: "Not specified",
+      company: popupForm.company.trim(),
       email: popupForm.email.trim(),
       phone: popupForm.phone.trim(),
       service: popupForm.service,
-      budget: "Not specified",
-      message: `Requirement submitted via popup — interested in: ${popupForm.service}`,
+      budget: popupForm.budget,
+      message: [popupForm.message.trim(), `Expected timeline: ${popupForm.timeline}`].filter(Boolean).join("\n"),
     };
 
     setPopupStatus({ submitting: true, error: "", success: false });
@@ -300,6 +299,11 @@ export default function CustomSoftwareLanding() {
                     {popupErr.name && <span style={errText}>{popupErr.name}</span>}
                   </label>
                   <label style={field}>
+                    <span style={labelSpan}>company name*</span>
+                    <input type="text" placeholder="company" style={inputStyle} value={popupForm.company} onChange={(e) => setPopupForm((s) => ({ ...s, company: e.target.value }))} />
+                    {popupErr.company && <span style={errText}>{popupErr.company}</span>}
+                  </label>
+                  <label style={field}>
                     <span style={labelSpan}>phone number*</span>
                     <input type="tel" placeholder="+91 00000 00000" style={inputStyle} value={popupForm.phone} onChange={(e) => setPopupForm((s) => ({ ...s, phone: e.target.value }))} />
                     {popupErr.phone && <span style={errText}>{popupErr.phone}</span>}
@@ -312,6 +316,22 @@ export default function CustomSoftwareLanding() {
                   <label style={field}><span style={labelSpan}>what solution are you looking for?</span>
                     <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.service} onChange={(e) => setPopupForm((s) => ({ ...s, service: e.target.value }))}>
                       {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+                    </select>
+                  </label>
+                  <label style={field}>
+                    <span style={labelSpan}>what are you trying to automate, improve or build?</span>
+                    <textarea rows={3} placeholder="e.g. our sales team tracks leads in Excel and follow-ups get missed" style={{ ...inputStyle, resize: "vertical" }} value={popupForm.message} onChange={(e) => setPopupForm((s) => ({ ...s, message: e.target.value }))} />
+                  </label>
+                  <label style={field}>
+                    <span style={labelSpan}>estimated investment</span>
+                    <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.budget} onChange={(e) => setPopupForm((s) => ({ ...s, budget: e.target.value }))}>
+                      <option>2-5 Lakh</option><option>5-10 Lakh</option><option>10-20 Lakh</option><option>20-30 Lakh</option><option>30 Lakh+</option>
+                    </select>
+                  </label>
+                  <label style={field}>
+                    <span style={labelSpan}>expected timeline to start</span>
+                    <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.timeline} onChange={(e) => setPopupForm((s) => ({ ...s, timeline: e.target.value }))}>
+                      <option>Immediately</option><option>Within 1 – 15 Days</option><option>Within 15 – 30 Days</option>
                     </select>
                   </label>
                 </div>
@@ -618,30 +638,10 @@ export default function CustomSoftwareLanding() {
 
       {/* ══ 8. CTA / Investment ══ */}
       <section id="investment" style={{ padding: "0 0 104px" }}>
-        <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "0.72fr 1.28fr", gap: 32, alignItems: "start" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "1fr", gap: 32, alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 760 }}>
             <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.12 }}>Custom Software. Scoped Around Your Requirements.</h2>
             <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
-          </div>
-          <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 24, boxShadow: "0 10px 34px rgba(20,20,32,0.07)" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <h3 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#141420", letterSpacing: "-0.02em" }}>Built For Long-Term Solutions</h3>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7, maxWidth: 560 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's discuss your requirements.</p>
-            </div>
-            <div data-r="aud-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 32px" }}>
-              {AUDIENCES.map((a) => (
-                <div key={a} style={{ display: "flex", alignItems: "center", gap: 11 }}>{CHECK}<span style={{ fontSize: 14, fontWeight: 500, color: "#3b3b57", lineHeight: 1.5 }}>{a}</span></div>
-              ))}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#f5f5fa", borderRadius: 14, padding: "24px 28px", flexWrap: "wrap" }}>
-              <div>
-                <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6b8a" }}>Projects Starting From</div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
-                  <span style={{ fontSize: "clamp(32px, 4vw, 42px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em" }}>₹2 Lakh+</span>
-                </div>
-              </div>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 24px", boxShadow: "0 10px 26px rgba(0,55,202,0.26)" }}>Discuss Your Requirement</a>
-            </div>
           </div>
         </div>
       </section>
