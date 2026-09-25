@@ -63,6 +63,15 @@ const STAR = <svg width="13" height="13" viewBox="0 0 24 24" fill="#F1891A"><pat
 const SERVICE_OPTIONS = ["Custom Software", "CRM Solution", "Business Automation", "Web / Mobile Application", "ERP / Management System", "AI Solution", "Other"];
 
 const CLIENT_LOGOS = [
+  // original set
+  { name: "Vidyakunj", src: `${IMG}/logo-vidyakunj.png`, h: 58 },
+  { name: "Navanagara House Building Co-operative Society", src: `${IMG}/logo-navanagara.png`, h: 56 },
+  { name: "Spotek Group", src: `${IMG}/logo-spotek.png`, h: 44 },
+  { name: "Greater Knack", src: `${IMG}/logo-greaterknack.png`, h: 54 },
+  { name: "Gruhakalpa", src: `${IMG}/logo-gruhakalpa.png`, h: 60 },
+  { name: "Novara Nature Estate", src: `${IMG}/logo-novara.png`, h: 54 },
+  { name: "Rathna Bhoomi Developers", src: `${IMG}/logo-rathnabhoomi.png`, h: 40 },
+  // new client logos
   { name: "Tata Housing Varnam", src: `${IMG}/Tata Housing Varnam Logo.png`, h: 46 },
   { name: "Godrej", src: `${IMG}/Godrej Logo.png`, h: 40 },
   { name: "Sattva Lumina", src: `${IMG}/Sattva Lumina Logo.png`, h: 46 },
