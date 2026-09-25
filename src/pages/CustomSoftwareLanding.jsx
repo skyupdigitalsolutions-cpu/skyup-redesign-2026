@@ -120,6 +120,7 @@ export default function CustomSoftwareLanding() {
   const [modal, setModal] = useState("idle"); // idle | open | closing | done
   const timers = useRef({});
   const mapRef = useRef(null);
+  const shownRef = useRef(false);
 
   // ── Popup lead form ──
   const [popupForm, setPopupForm] = useState({ name: "", phone: "", email: "", service: "Custom Software" });
@@ -132,32 +133,51 @@ export default function CustomSoftwareLanding() {
   const [leadStatus, setLeadStatus] = useState({ submitting: false, error: "", success: false });
 
   // Close the mobile nav on desktop resize; open the lead popup the first time
-  // the world map scrolls into view (once per browser, gated by localStorage).
+  // the world map scrolls into view. Uses an IntersectionObserver with a scroll
+  // fallback, gated once per browser session (sessionStorage).
   useEffect(() => {
     const onResize = () => { if (window.innerWidth > 991) setNavOpen(false); };
     window.addEventListener("resize", onResize);
 
-    let seen = false;
-    try { seen = !!localStorage.getItem("skyup-lead-modal-seen"); } catch (_) { /* storage blocked */ }
+    let dismissed = false;
+    try { dismissed = sessionStorage.getItem("skyup-lead-popup-v2") === "done"; } catch (_) { /* storage blocked */ }
 
     let observer;
-    if (!seen && mapRef.current && typeof IntersectionObserver !== "undefined") {
-      observer = new IntersectionObserver((entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            try { localStorage.setItem("skyup-lead-modal-seen", "1"); } catch (_) { /* ignore */ }
-            setModal("open");
-            observer.disconnect();
-            break;
-          }
-        }
-      }, { threshold: 0.4 });
-      observer.observe(mapRef.current);
+    const cleanupTriggers = () => {
+      window.removeEventListener("scroll", onScroll);
+      if (observer) { observer.disconnect(); observer = null; }
+    };
+
+    const openOnce = () => {
+      if (shownRef.current || dismissed) return;
+      shownRef.current = true;
+      try { sessionStorage.setItem("skyup-lead-popup-v2", "done"); } catch (_) { /* ignore */ }
+      setModal("open");
+      cleanupTriggers();
+    };
+
+    function onScroll() {
+      const el = mapRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      if (r.top < vh * 0.75 && r.bottom > 0) openOnce();
+    }
+
+    if (!dismissed) {
+      if (typeof IntersectionObserver !== "undefined" && mapRef.current) {
+        observer = new IntersectionObserver((entries) => {
+          if (entries.some((e) => e.isIntersecting)) openOnce();
+        }, { threshold: 0.25 });
+        observer.observe(mapRef.current);
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll(); // in case the map is already in view on load
     }
 
     return () => {
       window.removeEventListener("resize", onResize);
-      if (observer) observer.disconnect();
+      cleanupTriggers();
       clearTimeout(timers.current.close);
       clearTimeout(timers.current.popupSuccess);
     };
@@ -381,6 +401,21 @@ export default function CustomSoftwareLanding() {
           {/* Interactive India map — scrolling into view opens the lead popup */}
           <div ref={mapRef} data-r="map-hold" style={{ position: "relative", maxWidth: 860, margin: "48px auto 0" }}>
             <CustomSoftwareMap />
+          </div>
+
+          {/* A glimpse — many more delivered */}
+          <div data-r="more-work" style={{ maxWidth: 720, margin: "36px auto 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.72)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 9999, padding: "10px 20px", boxShadow: "0 8px 24px rgba(20,20,32,0.07)", flexWrap: "wrap", justifyContent: "center" }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 600, color: "#141420" }}>
+                {svg([<circle key="a" cx="12" cy="12" r="9.5" />, P("M8.5 12l2.5 2.5 4.5-5", "b")], { w: 15, h: 15, stroke: "#0037CA", sw: 2.4 })}A glimpse of our work
+              </span>
+              <span aria-hidden="true" style={{ width: 1, height: 14, background: "#c9c9dc" }} />
+              <span style={{ fontSize: 13, fontWeight: 500, color: "#4a4a66" }}>and many more delivered across India</span>
+            </div>
+            <p style={{ margin: 0, fontSize: 14.5, fontWeight: 500, color: "#5c5c7a", lineHeight: 1.7, maxWidth: 620 }}>
+              These are just a few examples. We've built custom software, CRMs, ERPs and automation for many more businesses.{" "}
+              <a href="#form" style={{ fontWeight: 600, color: "#0037CA", textDecoration: "underline", textUnderlineOffset: 4, whiteSpace: "nowrap" }}>Let's build yours →</a>
+            </p>
           </div>
         </div>
       </section>
@@ -776,11 +811,12 @@ const CSS = `
 .svc-card:hover { transform:translateY(-6px); box-shadow:0 26px 60px rgba(20,20,32,0.16), inset 0 1px 0 rgba(255,255,255,0.9); }
 
 /* How-we-work marquee */
-[data-r="proc-marquee"] { position:relative; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+[data-r="proc-marquee"] { position:relative; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .proc-track { display:flex; width:max-content; animation:skyup-marquee 46s linear infinite; }
 [data-r="proc-marquee"]:hover .proc-track { animation-play-state:paused; }
 .proc-step { padding:0 9px; flex-shrink:0; box-sizing:border-box; }
 .proc-step-card { width:330px; }
+@media (prefers-reduced-motion: reduce) { .proc-track { animation:none; } }
 
 @media (max-width:1199px) {
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:24px !important; padding-right:24px !important; }
@@ -835,6 +871,7 @@ const CSS = `
   [data-r="proc-head"] { margin-bottom:28px !important; padding:0 18px !important; }
   [data-r="proc-practices"] { padding:0 18px !important; }
   [data-r="proc-practices"] > span { font-size:12.5px !important; padding:8px 14px !important; }
+  .proc-step-card { width:300px !important; }
   [data-r="cap-card"] { padding:32px 20px !important; border-radius:22px !important; }
   [data-r="aud-grid"], [data-r="form-grid"] { grid-template-columns:1fr !important; }
   [data-r="form-grid"] > label { grid-column:span 1 !important; }
