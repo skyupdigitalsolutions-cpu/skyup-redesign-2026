@@ -831,7 +831,6 @@ img, svg { max-width:100%; }
 [data-r="modal-card"] input, [data-r="modal-card"] select { height:46px; box-sizing:border-box; }
 [data-r="modal-fields"] > label { min-width:0; }
 [data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { min-width:0; width:100%; box-sizing:border-box; }
-@media (min-width:768px) { [data-r="modal-fields"] { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
 #solutions a:hover, #why a:hover, #process a:hover, #investment a:hover { opacity:.9; }
 .foot-logo { transition:transform .2s ease; }
 .foot-logo:hover { transform:translateY(-2px); }
