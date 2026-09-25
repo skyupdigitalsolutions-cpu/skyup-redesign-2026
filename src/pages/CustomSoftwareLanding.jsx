@@ -121,6 +121,9 @@ export default function CustomSoftwareLanding() {
   const timers = useRef({});
   const mapRef = useRef(null);
   const shownRef = useRef(false);
+  const servicesRef = useRef(null);
+  const [svcArmed, setSvcArmed] = useState(false);
+  const [svcIn, setSvcIn] = useState(false);
 
   // ── Popup lead form ──
   const [popupForm, setPopupForm] = useState({ name: "", company: "", phone: "", email: "", service: "Custom Software", message: "", budget: "2-5 Lakh", timeline: "Immediately" });
@@ -186,6 +189,17 @@ export default function CustomSoftwareLanding() {
   const closeModal = useCallback(() => {
     setModal("closing");
     timers.current.close = setTimeout(() => setModal("done"), 300);
+  }, []);
+
+  // Staggered reveal for the "What We Build" cards when scrolled into view.
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined" || !servicesRef.current) return;
+    setSvcArmed(true);
+    const ob = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { setSvcIn(true); ob.disconnect(); }
+    }, { threshold: 0.15 });
+    ob.observe(servicesRef.current);
+    return () => ob.disconnect();
   }, []);
 
   // Popup collects the same fields as the main contact form.
@@ -292,7 +306,7 @@ export default function CustomSoftwareLanding() {
               </div>
             ) : (
               <>
-                <div data-r="modal-fields" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div data-r="modal-fields" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <label style={field}>
                     <span style={labelSpan}>name*</span>
                     <input type="text" placeholder="full name" style={inputStyle} value={popupForm.name} onChange={(e) => setPopupForm((s) => ({ ...s, name: e.target.value }))} />
@@ -313,12 +327,12 @@ export default function CustomSoftwareLanding() {
                     <input type="email" placeholder="example@email.com" style={inputStyle} value={popupForm.email} onChange={(e) => setPopupForm((s) => ({ ...s, email: e.target.value }))} />
                     {popupErr.email && <span style={errText}>{popupErr.email}</span>}
                   </label>
-                  <label style={field}><span style={labelSpan}>what solution are you looking for?</span>
+                  <label style={{ ...field, gridColumn: "span 2" }}><span style={labelSpan}>what solution are you looking for?</span>
                     <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.service} onChange={(e) => setPopupForm((s) => ({ ...s, service: e.target.value }))}>
                       {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
                     </select>
                   </label>
-                  <label style={field}>
+                  <label style={{ ...field, gridColumn: "span 2" }}>
                     <span style={labelSpan}>what are you trying to automate, improve or build?</span>
                     <textarea rows={3} placeholder="e.g. our sales team tracks leads in Excel and follow-ups get missed" style={{ ...inputStyle, resize: "vertical" }} value={popupForm.message} onChange={(e) => setPopupForm((s) => ({ ...s, message: e.target.value }))} />
                   </label>
@@ -448,9 +462,9 @@ export default function CustomSoftwareLanding() {
             </div>
           </div>
           {/* 6 cards: flex-wrap gives 3 + 3 on desktop, 2 + 2 + 2 on tablet, stacked on mobile */}
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 18 }}>
+          <div ref={servicesRef} data-r="svc-grid" className={`svc-grid${svcArmed ? " svc-reveal" : ""}${svcIn ? " in" : ""}`} style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 18 }}>
             {SERVICES.map((s) => (
-              <div key={s.title} className="svc-card" style={{ flex: "1 1 300px", maxWidth: 372, background: "linear-gradient(155deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.34) 100%)", backdropFilter: "blur(24px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: "30px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14, minHeight: 236, boxSizing: "border-box", boxShadow: "0 18px 44px rgba(20,20,32,0.10), inset 0 1px 0 rgba(255,255,255,0.85)", transition: "0.2s ease" }}>
+              <div key={s.title} className="svc-card" style={{ flex: "1 1 300px", maxWidth: 372, background: "linear-gradient(155deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.34) 100%)", backdropFilter: "blur(24px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: "30px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14, minHeight: 236, boxSizing: "border-box", boxShadow: "0 18px 44px rgba(20,20,32,0.10), inset 0 1px 0 rgba(255,255,255,0.85)" }}>
                 <div style={{ width: 58, height: 58, borderRadius: 9999, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(20,20,32,0.12)" }}>{svg(ICON[s.icon], { w: 24, h: 24 })}</div>
                 <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: "#141420", lineHeight: 1.32, letterSpacing: "-0.01em" }}>{s.title}</h3>
                 <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#3b3b57", lineHeight: 1.65 }}>{s.body}</p>
@@ -638,10 +652,22 @@ export default function CustomSoftwareLanding() {
 
       {/* ══ 8. CTA / Investment ══ */}
       <section id="investment" style={{ padding: "0 0 104px" }}>
-        <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "1fr", gap: 32, alignItems: "start" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 760 }}>
+        <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "0.85fr 1.15fr", gap: 32, alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.12 }}>Custom Software. Scoped Around Your Requirements.</h2>
             <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
+          </div>
+          <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 22, boxShadow: "0 10px 34px rgba(20,20,32,0.07)" }}>
+            <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's discuss your requirements.</p>
+            <div data-r="inv-price" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#f5f5fa", borderRadius: 14, padding: "24px 28px", flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6b8a" }}>Projects Starting From</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
+                  <span style={{ fontSize: "clamp(32px, 4vw, 42px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em" }}>₹2 Lakh+</span>
+                </div>
+              </div>
+              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 24px", boxShadow: "0 10px 26px rgba(0,55,202,0.26)" }}>Discuss Your Requirement</a>
+            </div>
           </div>
         </div>
       </section>
@@ -808,12 +834,25 @@ const CSS = `
 .foot-top:hover { background:rgba(255,255,255,0.14) !important; transform:translateY(-2px); }
 [data-r="rev-line"] { display:block; white-space:nowrap; }
 .prob-card:hover { transform:translateY(-4px); box-shadow:0 24px 52px rgba(20,20,32,0.13) !important; }
+.svc-card { transition: transform .25s ease, box-shadow .25s ease, opacity .5s ease; }
 .svc-card:hover { transform:translateY(-6px); box-shadow:0 26px 60px rgba(20,20,32,0.16), inset 0 1px 0 rgba(255,255,255,0.9); }
+/* staggered reveal for What We Build */
+.svc-reveal .svc-card { opacity:0; transform:translateY(20px); transition: opacity .55s ease, transform .55s cubic-bezier(.4,0,.2,1); }
+.svc-reveal.in .svc-card { opacity:1; transform:translateY(0); }
+.svc-reveal.in .svc-card:nth-child(1){transition-delay:.05s}
+.svc-reveal.in .svc-card:nth-child(2){transition-delay:.13s}
+.svc-reveal.in .svc-card:nth-child(3){transition-delay:.21s}
+.svc-reveal.in .svc-card:nth-child(4){transition-delay:.29s}
+.svc-reveal.in .svc-card:nth-child(5){transition-delay:.37s}
+.svc-reveal.in .svc-card:nth-child(6){transition-delay:.45s}
+@media (prefers-reduced-motion: reduce) { .svc-reveal .svc-card { opacity:1 !important; transform:none !important; transition:none !important; } }
 
 /* How-we-work marquee */
 [data-r="proc-marquee"] { position:relative; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .proc-track { display:flex; width:max-content; animation:skyup-marquee 46s linear infinite; }
-[data-r="proc-marquee"]:hover .proc-track { animation-play-state:paused; }
+/* pause on hover only for mouse devices (so touch doesn't stick); pause while pressing on touch */
+@media (hover: hover) { [data-r="proc-marquee"]:hover .proc-track { animation-play-state:paused; } }
+[data-r="proc-marquee"]:active .proc-track { animation-play-state:paused; }
 .proc-step { padding:0 9px; flex-shrink:0; box-sizing:border-box; }
 .proc-step-card { width:330px; }
 @media (prefers-reduced-motion: reduce) { .proc-track { animation:none; } }
@@ -871,7 +910,7 @@ const CSS = `
   [data-r="proc-head"] { margin-bottom:28px !important; padding:0 18px !important; }
   [data-r="proc-practices"] { padding:0 18px !important; display:grid !important; grid-template-columns:1fr 1fr !important; gap:10px !important; }
   [data-r="proc-practices"] > span { font-size:12.5px !important; padding:8px 12px !important; width:100% !important; box-sizing:border-box !important; justify-content:center !important; }
-  .proc-step-card { width:300px !important; }
+  .proc-step-card { width:264px !important; padding:24px !important; min-height:212px !important; }
   [data-r="cap-card"] { padding:32px 20px !important; border-radius:22px !important; }
   [data-r="aud-grid"], [data-r="form-grid"] { grid-template-columns:1fr !important; }
   [data-r="form-grid"] > label { grid-column:span 1 !important; }
@@ -897,8 +936,7 @@ const CSS = `
   [data-r="sect"] { padding-bottom:56px !important; }
   #reviews, #solutions, #why, #process, #capabilities, #investment { padding-bottom:56px !important; }
   .proc-step { padding:0 7px !important; }
-  .proc-step-card { width:270px !important; }
-  .proc-step-card { padding:22px !important; min-height:214px !important; }
+  .proc-step-card { width:236px !important; padding:20px !important; min-height:196px !important; }
   [data-r="why-card"] { padding:20px !important; border-radius:22px !important; }
   [data-r="why-art"] { height:164px !important; }
   [data-r="inv-card"], [data-r="form-card"] { padding:20px !important; }
