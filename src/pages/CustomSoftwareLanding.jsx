@@ -161,14 +161,14 @@ export default function CustomSoftwareLanding() {
       if (!el) return;
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
-      if (r.top < vh * 0.75 && r.bottom > 0) openOnce();
+      if (r.top < vh * 0.9) openOnce();
     }
 
     if (!dismissed) {
       if (typeof IntersectionObserver !== "undefined" && mapRef.current) {
         observer = new IntersectionObserver((entries) => {
           if (entries.some((e) => e.isIntersecting)) openOnce();
-        }, { threshold: 0.25 });
+        }, { threshold: 0 });
         observer.observe(mapRef.current);
       }
       window.addEventListener("scroll", onScroll, { passive: true });
@@ -273,17 +273,17 @@ export default function CustomSoftwareLanding() {
       {(modal === "open" || modal === "closing") && (
         <div data-r="modal" style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "rgba(20,20,32,0.5)", backdropFilter: "blur(6px)", opacity: modal === "open" ? 1 : 0, transition: "opacity .28s ease" }}>
           <div style={{ position: "absolute", inset: 0 }} onClick={closeModal} />
-          <div style={{ position: "relative", width: "100%", maxWidth: 520, maxHeight: "88vh", overflowY: "auto", background: "#fff", borderRadius: 24, padding: 34, boxShadow: "0 40px 90px rgba(20,20,32,0.34)", transform: modal === "open" ? "translateY(0) scale(1)" : "translateY(14px) scale(0.98)", transition: "transform .32s cubic-bezier(.4,0,.2,1)" }}>
+          <div data-r="modal-card" style={{ position: "relative", width: "100%", maxWidth: 520, maxHeight: "88vh", overflowY: "auto", background: "#fff", borderRadius: 24, padding: 34, boxShadow: "0 40px 90px rgba(20,20,32,0.34)", transform: modal === "open" ? "translateY(0) scale(1)" : "translateY(14px) scale(0.98)", transition: "transform .32s cubic-bezier(.4,0,.2,1)" }}>
             <button type="button" onClick={closeModal} aria-label="Close" style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: 9999, border: "1px solid #ebebf4", background: "#f5f5fa", color: "#141420", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {svg([P("M6 6l12 12", "a"), P("M18 6L6 18", "b")], { w: 18, h: 18, stroke: "currentColor", sw: 2 })}
             </button>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 22, paddingRight: 44 }}>
+            <div data-r="modal-head" style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 22, paddingRight: 44 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 9, width: "fit-content", background: "#f5f5fa", borderRadius: 9999, padding: "7px 14px", whiteSpace: "nowrap" }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
                 <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>Free Consultation</span>
               </div>
               <h2 style={{ margin: 0, fontSize: "clamp(24px, 5vw, 30px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.14 }}>Discuss your software requirement</h2>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>Tell us what you're trying to automate, improve or build — we'll understand your requirement and discuss the right solution.</p>
+              <p data-r="modal-sub" style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>Tell us what you're trying to automate, improve or build — we'll understand your requirement and discuss the right solution.</p>
             </div>
             {popupStatus.success ? (
               <div style={{ padding: "30px 4px 8px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -293,7 +293,7 @@ export default function CustomSoftwareLanding() {
               </div>
             ) : (
               <>
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div data-r="modal-fields" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <label style={field}>
                     <span style={labelSpan}>name*</span>
                     <input type="text" placeholder="full name" style={inputStyle} value={popupForm.name} onChange={(e) => setPopupForm((s) => ({ ...s, name: e.target.value }))} />
@@ -385,11 +385,6 @@ export default function CustomSoftwareLanding() {
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div data-r="rev-grid" style={{ display: "grid", gridTemplateColumns: "1fr", justifyItems: "center", textAlign: "center", gap: 56, alignItems: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, maxWidth: 1000 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#fff", border: "1px solid #ebebf4", borderRadius: 9999, padding: "10px 20px", whiteSpace: "nowrap", boxShadow: "0 8px 24px rgba(20,20,32,0.07)" }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#141420" }}>4.9</span>
-                <div style={{ display: "flex", gap: 2 }}>{[0, 1, 2, 3, 4].map((k) => <span key={k}>{STAR}</span>)}</div>
-                <span style={{ fontSize: 14, fontWeight: 500, color: "#6b6b8a" }}>from business owners</span>
-              </div>
               <h2 style={{ margin: 0, fontSize: "clamp(29px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.035em", lineHeight: 1.1, textWrap: "balance" }}>
                 <span data-r="rev-line">Real Businesses. Real Workflows.</span>{" "}
                 <span data-r="rev-line">Software Built Around Them.</span>
@@ -398,25 +393,30 @@ export default function CustomSoftwareLanding() {
             </div>
           </div>
 
-          {/* Interactive India map — scrolling into view opens the lead popup */}
-          <div ref={mapRef} data-r="map-hold" style={{ position: "relative", maxWidth: 860, margin: "48px auto 0" }}>
-            <CustomSoftwareMap />
-          </div>
-
-          {/* A glimpse — many more delivered */}
-          <div data-r="more-work" style={{ maxWidth: 720, margin: "36px auto 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.72)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 9999, padding: "10px 20px", boxShadow: "0 8px 24px rgba(20,20,32,0.07)", flexWrap: "wrap", justifyContent: "center" }}>
+          {/* A glimpse of our work — above the map */}
+          <div data-r="glimpse-wrap" style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+            <div className="glimpse-chip" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 10, flexWrap: "wrap", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 9999, padding: "10px 20px", boxShadow: "0 8px 24px rgba(20,20,32,0.07)" }}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 600, color: "#141420" }}>
                 {svg([<circle key="a" cx="12" cy="12" r="9.5" />, P("M8.5 12l2.5 2.5 4.5-5", "b")], { w: 15, h: 15, stroke: "#0037CA", sw: 2.4 })}A glimpse of our work
               </span>
-              <span aria-hidden="true" style={{ width: 1, height: 14, background: "#c9c9dc" }} />
+              <span className="glimpse-div" aria-hidden="true" style={{ width: 1, height: 14, background: "#c9c9dc" }} />
               <span style={{ fontSize: 13, fontWeight: 500, color: "#4a4a66" }}>and many more delivered across India</span>
             </div>
-            <p style={{ margin: 0, fontSize: 14.5, fontWeight: 500, color: "#5c5c7a", lineHeight: 1.7, maxWidth: 620 }}>
-              These are just a few examples. We've built custom software, CRMs, ERPs and automation for many more businesses.{" "}
-              <a href="#form" style={{ fontWeight: 600, color: "#0037CA", textDecoration: "underline", textUnderlineOffset: 4, whiteSpace: "nowrap" }}>Let's build yours →</a>
-            </p>
           </div>
+
+          {/* Interactive India map */}
+          <div data-r="map-hold" style={{ position: "relative", maxWidth: 860, margin: "28px auto 0" }}>
+            <CustomSoftwareMap />
+          </div>
+
+          {/* Supporting note */}
+          <p data-r="more-note" style={{ margin: "28px auto 0", maxWidth: 620, textAlign: "center", fontSize: 14.5, fontWeight: 500, color: "#5c5c7a", lineHeight: 1.7 }}>
+            These are just a few examples. We've built custom software, CRMs, ERPs and automation for many more businesses.{" "}
+            <a href="#form" style={{ fontWeight: 600, color: "#0037CA", textDecoration: "underline", textUnderlineOffset: 4, whiteSpace: "nowrap" }}>Let's build yours →</a>
+          </p>
+
+          {/* popup trigger — fires once the map section has been scrolled through */}
+          <div ref={mapRef} aria-hidden="true" style={{ height: 1 }} />
         </div>
       </section>
 
@@ -529,7 +529,7 @@ export default function CustomSoftwareLanding() {
               );
             })}
           </div>
-          <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
+          <div data-r="why-stats" style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
             {[["100%", "Custom-built", "#141420"], ["6", "Stage process", "#0037CA"], ["\u20b92L+", "Project scale", "#F1891A"]].map(([n, l, c]) => (
               <div key={l} style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 16, padding: "16px 22px", boxShadow: "0 10px 26px rgba(20,20,32,0.08)" }}>
                 <div style={{ fontSize: 28, fontWeight: 700, color: c, letterSpacing: "-0.03em" }}>{n}</div>
@@ -732,7 +732,7 @@ export default function CustomSoftwareLanding() {
               {/* NOTE: replace LinkedIn / Instagram hrefs with your real profile URLs */}
               <div style={{ display: "flex", gap: 12 }}>
                 {[
-                  { label: "LinkedIn", href: "https://www.linkedin.com/company/skyupdigitalsolutions", icon: [P("M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z", "a"), <rect key="b" x="2" y="9" width="4" height="12" />, <circle key="c" cx="4" cy="4" r="2" />] },
+                  { label: "LinkedIn", href: "https://www.linkedin.com/company/skyup-digital-solutions", icon: [P("M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z", "a"), <rect key="b" x="2" y="9" width="4" height="12" />, <circle key="c" cx="4" cy="4" r="2" />] },
                   { label: "Instagram", href: "https://www.instagram.com/skyupdigitalsolutions", icon: [<rect key="a" x="2" y="2" width="20" height="20" rx="5" />, <circle key="b" cx="12" cy="12" r="4" />, P("M17.5 6.5h.01", "c")] },
                   { label: "Email", href: "mailto:contact@skyupdigitalsolutions.com", icon: [<rect key="a" x="2" y="4" width="20" height="16" rx="2" />, P("m22 6-10 7L2 6", "b")] },
                 ].map((s) => (
@@ -879,6 +879,18 @@ const CSS = `
   [data-r="foot-links"] > a { padding:2px 0 !important; }
   [data-r="foot-bottom"] { flex-direction:column !important; align-items:flex-start !important; gap:16px !important; }
   [data-r="foot-bottom"] > div:last-child { flex-wrap:wrap !important; }
+  .glimpse-chip { flex-direction:column !important; gap:4px !important; border-radius:18px !important; padding:12px 18px !important; }
+  .glimpse-chip .glimpse-div { display:none !important; }
+  [data-r="why-stats"] { display:grid !important; grid-template-columns:repeat(3,1fr) !important; gap:10px !important; }
+  [data-r="why-stats"] > div { padding:14px 10px !important; }
+  [data-r="why-stats"] > div > div:first-child { font-size:22px !important; }
+  [data-r="why-stats"] > div > div:last-child { font-size:12px !important; line-height:1.3 !important; }
+  [data-r="modal"] { padding:14px !important; }
+  [data-r="modal-card"] { padding:22px 20px !important; border-radius:20px !important; max-height:94vh !important; }
+  [data-r="modal-head"] { margin-bottom:16px !important; }
+  [data-r="modal-sub"] { display:none !important; }
+  [data-r="modal-fields"] { gap:10px !important; }
+  [data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { padding:11px 14px !important; }
 }
 @media (max-width:479px) {
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:14px !important; padding-right:14px !important; }
