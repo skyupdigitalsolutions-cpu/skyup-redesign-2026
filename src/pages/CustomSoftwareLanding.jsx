@@ -68,14 +68,6 @@ const SERVICES = [
   { title: "ERP & Management Systems", body: "Connected systems for managing operations, finance, inventory, employees and reporting.", icon: "erp" },
   { title: "AI-Powered Solutions", body: "AI voice agents, intelligent workflows and AI integrations for business processes.", icon: "ai" },
 ];
-const PROJECTS = [
-  { client: "Natraj Home Furnishing", system: "Field Management System", location: "Haryana" },
-  { client: "Spotek", system: "CRM + Invoice Software", location: "Dubai, UAE" },
-  { client: "Sarathi", system: "Finance CRM", location: "Bengaluru, Karnataka" },
-  { client: "Abhi Cabs", system: "Transport ERP", location: "Karnataka, India" },
-  { client: "Ashwika Enterprises", system: "AI Voice Agent", location: "Bengaluru, Karnataka" },
-  { client: "Logistics Business", system: "AI Summary Software", location: "Bengaluru, Karnataka" },
-];
 const REASONS = [
   { num: "01.", title: "Business-First", body: "We understand your workflow, challenges and objectives before defining the solution.", icon: "target", art: `${IMG}/why-1-target.png` },
   { num: "02.", title: "Fully Customized", body: "Your software is designed around your processes—not a fixed template.", icon: "puzzle", art: `${IMG}/why-2-cubes.png` },
@@ -445,25 +437,12 @@ export default function CustomSoftwareLanding() {
                 <span data-r="rev-line">Software Built Around Them.</span>
               </h2>
               <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, maxWidth: 760, textWrap: "balance" }}>From CRM and ERP to field management, automation and AI solutions, we build software around the way businesses actually operate.</p>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#141420", borderRadius: 9999, padding: "14px 28px", marginTop: 4, boxShadow: "0 12px 30px rgba(20,20,32,0.24)" }}>Discuss Your Requirement</a>
             </div>
           </div>
 
           {/* Interactive India map with client-review pins */}
           <div data-r="map-hold" style={{ position: "relative", maxWidth: 860, margin: "48px auto 0" }}>
             <CustomSoftwareMap />
-          </div>
-
-          <div data-r="proj-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 48 }}>
-            {PROJECTS.map((p) => (
-              <div key={p.client} style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: "22px 24px", display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 8px 24px rgba(20,20,32,0.05)" }}>
-                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 600, color: "#141420", letterSpacing: "-0.01em" }}>{p.client}</h3>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "#0037CA" }}>{p.system}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 13.5, fontWeight: 500, color: "#6b6b8a" }}>
-                  {svg(ICON.pin, { w: 15, h: 15, stroke: "#F1891A", sw: 2.2 })}{p.location}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -600,11 +579,6 @@ export default function CustomSoftwareLanding() {
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.12 }}>Custom Software. Scoped Around Your Requirements.</h2>
             <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
-            <div style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 26, display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 2px 10px rgba(20,20,32,0.04)" }}>
-              <div style={{ width: 42, height: 42, borderRadius: 13, background: "#f5f5fa", display: "flex", alignItems: "center", justifyContent: "center" }}>{svg(ICON.pin, { w: 20, h: 20, stroke: "#F1891A", sw: 2.1 })}</div>
-              <h3 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#141420", lineHeight: 1.28, letterSpacing: "-0.02em" }}>Based in Bangalore. Serving businesses across India.</h3>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>SkyUp Digital Solutions works with businesses across India to design and develop customized software solutions. Our Bangalore team is available for discussions and in-person meetings when required.</p>
-            </div>
           </div>
           <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 24, boxShadow: "0 10px 34px rgba(20,20,32,0.07)" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -757,7 +731,6 @@ const CSS = `
   [data-r="prob-tl"], [data-r="prob-tr"], [data-r="prob-b"] { justify-self:stretch !important; max-width:none !important; margin-top:0 !important; }
   [data-r="prob-link"] { display:none !important; }
   [data-r="rev-grid"], [data-r="why-head"], [data-r="inv-grid"], [data-r="foot-grid"], [data-r="cap-card"] { grid-template-columns:1fr !important; }
-  [data-r="proj-grid"] { grid-template-columns:repeat(2, 1fr) !important; }
   [data-r="why-head"] { align-items:start !important; gap:20px !important; margin-bottom:32px !important; }
   [data-r="foot-grid"] { gap:28px !important; }
   [data-r="foot-right"] { align-items:flex-start !important; }
@@ -781,7 +754,6 @@ const CSS = `
   [data-r="proc-card"] { padding:36px 20px 32px !important; border-radius:22px !important; }
   [data-r="proc-practices"] > span { font-size:12.5px !important; padding:8px 14px !important; }
   [data-r="cap-card"] { padding:32px 20px !important; border-radius:22px !important; }
-  [data-r="proj-grid"] { grid-template-columns:1fr !important; }
   [data-r="aud-grid"], [data-r="form-grid"] { grid-template-columns:1fr !important; }
   [data-r="form-grid"] > label { grid-column:span 1 !important; }
   [data-r="foot-grid"] { padding:28px 22px !important; }
@@ -803,5 +775,5 @@ const CSS = `
   [data-r="prob-card"] p { font-size:13.5px !important; }
 }
 @keyframes skyup-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
-@keyframes skyup-drift { 0%,100% { transform:translate3d(0,0,0) scale(1); } 50% { transform:translate3d(0,-24px,0) scale(1.06); } }
+ 
 `;
