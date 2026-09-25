@@ -819,6 +819,12 @@ export default function CustomSoftwareLanding() {
 }
 
 const CSS = `
+html, body { overflow-x:hidden; max-width:100%; }
+img, svg { max-width:100%; }
+* { -webkit-tap-highlight-color: transparent; }
+[data-r="map-hold"] { overflow:hidden; }
+[data-r="map-hold"] svg, [data-r="map-hold"] img, [data-r="map-hold"] canvas { max-width:100% !important; height:auto; }
+[data-r="modal-card"] input, [data-r="modal-card"] select { height:46px; box-sizing:border-box; }
 #solutions a:hover, #why a:hover, #process a:hover, #investment a:hover { opacity:.9; }
 .foot-logo { transition:transform .2s ease; }
 .foot-logo:hover { transform:translateY(-2px); }
@@ -924,8 +930,8 @@ const CSS = `
   [data-r="why-stats"] > div { padding:14px 10px !important; }
   [data-r="why-stats"] > div > div:first-child { font-size:22px !important; }
   [data-r="why-stats"] > div > div:last-child { font-size:12px !important; line-height:1.3 !important; }
-  [data-r="modal"] { padding:14px !important; }
-  [data-r="modal-card"] { padding:22px 20px !important; border-radius:20px !important; max-height:94vh !important; }
+  [data-r="modal"] { padding:14px !important; align-items:flex-start !important; overflow-y:auto !important; }
+  [data-r="modal-card"] { padding:22px 20px !important; border-radius:20px !important; max-height:none !important; overflow:visible !important; }
   [data-r="modal-head"] { margin-bottom:16px !important; }
   [data-r="modal-fields"] { gap:10px !important; }
   [data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { padding:11px 14px !important; }
@@ -933,6 +939,8 @@ const CSS = `
 @media (max-width:479px) {
   [data-r="wrap"], [data-r="inv-grid"] { padding-left:14px !important; padding-right:14px !important; }
   [data-r="brand"] { height:32px !important; }
+  [data-r="hero-rating"] { flex-wrap:wrap !important; white-space:normal !important; justify-content:center !important; }
+  [data-r="modal-fields"] { grid-template-columns:1fr !important; gap:12px !important; }
   [data-r="sect"] { padding-bottom:56px !important; }
   #reviews, #solutions, #why, #process, #capabilities, #investment { padding-bottom:56px !important; }
   .proc-step { padding:0 7px !important; }
