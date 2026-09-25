@@ -414,9 +414,6 @@ export default function CustomSoftwareLanding() {
             These are just a few examples. We've built custom software, CRMs, ERPs and automation for many more businesses.{" "}
             <a href="#form" style={{ fontWeight: 600, color: "#0037CA", textDecoration: "underline", textUnderlineOffset: 4, whiteSpace: "nowrap" }}>Let's build yours →</a>
           </p>
-
-          {/* popup trigger — fires once the map section has been scrolled through */}
-          <div ref={mapRef} aria-hidden="true" style={{ height: 1 }} />
         </div>
       </section>
 
@@ -444,6 +441,9 @@ export default function CustomSoftwareLanding() {
             Need something more specific?{" "}
             <a href="#form" style={{ fontWeight: 600, color: "#0037CA", textDecoration: "underline", textUnderlineOffset: 4 }}>We can design the solution around your requirements.</a>
           </p>
+
+          {/* popup trigger — fires once section 3 (What We Build) has been scrolled through */}
+          <div ref={mapRef} aria-hidden="true" style={{ height: 1 }} />
         </div>
       </section>
 
@@ -869,8 +869,8 @@ const CSS = `
   [data-r="hero-price"] { border-radius:18px !important; padding:12px 18px !important; }
   [data-r="proc-card"] { padding-top:36px !important; padding-bottom:32px !important; border-radius:22px !important; }
   [data-r="proc-head"] { margin-bottom:28px !important; padding:0 18px !important; }
-  [data-r="proc-practices"] { padding:0 18px !important; }
-  [data-r="proc-practices"] > span { font-size:12.5px !important; padding:8px 14px !important; }
+  [data-r="proc-practices"] { padding:0 18px !important; display:grid !important; grid-template-columns:1fr 1fr !important; gap:10px !important; }
+  [data-r="proc-practices"] > span { font-size:12.5px !important; padding:8px 12px !important; width:100% !important; box-sizing:border-box !important; justify-content:center !important; }
   .proc-step-card { width:300px !important; }
   [data-r="cap-card"] { padding:32px 20px !important; border-radius:22px !important; }
   [data-r="aud-grid"], [data-r="form-grid"] { grid-template-columns:1fr !important; }
@@ -888,7 +888,6 @@ const CSS = `
   [data-r="modal"] { padding:14px !important; }
   [data-r="modal-card"] { padding:22px 20px !important; border-radius:20px !important; max-height:94vh !important; }
   [data-r="modal-head"] { margin-bottom:16px !important; }
-  [data-r="modal-sub"] { display:none !important; }
   [data-r="modal-fields"] { gap:10px !important; }
   [data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { padding:11px 14px !important; }
 }
