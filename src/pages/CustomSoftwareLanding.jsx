@@ -284,9 +284,9 @@ export default function CustomSoftwareLanding() {
 
       {/* ── Lead popup (opens on world-map scroll) ── */}
       {(modal === "open" || modal === "closing") && (
-        <div data-r="modal" style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "rgba(20,20,32,0.5)", backdropFilter: "blur(6px)", opacity: modal === "open" ? 1 : 0, transition: "opacity .28s ease" }}>
-          <div style={{ position: "absolute", inset: 0 }} onClick={closeModal} />
-          <div data-r="modal-card" style={{ position: "relative", width: "100%", maxWidth: 520, maxHeight: "88vh", overflowY: "auto", background: "#fff", borderRadius: 24, padding: 34, boxShadow: "0 40px 90px rgba(20,20,32,0.34)", transform: modal === "open" ? "translateY(0) scale(1)" : "translateY(14px) scale(0.98)", transition: "transform .32s cubic-bezier(.4,0,.2,1)" }}>
+        <div data-r="modal" onClick={closeModal} style={{ position: "fixed", inset: 0, zIndex: 200, overflowY: "auto", WebkitOverflowScrolling: "touch", background: "rgba(20,20,32,0.5)", backdropFilter: "blur(6px)", opacity: modal === "open" ? 1 : 0, transition: "opacity .28s ease" }}>
+          <div data-r="modal-scroll" style={{ minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(16px, 4vw, 40px)", boxSizing: "border-box" }}>
+            <div data-r="modal-card" onClick={(e) => e.stopPropagation()} style={{ position: "relative", width: "100%", maxWidth: 520, background: "#fff", borderRadius: 20, padding: "clamp(22px, 4vw, 34px)", boxSizing: "border-box", boxShadow: "0 40px 90px rgba(20,20,32,0.34)", transform: modal === "open" ? "translateY(0) scale(1)" : "translateY(14px) scale(0.98)", transition: "transform .32s cubic-bezier(.4,0,.2,1)" }}>
             <button type="button" onClick={closeModal} aria-label="Close" style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: 9999, border: "1px solid #ebebf4", background: "#f5f5fa", color: "#141420", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {svg([P("M6 6l12 12", "a"), P("M18 6L6 18", "b")], { w: 18, h: 18, stroke: "currentColor", sw: 2 })}
             </button>
@@ -354,6 +354,7 @@ export default function CustomSoftwareLanding() {
                 <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
               </>
             )}
+            </div>
           </div>
         </div>
       )}
@@ -930,8 +931,6 @@ img, svg { max-width:100%; }
   [data-r="why-stats"] > div { padding:14px 10px !important; }
   [data-r="why-stats"] > div > div:first-child { font-size:22px !important; }
   [data-r="why-stats"] > div > div:last-child { font-size:12px !important; line-height:1.3 !important; }
-  [data-r="modal"] { padding:14px !important; align-items:flex-start !important; overflow-y:auto !important; }
-  [data-r="modal-card"] { padding:22px 20px !important; border-radius:20px !important; max-height:none !important; overflow:visible !important; }
   [data-r="modal-head"] { margin-bottom:16px !important; }
   [data-r="modal-fields"] { gap:10px !important; }
   [data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { padding:11px 14px !important; }
