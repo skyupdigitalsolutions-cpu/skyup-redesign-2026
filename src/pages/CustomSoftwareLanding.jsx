@@ -338,12 +338,12 @@ export default function CustomSoftwareLanding() {
                     <input type="email" placeholder="example@email.com" style={inputStyle} value={popupForm.email} onChange={(e) => setPopupForm((s) => ({ ...s, email: e.target.value }))} />
                     {popupErr.email && <span style={errText}>{popupErr.email}</span>}
                   </label>
-                  <label style={{ ...field, gridColumn: "span 2" }}><span style={labelSpan}>what solution are you looking for?</span>
+                  <label style={field}><span style={labelSpan}>what solution are you looking for?</span>
                     <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.service} onChange={(e) => setPopupForm((s) => ({ ...s, service: e.target.value }))}>
                       {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
                     </select>
                   </label>
-                  <label style={{ ...field, gridColumn: "span 2" }}>
+                  <label style={field}>
                     <span style={labelSpan}>what are you trying to automate, improve or build?</span>
                     <textarea rows={3} placeholder="e.g. our sales team tracks leads in Excel and follow-ups get missed" style={{ ...inputStyle, resize: "vertical" }} value={popupForm.message} onChange={(e) => setPopupForm((s) => ({ ...s, message: e.target.value }))} />
                   </label>
