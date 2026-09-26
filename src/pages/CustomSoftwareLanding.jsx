@@ -551,7 +551,7 @@ export default function CustomSoftwareLanding() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-start" }}>
               <p style={{ margin: 0, fontSize: 15.5, fontWeight: 500, color: "#3b3b57", lineHeight: 1.72 }}>Every project starts with your workflow, not a template. Hover a card to read how we work.</p>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#141420", borderRadius: 9999, padding: "14px 28px", boxShadow: "0 12px 30px rgba(20,20,32,0.26)" }}>Discuss Your Requirement</a>
+              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#141420", borderRadius: 9999, padding: "14px 28px", boxShadow: "0 12px 30px rgba(20,20,32,0.26)" }}>Discuss Your Software Requirement</a>
             </div>
           </div>
           <div data-r="why-row" style={{ display: "flex", gap: 18, alignItems: "center", minHeight: 520 }}>
@@ -670,7 +670,7 @@ export default function CustomSoftwareLanding() {
             <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
           </div>
           <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 22, boxShadow: "0 10px 34px rgba(20,20,32,0.07)" }}>
-            <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's discuss your requirements.</p>
+            <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's Discuss Your Software Requirements.</p>
             <div data-r="inv-price" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#f5f5fa", borderRadius: 14, padding: "24px 28px", flexWrap: "wrap" }}>
               <div>
                 <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6b8a" }}>Projects Starting From</div>
@@ -678,7 +678,7 @@ export default function CustomSoftwareLanding() {
                   <span style={{ fontSize: "clamp(32px, 4vw, 42px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em" }}>₹2 Lakh+</span>
                 </div>
               </div>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 24px", boxShadow: "0 10px 26px rgba(0,55,202,0.26)" }}>Discuss Your Requirement</a>
+              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 24px", boxShadow: "0 10px 26px rgba(0,55,202,0.26)" }}>Discuss Your Software Requirement</a>
             </div>
           </div>
         </div>
