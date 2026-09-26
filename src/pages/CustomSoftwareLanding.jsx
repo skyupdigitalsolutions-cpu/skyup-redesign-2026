@@ -968,4 +968,14 @@ img, svg { max-width:100%; }
   [data-r="prob-card"] p { font-size:13.5px !important; }
 }
 @keyframes skyup-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+/* dropdown chevron for selects (contact form + popup) */
+[data-r="form-card"] select, [data-r="modal-card"] select {
+  -webkit-appearance:none !important; -moz-appearance:none !important; appearance:none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b8a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 14px center !important;
+  background-size:16px 16px !important;
+  padding-right:42px !important;
+  cursor:pointer;
+}
 `;
