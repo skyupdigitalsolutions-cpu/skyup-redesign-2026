@@ -246,8 +246,7 @@ export default function CustomSoftwareLanding() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Something went wrong. Please try again.");
-      setPopupStatus({ submitting: false, error: "", success: true });
-      timers.current.popupSuccess = setTimeout(closeModal, 1500);
+      window.location.assign("/thank-you");
     } catch (err) {
       setPopupStatus({ submitting: false, error: err.message || "Could not submit. Please try again.", success: false });
     }
@@ -284,7 +283,7 @@ export default function CustomSoftwareLanding() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Something went wrong. Please try again.");
-      setLeadStatus({ submitting: false, error: "", success: true });
+      window.location.assign("/thank-you");
     } catch (err) {
       setLeadStatus({ submitting: false, error: err.message || "Could not submit. Please try again.", success: false });
     }
