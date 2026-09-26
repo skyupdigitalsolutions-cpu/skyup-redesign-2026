@@ -747,7 +747,7 @@ export default function CustomSoftwareLanding() {
                 </label>
               </div>
               {leadStatus.error && <p style={{ margin: "16px 0 0", fontSize: 13, fontWeight: 500, color: "#d64545", textAlign: "center" }}>{leadStatus.error}</p>}
-              <button type="submit" disabled={leadStatus.submitting} style={{ marginTop: 22, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: leadStatus.submitting ? "not-allowed" : "pointer", opacity: leadStatus.submitting ? 0.7 : 1, boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>{leadStatus.submitting ? "Submitting…" : "Discuss Your Software Requirement"}</button>
+              <button type="submit" disabled={leadStatus.submitting} style={{ marginTop: 22, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: leadStatus.submitting ? "not-allowed" : "pointer", opacity: leadStatus.submitting ? 0.7 : 1, boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>{leadStatus.submitting ? "Submitting…" : "Submit Requirement"}</button>
               <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
             </form>
           )}
