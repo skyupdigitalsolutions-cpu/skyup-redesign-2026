@@ -63,7 +63,6 @@ const STAR = <svg width="13" height="13" viewBox="0 0 24 24" fill="#F1891A"><pat
 const SERVICE_OPTIONS = ["Custom Software", "CRM Solution", "Business Automation", "Web / Mobile Application", "ERP / Management System", "AI Solution", "Other"];
 
 const CLIENT_LOGOS = [
-  // original set
   { name: "Vidyakunj", src: `${IMG}/logo-vidyakunj.png`, h: 58 },
   { name: "Navanagara House Building Co-operative Society", src: `${IMG}/logo-navanagara.png`, h: 56 },
   { name: "Spotek Group", src: `${IMG}/logo-spotek.png`, h: 44 },
@@ -71,7 +70,6 @@ const CLIENT_LOGOS = [
   { name: "Gruhakalpa", src: `${IMG}/logo-gruhakalpa.png`, h: 60 },
   { name: "Novara Nature Estate", src: `${IMG}/logo-novara.png`, h: 54 },
   { name: "Rathna Bhoomi Developers", src: `${IMG}/logo-rathnabhoomi.png`, h: 40 },
-  // new client logos
   { name: "Tata Housing Varnam", src: `${IMG}/Tata Housing Varnam Logo.png`, h: 46 },
   { name: "Godrej", src: `${IMG}/Godrej Logo.png`, h: 40 },
   { name: "Sattva Lumina", src: `${IMG}/Sattva Lumina Logo.png`, h: 46 },
@@ -126,6 +124,33 @@ const errText = { fontSize: 12, fontWeight: 500, color: "#d64545" };
 
 const procCardStyle = { background: "linear-gradient(155deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.26) 100%)", backdropFilter: "blur(22px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: 28, display: "flex", flexDirection: "column", gap: 16, boxSizing: "border-box", minHeight: 236, boxShadow: "0 18px 40px rgba(20,20,32,0.12), inset 0 1px 0 rgba(255,255,255,0.9)" };
 
+// ── Scroll-lock helpers ──────────────────────────────────────────────────────
+// Locks the page scroll when modal is open without layout shift (preserves
+// scrollbar gap). Cleans up reliably even if component unmounts while open.
+let _lockCount = 0;
+let _savedScrollY = 0;
+let _savedPaddingRight = "";
+
+function lockScroll() {
+  if (_lockCount === 0) {
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    _savedScrollY = window.scrollY;
+    _savedPaddingRight = document.body.style.paddingRight;
+    document.body.style.overflow = "hidden";
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+  }
+  _lockCount++;
+}
+
+function unlockScroll() {
+  _lockCount = Math.max(0, _lockCount - 1);
+  if (_lockCount === 0) {
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = _savedPaddingRight;
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function CustomSoftwareLanding() {
   const [navOpen, setNavOpen] = useState(false);
   const [whyActive, setWhyActive] = useState(1);
@@ -146,6 +171,19 @@ export default function CustomSoftwareLanding() {
   const [leadForm, setLeadForm] = useState({ name: "", company: "", phone: "", email: "", service: "Custom Software", message: "", budget: "2-5 Lakh", timeline: "Immediately" });
   const [leadErr, setLeadErr] = useState({});
   const [leadStatus, setLeadStatus] = useState({ submitting: false, error: "", success: false });
+
+  // ── Lock/unlock body scroll when modal opens/closes ──
+  useEffect(() => {
+    if (modal === "open") {
+      lockScroll();
+    } else {
+      unlockScroll();
+    }
+    return () => {
+      // Safety: ensure unlock on unmount
+      if (modal === "open") unlockScroll();
+    };
+  }, [modal]);
 
   // Close the mobile nav on desktop resize; open the lead popup the first time
   // the world map scrolls into view. Uses an IntersectionObserver with a scroll
@@ -187,7 +225,7 @@ export default function CustomSoftwareLanding() {
         observer.observe(mapRef.current);
       }
       window.addEventListener("scroll", onScroll, { passive: true });
-      onScroll(); // in case the map is already in view on load
+      onScroll();
     }
 
     return () => {
@@ -214,7 +252,6 @@ export default function CustomSoftwareLanding() {
     return () => ob.disconnect();
   }, []);
 
-  // Popup collects the same fields as the main contact form.
   const submitPopup = useCallback(async (ev) => {
     ev.preventDefault();
     const e = {};
@@ -295,29 +332,74 @@ export default function CustomSoftwareLanding() {
 
       {/* ── Lead popup (opens on world-map scroll) ── */}
       {(modal === "open" || modal === "closing") && (
-        <div data-r="modal" onClick={closeModal} style={{ position: "fixed", inset: 0, zIndex: 200, overflowY: "auto", WebkitOverflowScrolling: "touch", background: "rgba(20,20,32,0.5)", backdropFilter: "blur(6px)", opacity: modal === "open" ? 1 : 0, transition: "opacity .28s ease" }}>
-          <div data-r="modal-scroll" style={{ minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(16px, 4vw, 40px)", boxSizing: "border-box" }}>
-            <div data-r="modal-card" onClick={(e) => e.stopPropagation()} style={{ position: "relative", width: "100%", maxWidth: 520, background: "#fff", borderRadius: 20, padding: "clamp(22px, 4vw, 34px)", boxSizing: "border-box", boxShadow: "0 40px 90px rgba(20,20,32,0.34)", transform: modal === "open" ? "translateY(0) scale(1)" : "translateY(14px) scale(0.98)", transition: "transform .32s cubic-bezier(.4,0,.2,1)" }}>
-            <button type="button" onClick={closeModal} aria-label="Close" style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: 9999, border: "1px solid #ebebf4", background: "#f5f5fa", color: "#141420", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {svg([P("M6 6l12 12", "a"), P("M18 6L6 18", "b")], { w: 18, h: 18, stroke: "currentColor", sw: 2 })}
-            </button>
-            <div data-r="modal-head" style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 22, paddingRight: 44 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 9, width: "fit-content", background: "#f5f5fa", borderRadius: 9999, padding: "7px 14px", whiteSpace: "nowrap" }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
-                <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>Free Consultation</span>
+        <div
+          data-r="modal"
+          onClick={closeModal}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 200,
+            // Modal backdrop: flex-centres the card; overflow scroll is on the
+            // INNER scroll container below, NOT here — so the backdrop itself
+            // never scrolls and always covers the full viewport.
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            background: "rgba(20,20,32,0.5)",
+            backdropFilter: "blur(6px)",
+            opacity: modal === "open" ? 1 : 0,
+            transition: "opacity .28s ease",
+          }}
+        >
+          {/* Scrollable inner shell — only this element scrolls */}
+          <div
+            data-r="modal-scroll"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              height: "100%",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              padding: "clamp(16px, 4vw, 40px)",
+              boxSizing: "border-box",
+            }}
+          >
+            <div
+              data-r="modal-card"
+              style={{
+                position: "relative",
+                width: "100%",
+                maxWidth: 520,
+                background: "#fff",
+                borderRadius: 20,
+                padding: "clamp(22px, 4vw, 34px)",
+                boxSizing: "border-box",
+                boxShadow: "0 40px 90px rgba(20,20,32,0.34)",
+                transform: modal === "open" ? "translateY(0) scale(1)" : "translateY(14px) scale(0.98)",
+                transition: "transform .32s cubic-bezier(.4,0,.2,1)",
+                // Ensure card sits inside the padding on very small screens
+                margin: "auto",
+              }}
+            >
+              <button type="button" onClick={closeModal} aria-label="Close" style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: 9999, border: "1px solid #ebebf4", background: "#f5f5fa", color: "#141420", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {svg([P("M6 6l12 12", "a"), P("M18 6L6 18", "b")], { w: 18, h: 18, stroke: "currentColor", sw: 2 })}
+              </button>
+              <div data-r="modal-head" style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 22, paddingRight: 44 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 9, width: "fit-content", background: "#f5f5fa", borderRadius: 9999, padding: "7px 14px", whiteSpace: "nowrap" }}>
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F1891A", display: "inline-block" }} />
+                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#141420" }}>Free Consultation</span>
+                </div>
+                <h2 style={{ margin: 0, fontSize: "clamp(22px, 5vw, 30px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.14 }}>Discuss your software requirement</h2>
+                <p data-r="modal-sub" style={{ margin: 0, fontSize: 13.5, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.65 }}>Tell us what you're trying to automate, improve or build — we'll understand your requirement and discuss the right solution.</p>
               </div>
-              <h2 style={{ margin: 0, fontSize: "clamp(24px, 5vw, 30px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.14 }}>Discuss your software requirement</h2>
-              <p data-r="modal-sub" style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#6b6b8a", lineHeight: 1.7 }}>Tell us what you're trying to automate, improve or build — we'll understand your requirement and discuss the right solution.</p>
-            </div>
-            {popupStatus.success ? (
-              <div style={{ padding: "30px 4px 8px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                <div style={{ fontSize: 38 }}>✅</div>
-                <h3 style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "#141420" }}>Thank you!</h3>
-                <p style={{ margin: 0, fontSize: 13.5, fontWeight: 400, color: "#6b6b8a" }}>We've received your requirement and will reach out shortly.</p>
-              </div>
-            ) : (
-              <>
-                <div data-r="modal-fields" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14 }}>
+
+              {/* All form fields in a single-column stack — no 2-col grid in the popup */}
+              <div data-r="modal-fields" style={{ display: "flex", flexDirection: "column", gap: 13 }}>
+                {/* Row: Name + Company */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <label style={field}>
                     <span style={labelSpan}>name*</span>
                     <input type="text" placeholder="full name" style={inputStyle} value={popupForm.name} onChange={(e) => setPopupForm((s) => ({ ...s, name: e.target.value }))} />
@@ -328,25 +410,33 @@ export default function CustomSoftwareLanding() {
                     <input type="text" placeholder="company" style={inputStyle} value={popupForm.company} onChange={(e) => setPopupForm((s) => ({ ...s, company: e.target.value }))} />
                     {popupErr.company && <span style={errText}>{popupErr.company}</span>}
                   </label>
+                </div>
+                {/* Row: Phone + Email */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <label style={field}>
-                    <span style={labelSpan}>phone number*</span>
+                    <span style={labelSpan}>phone*</span>
                     <input type="tel" placeholder="+91 00000 00000" style={inputStyle} value={popupForm.phone} onChange={(e) => setPopupForm((s) => ({ ...s, phone: e.target.value }))} />
                     {popupErr.phone && <span style={errText}>{popupErr.phone}</span>}
                   </label>
                   <label style={field}>
                     <span style={labelSpan}>business email*</span>
-                    <input type="email" placeholder="example@email.com" style={inputStyle} value={popupForm.email} onChange={(e) => setPopupForm((s) => ({ ...s, email: e.target.value }))} />
+                    <input type="email" placeholder="you@company.com" style={inputStyle} value={popupForm.email} onChange={(e) => setPopupForm((s) => ({ ...s, email: e.target.value }))} />
                     {popupErr.email && <span style={errText}>{popupErr.email}</span>}
                   </label>
-                  <label style={field}><span style={labelSpan}>what solution are you looking for?</span>
-                    <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.service} onChange={(e) => setPopupForm((s) => ({ ...s, service: e.target.value }))}>
-                      {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
-                    </select>
-                  </label>
-                  <label style={field}>
-                    <span style={labelSpan}>what are you trying to automate, improve or build?</span>
-                    <textarea rows={3} placeholder="e.g. our sales team tracks leads in Excel and follow-ups get missed" style={{ ...inputStyle, resize: "vertical" }} value={popupForm.message} onChange={(e) => setPopupForm((s) => ({ ...s, message: e.target.value }))} />
-                  </label>
+                </div>
+                {/* Full-width fields */}
+                <label style={field}>
+                  <span style={labelSpan}>what solution are you looking for?</span>
+                  <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.service} onChange={(e) => setPopupForm((s) => ({ ...s, service: e.target.value }))}>
+                    {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+                  </select>
+                </label>
+                <label style={field}>
+                  <span style={labelSpan}>what are you trying to automate, improve or build?</span>
+                  <textarea rows={3} placeholder="e.g. our sales team tracks leads in Excel and follow-ups get missed" style={{ ...inputStyle, resize: "vertical" }} value={popupForm.message} onChange={(e) => setPopupForm((s) => ({ ...s, message: e.target.value }))} />
+                </label>
+                {/* Row: Budget + Timeline */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <label style={field}>
                     <span style={labelSpan}>estimated investment</span>
                     <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.budget} onChange={(e) => setPopupForm((s) => ({ ...s, budget: e.target.value }))}>
@@ -354,17 +444,17 @@ export default function CustomSoftwareLanding() {
                     </select>
                   </label>
                   <label style={field}>
-                    <span style={labelSpan}>expected timeline to start</span>
+                    <span style={labelSpan}>timeline to start</span>
                     <select style={{ ...inputStyle, appearance: "none" }} value={popupForm.timeline} onChange={(e) => setPopupForm((s) => ({ ...s, timeline: e.target.value }))}>
                       <option>Immediately</option><option>Within 1 – 15 Days</option><option>Within 15 – 30 Days</option>
                     </select>
                   </label>
                 </div>
-                {popupStatus.error && <p style={{ margin: "14px 0 0", fontSize: 13, fontWeight: 500, color: "#d64545", textAlign: "center" }}>{popupStatus.error}</p>}
-                <button type="button" onClick={submitPopup} disabled={popupStatus.submitting} style={{ marginTop: 20, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: popupStatus.submitting ? "not-allowed" : "pointer", opacity: popupStatus.submitting ? 0.7 : 1, boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>{popupStatus.submitting ? "Submitting…" : "Submit Requirement"}</button>
-                <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
-              </>
-            )}
+              </div>
+
+              {popupStatus.error && <p style={{ margin: "14px 0 0", fontSize: 13, fontWeight: 500, color: "#d64545", textAlign: "center" }}>{popupStatus.error}</p>}
+              <button type="button" onClick={submitPopup} disabled={popupStatus.submitting} style={{ marginTop: 18, width: "100%", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", border: "none", borderRadius: 10, padding: 16, cursor: popupStatus.submitting ? "not-allowed" : "pointer", opacity: popupStatus.submitting ? 0.7 : 1, boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>{popupStatus.submitting ? "Submitting…" : "Submit Requirement"}</button>
+              <p style={{ margin: "12px 0 0", fontSize: 11.5, fontWeight: 400, color: "#6b6b8a", textAlign: "center" }}>Your details stay confidential. No sales spam.</p>
             </div>
           </div>
         </div>
@@ -439,7 +529,6 @@ export default function CustomSoftwareLanding() {
             </div>
           </div>
 
-          {/* A glimpse of our work — above the map */}
           <div data-r="glimpse-wrap" style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
             <div className="glimpse-chip" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 10, flexWrap: "wrap", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 9999, padding: "10px 20px", boxShadow: "0 8px 24px rgba(20,20,32,0.07)" }}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 600, color: "#141420" }}>
@@ -450,12 +539,10 @@ export default function CustomSoftwareLanding() {
             </div>
           </div>
 
-          {/* Interactive India map */}
           <div data-r="map-hold" style={{ position: "relative", maxWidth: 860, margin: "28px auto 0" }}>
             <CustomSoftwareMap />
           </div>
 
-          {/* Supporting note */}
           <p data-r="more-note" style={{ margin: "28px auto 0", maxWidth: 620, textAlign: "center", fontSize: 14.5, fontWeight: 500, color: "#5c5c7a", lineHeight: 1.7 }}>
             These are just a few examples. We've built custom software, CRMs, ERPs and automation for many more businesses.{" "}
             <a href="#form" style={{ fontWeight: 600, color: "#0037CA", textDecoration: "underline", textUnderlineOffset: 4, whiteSpace: "nowrap" }}>Let's build yours →</a>
@@ -473,7 +560,6 @@ export default function CustomSoftwareLanding() {
               <span style={{ fontSize: "clamp(18px, 2.4vw, 22px)", fontWeight: 600, color: "#141420", letterSpacing: "-0.02em" }}>What We Build</span>
             </div>
           </div>
-          {/* 6 cards: flex-wrap gives 3 + 3 on desktop, 2 + 2 + 2 on tablet, stacked on mobile */}
           <div ref={servicesRef} data-r="svc-grid" className={`svc-grid${svcArmed ? " svc-reveal" : ""}${svcIn ? " in" : ""}`} style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 18 }}>
             {SERVICES.map((s) => (
               <div key={s.title} className="svc-card" style={{ flex: "1 1 300px", maxWidth: 372, background: "linear-gradient(155deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.34) 100%)", backdropFilter: "blur(24px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: "30px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14, minHeight: 236, boxSizing: "border-box", boxShadow: "0 18px 44px rgba(20,20,32,0.10), inset 0 1px 0 rgba(255,255,255,0.85)" }}>
@@ -488,7 +574,6 @@ export default function CustomSoftwareLanding() {
             <a href="#form" style={{ fontWeight: 600, color: "#0037CA", textDecoration: "underline", textUnderlineOffset: 4 }}>We can design the solution around your requirements.</a>
           </p>
 
-          {/* popup trigger — fires once section 3 (What We Build) has been scrolled through */}
           <div ref={mapRef} aria-hidden="true" style={{ height: 1 }} />
         </div>
       </section>
@@ -508,7 +593,6 @@ export default function CustomSoftwareLanding() {
               <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#4a4a66", maxWidth: 560, lineHeight: 1.7 }}>A structured SDLC with Agile development practices, from requirement analysis through deployment and ongoing support.</p>
             </div>
 
-            {/* auto-scrolling marquee of the 6 process steps (pauses on hover) */}
             <div data-r="proc-marquee">
               <div className="proc-track">
                 {[...STEPS, ...STEPS].map((st, i) => (
@@ -600,8 +684,6 @@ export default function CustomSoftwareLanding() {
             <p style={{ margin: 0, maxWidth: 620, fontSize: 16, fontWeight: 500, color: "#3b3b57", lineHeight: 1.7, textWrap: "pretty" }}>Standard software works well when your processes are standard. But growing businesses often need more flexibility.</p>
           </div>
 
-          {/* Desktop: 01 top-left, 02 top-right, 03 below — each tied to an orbit dot.
-              Mobile: orbit on top, three stacked cards. */}
           <div data-r="prob-stage" style={{ display: "grid", gridTemplateColumns: "1fr 440px 1fr", gridTemplateAreas: '"p1 orbit p2" "p3 p3 p3"', columnGap: 40, alignItems: "start" }}>
             <div data-r="orbit" style={{ gridArea: "orbit", position: "relative", width: 440, height: 440, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
               <div style={{ position: "absolute", inset: 0, borderRadius: 9999, border: "1px solid #d8d8e8" }} />
@@ -617,7 +699,6 @@ export default function CustomSoftwareLanding() {
 
             {PROBLEMS.map((p) => (
               <div key={p.n} data-r={`prob-${p.pos}`} style={{ gridArea: p.area, position: "relative", justifySelf: p.pos === "tl" ? "end" : p.pos === "tr" ? "start" : "center", width: "100%", maxWidth: 330, marginTop: p.pos === "b" ? 44 : 0 }}>
-                {/* dashed connector to the matching orbit dot (desktop only) */}
                 <span data-r="prob-link" aria-hidden="true" style={p.pos === "b"
                   ? { position: "absolute", top: -44, left: "50%", height: 44, borderLeft: "1.5px dashed #c9c9dc" }
                   : { position: "absolute", top: 54, [p.pos === "tl" ? "right" : "left"]: -94, width: 94, borderTop: "1.5px dashed #c9c9dc" }} />
@@ -758,16 +839,13 @@ export default function CustomSoftwareLanding() {
       <footer style={{ padding: "0 0 40px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div data-r="foot-grid" style={{ position: "relative", overflow: "hidden", background: "linear-gradient(160deg,#181a2b 0%,#101120 60%,#0c0d18 100%)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 26, padding: "48px 48px 32px", display: "grid", gridTemplateColumns: "1.5fr 1fr 1.3fr", gap: 48, alignItems: "start", boxShadow: "0 24px 60px rgba(20,20,32,0.30)" }}>
-            {/* soft brand glow */}
             <div aria-hidden="true" style={{ position: "absolute", top: -120, left: -60, width: 520, height: 320, filter: "blur(90px)", opacity: 0.4, pointerEvents: "none", background: "radial-gradient(40% 50% at 30% 40%, #0037CA 0%, rgba(0,55,202,0) 70%), radial-gradient(40% 50% at 70% 60%, #FA9F43 0%, rgba(250,159,67,0) 72%)" }} />
 
-            {/* Brand + socials */}
             <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 20, maxWidth: 400 }}>
               <a href="#top" className="foot-logo" style={{ alignSelf: "flex-start", display: "inline-flex", background: "#fff", borderRadius: 12, padding: "10px 14px", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>
                 <img src={`${IMG}/SKYUP-Logo.svg`} alt="SKYUP Digital Solutions" style={{ height: 32, display: "block" }} />
               </a>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: "#a6a6c2", lineHeight: 1.75 }}>Based in Bangalore. Serving businesses across India. Tell us what you want to automate, improve or build, and we'll help turn it into a reliable software solution.</p>
-              {/* NOTE: replace LinkedIn / Instagram hrefs with your real profile URLs */}
               <div style={{ display: "flex", gap: 12 }}>
                 {[
                   { label: "LinkedIn", href: "https://www.linkedin.com/company/skyup-digital-solutions", icon: [P("M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z", "a"), <rect key="b" x="2" y="9" width="4" height="12" />, <circle key="c" cx="4" cy="4" r="2" />] },
@@ -781,7 +859,6 @@ export default function CustomSoftwareLanding() {
               </div>
             </div>
 
-            {/* Explore */}
             <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#6f6f92" }}>Explore</div>
               <div data-r="foot-links" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -793,7 +870,6 @@ export default function CustomSoftwareLanding() {
               </div>
             </div>
 
-            {/* Get in touch */}
             <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#6f6f92" }}>Get In Touch</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -813,7 +889,6 @@ export default function CustomSoftwareLanding() {
               </a>
             </div>
 
-            {/* Bottom bar */}
             <div data-r="foot-bottom" style={{ position: "relative", gridColumn: "1 / -1", marginTop: 12, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
               <div style={{ fontSize: 12.5, fontWeight: 400, color: "#8686a6" }}>© 2026 SKYUP Digital Solutions LLP · All rights reserved</div>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -836,9 +911,23 @@ img, svg { max-width:100%; }
 * { -webkit-tap-highlight-color: transparent; }
 [data-r="map-hold"] { overflow:hidden; }
 [data-r="map-hold"] svg, [data-r="map-hold"] img, [data-r="map-hold"] canvas { max-width:100% !important; height:auto; }
-[data-r="modal-card"] input, [data-r="modal-card"] select { height:46px; box-sizing:border-box; }
-[data-r="modal-fields"] > label { min-width:0; }
-[data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { min-width:0; width:100%; box-sizing:border-box; }
+
+/* ── Modal input heights — enforce consistent 46px on all inputs/selects ── */
+[data-r="modal-card"] input,
+[data-r="modal-card"] select { height:46px; box-sizing:border-box; }
+[data-r="modal-fields"] > *,
+[data-r="modal-fields"] > div > label { min-width:0; }
+[data-r="modal-card"] input,
+[data-r="modal-card"] select,
+[data-r="modal-card"] textarea { min-width:0; width:100%; box-sizing:border-box; }
+
+/* ── On narrow mobile (≤ 420px) collapse the 2-col rows in the popup to 1-col ── */
+@media (max-width: 420px) {
+  [data-r="modal-fields"] > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 #solutions a:hover, #why a:hover, #process a:hover, #investment a:hover { opacity:.9; }
 .foot-logo { transition:transform .2s ease; }
 .foot-logo:hover { transform:translateY(-2px); }
@@ -870,7 +959,6 @@ img, svg { max-width:100%; }
 /* How-we-work marquee */
 [data-r="proc-marquee"] { position:relative; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .proc-track { display:flex; width:max-content; animation:skyup-marquee 46s linear infinite; }
-/* pause on hover only for mouse devices (so touch doesn't stick); pause while pressing on touch */
 @media (hover: hover) { [data-r="proc-marquee"]:hover .proc-track { animation-play-state:paused; } }
 [data-r="proc-marquee"]:active .proc-track { animation-play-state:paused; }
 .proc-step { padding:0 9px; flex-shrink:0; box-sizing:border-box; }
@@ -968,7 +1056,7 @@ img, svg { max-width:100%; }
   [data-r="prob-card"] p { font-size:13.5px !important; }
 }
 @keyframes skyup-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
-/* dropdown chevron for selects (contact form + popup) */
+/* dropdown chevron for selects */
 [data-r="form-card"] select, [data-r="modal-card"] select {
   -webkit-appearance:none !important; -moz-appearance:none !important; appearance:none !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b8a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
