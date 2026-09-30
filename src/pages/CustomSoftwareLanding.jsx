@@ -768,11 +768,11 @@ export default function CustomSoftwareLanding() {
       </section>
 
       {/* ══ 8. CTA / Investment ══ */}
-      <section id="investment" style={{ padding: "0 0 104px" }}>
-        <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "0.85fr 1.15fr", gap: 32, alignItems: "start" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.12 }}>Custom Software. Scoped Around Your Requirements.</h2>
-            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.60 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
+      <section id="investment" style={{ padding: "0 0 104px", overflowX: "hidden" }}>
+        <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "0.85fr 1.15fr", gap: 32, alignItems: "start", boxSizing: "border-box", width: "100%" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0, overflow: "hidden" }}>
+            <h2 style={{ margin: 0, fontSize: "clamp(20px, 4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.02em", lineHeight: 1.18, wordBreak: "break-word", overflowWrap: "break-word", hyphens: "auto" }}>Custom Software. Scoped Around Your Requirements.</h2>
+            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72, wordBreak: "break-word", overflowWrap: "break-word" }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
           </div>
           <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 22, boxShadow: "0 10px 34px rgba(20,20,32,0.07)" }}>
             <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's Discuss Your Software Requirements.</p>
@@ -982,10 +982,11 @@ img, svg { max-width:100%; }
 
 /* How-we-work marquee */
 [data-r="proc-marquee"] { position:relative; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
-.proc-track { display:flex; width:max-content; animation:skyup-marquee 46s linear infinite; }
+/* align-items:stretch makes every card in the row match the tallest one */
+.proc-track { display:flex; align-items:stretch; width:max-content; animation:skyup-marquee 46s linear infinite; }
 @media (hover: hover) { [data-r="proc-marquee"]:hover .proc-track { animation-play-state:paused; } }
 [data-r="proc-marquee"]:active .proc-track { animation-play-state:paused; }
-.proc-step { padding:0 9px; flex-shrink:0; box-sizing:border-box; }
+.proc-step { padding:0 9px; flex-shrink:0; box-sizing:border-box; display:flex; }
 .proc-step-card { width:330px; }
 @media (prefers-reduced-motion: reduce) { .proc-track { animation:none; } }
 
@@ -1027,7 +1028,8 @@ img, svg { max-width:100%; }
   [data-r="inv-card"], [data-r="form-card"] { padding:26px !important; }
 }
 @media (max-width:767px) {
-  [data-r="wrap"], [data-r="inv-grid"] { padding-left:18px !important; padding-right:18px !important; }
+  [data-r="wrap"], [data-r="inv-grid"] { padding-left:18px !important; padding-right:18px !important; width:100% !important; box-sizing:border-box !important; }
+  #investment { overflow-x:hidden !important; }
   [data-r="sect"] { padding-bottom:60px !important; }
   [data-r="hero"] { padding-bottom:56px !important; }
   #reviews, #solutions, #why, #process, #capabilities, #investment { padding-bottom:64px !important; }
@@ -1042,7 +1044,7 @@ img, svg { max-width:100%; }
   [data-r="proc-head"] { margin-bottom:28px !important; padding:0 18px !important; }
   [data-r="proc-practices"] { padding:0 18px !important; display:grid !important; grid-template-columns:1fr 1fr !important; gap:10px !important; }
   [data-r="proc-practices"] > span { font-size:12.5px !important; padding:8px 12px !important; width:100% !important; box-sizing:border-box !important; justify-content:center !important; }
-  .proc-step-card { width:264px !important; padding:24px !important; min-height:212px !important; }
+  .proc-step-card { width:264px !important; padding:24px !important; }
   [data-r="cap-card"] { padding:32px 20px !important; border-radius:22px !important; }
   [data-r="aud-grid"], [data-r="form-grid"] { grid-template-columns:1fr !important; }
   [data-r="form-grid"] > label { grid-column:span 1 !important; }
@@ -1061,14 +1063,14 @@ img, svg { max-width:100%; }
   [data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { padding:11px 14px !important; }
 }
 @media (max-width:479px) {
-  [data-r="wrap"], [data-r="inv-grid"] { padding-left:14px !important; padding-right:14px !important; }
+  [data-r="wrap"], [data-r="inv-grid"] { padding-left:14px !important; padding-right:14px !important; width:100% !important; box-sizing:border-box !important; }
   [data-r="brand"] { height:32px !important; }
   [data-r="hero-rating"] { flex-wrap:wrap !important; white-space:normal !important; justify-content:center !important; }
   [data-r="modal-fields"] { gap:12px !important; }
   [data-r="sect"] { padding-bottom:56px !important; }
   #reviews, #solutions, #why, #process, #capabilities, #investment { padding-bottom:56px !important; }
   .proc-step { padding:0 7px !important; }
-  .proc-step-card { width:236px !important; padding:20px !important; min-height:196px !important; }
+  .proc-step-card { width:236px !important; padding:20px !important; }
   [data-r="why-card"] { padding:20px !important; border-radius:22px !important; }
   [data-r="why-art"] { height:164px !important; }
   [data-r="inv-card"], [data-r="form-card"] { padding:20px !important; }
