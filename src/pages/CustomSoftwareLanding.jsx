@@ -122,7 +122,9 @@ const labelSpan = { fontSize: 12.5, fontWeight: 500, color: "#6b6b8a" };
 const field = { display: "flex", flexDirection: "column", gap: 7 };
 const errText = { fontSize: 12, fontWeight: 500, color: "#d64545" };
 
-const procCardStyle = { background: "linear-gradient(155deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.26) 100%)", backdropFilter: "blur(22px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: 28, display: "flex", flexDirection: "column", gap: 16, boxSizing: "border-box", minHeight: 236, boxShadow: "0 18px 40px rgba(20,20,32,0.12), inset 0 1px 0 rgba(255,255,255,0.9)" };
+// minHeight removed — cards in the marquee track use align-items:stretch so
+// all cards in one "row" share the tallest card's height automatically.
+const procCardStyle = { background: "linear-gradient(155deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.26) 100%)", backdropFilter: "blur(22px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: 28, display: "flex", flexDirection: "column", gap: 16, boxSizing: "border-box", height: "100%", boxShadow: "0 18px 40px rgba(20,20,32,0.12), inset 0 1px 0 rgba(255,255,255,0.9)" };
 
 // ── Scroll-lock helpers ──────────────────────────────────────────────────────
 // On desktop: sets body overflow:hidden + preserves scrollbar width gap.
@@ -345,7 +347,7 @@ export default function CustomSoftwareLanding() {
   }, [leadForm]);
 
   return (
-    <div style={{ background: "#f5f5fa", overflow: "hidden", fontFamily: "'Poppins',sans-serif" }}>
+    <div style={{ background: "#f5f5fa", overflowX: "hidden", fontFamily: "'Poppins',sans-serif" }}>
       <style>{CSS}</style>
 
       {/* ── Lead popup (opens on world-map scroll) ── */}
