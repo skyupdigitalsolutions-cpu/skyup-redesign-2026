@@ -772,7 +772,7 @@ export default function CustomSoftwareLanding() {
         <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "0.85fr 1.15fr", gap: 32, alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <h2 style={{ margin: 0, fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em", lineHeight: 1.12 }}>Custom Software. Scoped Around Your Requirements.</h2>
-            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
+            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.60 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
           </div>
           <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 22, boxShadow: "0 10px 34px rgba(20,20,32,0.07)" }}>
             <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's Discuss Your Software Requirements.</p>
