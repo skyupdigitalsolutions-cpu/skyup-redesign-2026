@@ -14,11 +14,12 @@
 //   8. CTA / Investment                 (#investment)
 //   9. Contact form                     (#form)
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import axios from "axios";
 import CustomSoftwareMap from "../components/CustomSoftwareMap";
 
 
-// Backend base URL — set VITE_API_BASE_URL in your deployment environment variables.
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3500";
+// CRM API endpoint — set VITE_CRM_API_URL in your deployment environment variables.
+const CRM_API_URL = import.meta.env.VITE_CRM_API_URL || "https://your-crm-api.com/api/leads";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+]?[\d][\d\s-]{6,14}$/;
