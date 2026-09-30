@@ -768,22 +768,24 @@ export default function CustomSoftwareLanding() {
       </section>
 
       {/* ══ 8. CTA / Investment ══ */}
-      <section id="investment" style={{ padding: "0 0 104px", overflowX: "hidden" }}>
-        <div data-r="inv-grid" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "0.85fr 1.15fr", gap: 32, alignItems: "start", boxSizing: "border-box", width: "100%" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0, overflow: "hidden" }}>
-            <h2 style={{ margin: 0, fontSize: "clamp(20px, 4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.02em", lineHeight: 1.18, wordBreak: "break-word", overflowWrap: "break-word", hyphens: "auto" }}>Custom Software. Scoped Around Your Requirements.</h2>
-            <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72, wordBreak: "break-word", overflowWrap: "break-word" }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
-          </div>
-          <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 22, boxShadow: "0 10px 34px rgba(20,20,32,0.07)" }}>
-            <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's Discuss Your Software Requirements.</p>
-            <div data-r="inv-price" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#f5f5fa", borderRadius: 14, padding: "24px 28px", flexWrap: "wrap" }}>
-              <div>
-                <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6b8a" }}>Projects Starting From</div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
-                  <span style={{ fontSize: "clamp(32px, 4vw, 42px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em" }}>₹2 Lakh+</span>
+      <section id="investment" style={{ padding: "0 0 104px" }}>
+        <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", boxSizing: "border-box" }}>
+          <div className="inv-inner">
+            <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0 }}>
+              <h2 style={{ margin: 0, fontSize: "clamp(20px, 4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.02em", lineHeight: 1.18 }}>Custom Software. Scoped Around Your Requirements.</h2>
+              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
+            </div>
+            <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 22, boxShadow: "0 10px 34px rgba(20,20,32,0.07)", minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's Discuss Your Software Requirements.</p>
+              <div data-r="inv-price" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#f5f5fa", borderRadius: 14, padding: "24px 28px", flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6b8a" }}>Projects Starting From</div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
+                    <span style={{ fontSize: "clamp(32px, 4vw, 42px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.03em" }}>₹2 Lakh+</span>
+                  </div>
                 </div>
+                <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 24px", boxShadow: "0 10px 26px rgba(0,55,202,0.26)" }}>Discuss Your Software Requirement</a>
               </div>
-              <a href="#form" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", fontWeight: 600, fontSize: 14.5, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 24px", boxShadow: "0 10px 26px rgba(0,55,202,0.26)" }}>Discuss Your Software Requirement</a>
             </div>
           </div>
         </div>
@@ -952,6 +954,10 @@ img, svg { max-width:100%; }
   }
 }
 
+/* Investment section — 2-col on desktop, stacked on mobile via class not inline */
+.inv-inner { display:grid; grid-template-columns:0.85fr 1.15fr; gap:32px; align-items:start; }
+@media (max-width:991px) { .inv-inner { grid-template-columns:1fr; } }
+
 #solutions a:hover, #why a:hover, #process a:hover, #investment a:hover { opacity:.9; }
 .foot-logo { transition:transform .2s ease; }
 .foot-logo:hover { transform:translateY(-2px); }
@@ -991,7 +997,7 @@ img, svg { max-width:100%; }
 @media (prefers-reduced-motion: reduce) { .proc-track { animation:none; } }
 
 @media (max-width:1199px) {
-  [data-r="wrap"], [data-r="inv-grid"] { padding-left:24px !important; padding-right:24px !important; }
+  [data-r="wrap"] { padding-left:24px !important; padding-right:24px !important; }
   [data-r="prob-stage"] { grid-template-columns:1fr 380px 1fr !important; column-gap:28px !important; }
   [data-r="orbit"] { width:380px !important; height:380px !important; }
   [data-r="orbit-disc"] { width:250px !important; height:250px !important; padding:26px !important; }
@@ -1016,7 +1022,7 @@ img, svg { max-width:100%; }
   [data-r="orbit-text"] { font-size:14px !important; }
   [data-r="prob-tl"], [data-r="prob-tr"], [data-r="prob-b"] { justify-self:stretch !important; max-width:none !important; margin-top:0 !important; }
   [data-r="prob-link"] { display:none !important; }
-  [data-r="rev-grid"], [data-r="why-head"], [data-r="inv-grid"], [data-r="foot-grid"], [data-r="cap-card"] { grid-template-columns:1fr !important; }
+  [data-r="rev-grid"], [data-r="why-head"], [data-r="foot-grid"], [data-r="cap-card"] { grid-template-columns:1fr !important; }
   [data-r="why-head"] { align-items:start !important; gap:20px !important; margin-bottom:32px !important; }
   [data-r="foot-grid"] { gap:28px !important; }
   [data-r="why-row"] { flex-direction:column !important; min-height:0 !important; align-items:stretch !important; }
@@ -1028,8 +1034,7 @@ img, svg { max-width:100%; }
   [data-r="inv-card"], [data-r="form-card"] { padding:26px !important; }
 }
 @media (max-width:767px) {
-  [data-r="wrap"], [data-r="inv-grid"] { padding-left:18px !important; padding-right:18px !important; width:100% !important; box-sizing:border-box !important; }
-  #investment { overflow-x:hidden !important; }
+  [data-r="wrap"] { padding-left:18px !important; padding-right:18px !important; }
   [data-r="sect"] { padding-bottom:60px !important; }
   [data-r="hero"] { padding-bottom:56px !important; }
   #reviews, #solutions, #why, #process, #capabilities, #investment { padding-bottom:64px !important; }
@@ -1063,7 +1068,7 @@ img, svg { max-width:100%; }
   [data-r="modal-card"] input, [data-r="modal-card"] select, [data-r="modal-card"] textarea { padding:11px 14px !important; }
 }
 @media (max-width:479px) {
-  [data-r="wrap"], [data-r="inv-grid"] { padding-left:14px !important; padding-right:14px !important; width:100% !important; box-sizing:border-box !important; }
+  [data-r="wrap"] { padding-left:14px !important; padding-right:14px !important; }
   [data-r="brand"] { height:32px !important; }
   [data-r="hero-rating"] { flex-wrap:wrap !important; white-space:normal !important; justify-content:center !important; }
   [data-r="modal-fields"] { gap:12px !important; }
