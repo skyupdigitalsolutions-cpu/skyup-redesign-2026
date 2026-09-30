@@ -125,19 +125,32 @@ const errText = { fontSize: 12, fontWeight: 500, color: "#d64545" };
 const procCardStyle = { background: "linear-gradient(155deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.26) 100%)", backdropFilter: "blur(22px) saturate(150%)", border: "1px solid rgba(255,255,255,0.75)", borderRadius: 22, padding: 28, display: "flex", flexDirection: "column", gap: 16, boxSizing: "border-box", minHeight: 236, boxShadow: "0 18px 40px rgba(20,20,32,0.12), inset 0 1px 0 rgba(255,255,255,0.9)" };
 
 // ── Scroll-lock helpers ──────────────────────────────────────────────────────
-// Locks the page scroll when modal is open without layout shift (preserves
-// scrollbar gap). Cleans up reliably even if component unmounts while open.
+// On desktop: sets body overflow:hidden + preserves scrollbar width gap.
+// On iOS/Android: body overflow:hidden alone doesn't stop touch scroll.
+//   We use the position:fixed trick (saves scrollY, fixes body, restores on unlock)
+//   AND block touchmove on the backdrop so only the inner scroll container scrolls.
 let _lockCount = 0;
 let _savedScrollY = 0;
-let _savedPaddingRight = "";
+let _savedBodyStyles = {};
 
 function lockScroll() {
   if (_lockCount === 0) {
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     _savedScrollY = window.scrollY;
-    _savedPaddingRight = document.body.style.paddingRight;
+    _savedBodyStyles = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
+      paddingRight: document.body.style.paddingRight,
+    };
+    // Desktop: overflow hidden + preserve scrollbar gap
     document.body.style.overflow = "hidden";
     document.body.style.paddingRight = `${scrollbarWidth}px`;
+    // iOS Safari / Android Chrome: fix the body at the current scroll position
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${_savedScrollY}px`;
+    document.body.style.width = "100%";
   }
   _lockCount++;
 }
@@ -145,8 +158,13 @@ function lockScroll() {
 function unlockScroll() {
   _lockCount = Math.max(0, _lockCount - 1);
   if (_lockCount === 0) {
-    document.body.style.overflow = "";
-    document.body.style.paddingRight = _savedPaddingRight;
+    document.body.style.overflow = _savedBodyStyles.overflow;
+    document.body.style.position = _savedBodyStyles.position;
+    document.body.style.top = _savedBodyStyles.top;
+    document.body.style.width = _savedBodyStyles.width;
+    document.body.style.paddingRight = _savedBodyStyles.paddingRight;
+    // Restore scroll position (lost when position:fixed was applied)
+    window.scrollTo(0, _savedScrollY);
   }
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -335,13 +353,11 @@ export default function CustomSoftwareLanding() {
         <div
           data-r="modal"
           onClick={closeModal}
+          onTouchMove={(e) => e.preventDefault()} // block page scroll on iOS backdrop touch
           style={{
             position: "fixed",
             inset: 0,
             zIndex: 200,
-            // Modal backdrop: flex-centres the card; overflow scroll is on the
-            // INNER scroll container below, NOT here — so the backdrop itself
-            // never scrolls and always covers the full viewport.
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "center",
@@ -349,17 +365,22 @@ export default function CustomSoftwareLanding() {
             backdropFilter: "blur(6px)",
             opacity: modal === "open" ? 1 : 0,
             transition: "opacity .28s ease",
+            // Prevent the native rubber-band / overscroll from leaking to the page
+            overscrollBehavior: "contain",
           }}
         >
-          {/* Scrollable inner shell — only this element scrolls */}
+          {/* Scrollable inner shell — ONLY this scrolls, not the page behind */}
           <div
             data-r="modal-scroll"
             onClick={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()} // allow scroll inside this container
             style={{
               width: "100%",
               height: "100%",
               overflowY: "auto",
+              overflowX: "hidden",
               WebkitOverflowScrolling: "touch",
+              overscrollBehavior: "contain",
               display: "flex",
               alignItems: "flex-start",
               justifyContent: "center",
@@ -380,8 +401,9 @@ export default function CustomSoftwareLanding() {
                 boxShadow: "0 40px 90px rgba(20,20,32,0.34)",
                 transform: modal === "open" ? "translateY(0) scale(1)" : "translateY(14px) scale(0.98)",
                 transition: "transform .32s cubic-bezier(.4,0,.2,1)",
-                // Ensure card sits inside the padding on very small screens
                 margin: "auto",
+                // Give enough bottom breathing room so submit button isn't cut off
+                marginBottom: "clamp(16px, 4vw, 40px)",
               }}
             >
               <button type="button" onClick={closeModal} aria-label="Close" style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: 9999, border: "1px solid #ebebf4", background: "#f5f5fa", color: "#141420", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
