@@ -25,6 +25,94 @@ const CRM_WEBHOOK_KEY = import.meta.env.VITE_CRM_WEBHOOK_KEY || "skyup_customsof
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+]?[\d][\d\s-]{6,14}$/;
 
+// ── Lead submission ────────────────────────────────────────────────────────
+// /google-webhook is the CRM's Google Ads lead-form endpoint. Google sends the
+// key in the BODY as `google_key` and the fields inside `user_column_data`,
+// and it does not reply with `{ success: true }`. The old code sent the key
+// only as a header, sent flat fields only, and treated any reply without
+// `success: true` as a failure — which is what produced
+// "Something went wrong. Please try again." even when the request went through.
+//
+// This sends the Google Ads shape (plus the flat fields and header, so either
+// backend parser works), treats any 2xx as success unless the server says
+// `success: false`, and also fires the site-wide `crm_lead` GTM event used by
+// the other forms so the lead is captured even if this endpoint has a hiccup.
+const submitCustomSoftwareLead = async (form) => {
+  const name = form.name.trim();
+  const company = form.company.trim();
+  const email = form.email.trim();
+  const phone = form.phone.trim();
+  const message = [
+    form.message.trim(),
+    `Company: ${company}`,
+    `Service: ${form.service}`,
+    `Budget: ${form.budget}`,
+    `Expected timeline: ${form.timeline}`,
+  ].filter(Boolean).join("\n");
+
+  if (typeof window !== "undefined") {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "crm_lead",
+      lead_name: name, lead_mobile: phone, lead_email: email, lead_message: message,
+      lead_source: "Skyup_custom_software",
+      form_name: name, form_mobile: phone, form_email: email, form_message: message,
+      form_source: "Skyup_custom_software",
+    });
+  }
+
+  const col = (column_id, column_name, string_value) => ({ column_id, column_name, string_value });
+  const payload = {
+    // Google Ads lead-form webhook shape
+    lead_id: `web_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    api_version: "1.0",
+    google_key: CRM_WEBHOOK_KEY,
+    is_test: false,
+    user_column_data: [
+      col("FULL_NAME", "Full Name", name),
+      col("EMAIL", "User Email", email),
+      col("PHONE_NUMBER", "User Phone", phone),
+      col("COMPANY_NAME", "Company Name", company),
+      col("SERVICE", "Service", form.service),
+      col("BUDGET", "Budget", form.budget),
+      col("TIMELINE", "Timeline", form.timeline),
+      col("MESSAGE", "Message", message),
+    ],
+    // Flat fields (for a parser that reads plain keys)
+    webhook_secret: CRM_WEBHOOK_KEY,
+    name, company, email, phone, mobile: phone,
+    service: form.service, budget: form.budget, timeline: form.timeline, message,
+    source: "custom_software_development",
+  };
+
+  try {
+    const response = await axios.post(CRM_API_URL, payload, {
+      headers: { "x-webhook-key": CRM_WEBHOOK_KEY, "Content-Type": "application/json" },
+      timeout: 20000,
+    });
+    const data = response.data;
+    if (data && typeof data === "object" && data.success === false) {
+      throw new Error(data.message || data.error || "We couldn't submit your details. Please try again.");
+    }
+  } catch (err) {
+    if (err.response) {
+      const d = err.response.data;
+      const serverMsg = d && typeof d === "object" ? d.message || d.error : null;
+      console.error("CRM lead submit failed:", err.response.status, d);
+      throw new Error(serverMsg || `Submission failed (${err.response.status}). Please try again.`);
+    }
+    if (err.request) {
+      console.error("CRM lead submit: no response", err);
+      throw new Error("Couldn't reach the server. Please check your connection and try again.");
+    }
+    throw err;
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: "lead_form_success", lead_source: "custom_software_development" });
+  window.location.href = "/thank-you/";
+};
+
 const IMG = "/images/custom-software";
 const svg = (paths, opts = {}) => (
   <svg width={opts.w || 24} height={opts.h || 24} viewBox="0 0 24 24" fill={opts.fill || "none"}
@@ -286,34 +374,11 @@ export default function CustomSoftwareLanding() {
     setPopupErr(e);
     if (Object.keys(e).length) return;
 
-    const payload = {
-      name: popupForm.name.trim(),
-      company: popupForm.company.trim(),
-      email: popupForm.email.trim(),
-      phone: popupForm.phone.trim(),
-      service: popupForm.service,
-      budget: popupForm.budget,
-      message: [popupForm.message.trim(), `Expected timeline: ${popupForm.timeline}`].filter(Boolean).join("\n"),
-    };
-
     setPopupStatus({ submitting: true, error: "", success: false });
     try {
-      const response = await axios.post(CRM_API_URL, payload, {
-        headers: { "x-webhook-key": CRM_WEBHOOK_KEY, "Content-Type": "application/json" },
-      });
-      if (response.data.success) {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: "lead_form_success",
-          lead_source: "custom_software_development",
-        });
-        window.location.href = "/thank-you/";
-      } else {
-        throw new Error(response.data.message || "Something went wrong. Please try again.");
-      }
+      await submitCustomSoftwareLead(popupForm);
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || "Could not submit. Please try again.";
-      setPopupStatus({ submitting: false, error: msg, success: false });
+      setPopupStatus({ submitting: false, error: err.message || "Could not submit. Please try again.", success: false });
     }
   }, [popupForm, closeModal]);
 
@@ -329,34 +394,11 @@ export default function CustomSoftwareLanding() {
     setLeadErr(e);
     if (Object.keys(e).length) return;
 
-    const payload = {
-      name: leadForm.name.trim(),
-      company: leadForm.company.trim(),
-      email: leadForm.email.trim(),
-      phone: leadForm.phone.trim(),
-      service: leadForm.service,
-      budget: leadForm.budget,
-      message: [leadForm.message.trim(), `Expected timeline: ${leadForm.timeline}`].filter(Boolean).join("\n"),
-    };
-
     setLeadStatus({ submitting: true, error: "", success: false });
     try {
-      const response = await axios.post(CRM_API_URL, payload, {
-        headers: { "x-webhook-key": CRM_WEBHOOK_KEY, "Content-Type": "application/json" },
-      });
-      if (response.data.success) {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: "lead_form_success",
-          lead_source: "custom_software_development",
-        });
-        window.location.href = "/thank-you/";
-      } else {
-        throw new Error(response.data.message || "Something went wrong. Please try again.");
-      }
+      await submitCustomSoftwareLead(leadForm);
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || "Could not submit. Please try again.";
-      setLeadStatus({ submitting: false, error: msg, success: false });
+      setLeadStatus({ submitting: false, error: err.message || "Could not submit. Please try again.", success: false });
     }
   }, [leadForm]);
 
