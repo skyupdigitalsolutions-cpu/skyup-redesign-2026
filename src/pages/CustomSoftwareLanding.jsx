@@ -18,8 +18,9 @@ import axios from "axios";
 import CustomSoftwareMap from "../components/CustomSoftwareMap";
 
 
-// CRM API endpoint — set VITE_CRM_API_URL in your deployment environment variables.
-const CRM_API_URL = import.meta.env.VITE_CRM_API_URL || "https://your-crm-api.com/api/leads";
+// CRM API endpoint + webhook key — set both in your .env file.
+const CRM_API_URL = import.meta.env.VITE_CRM_API_URL || "https://skyupcrm-backend.duckdns.org/google-webhook";
+const CRM_WEBHOOK_KEY = import.meta.env.VITE_CRM_WEBHOOK_KEY || "skyup_customsoftware_2026";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+]?[\d][\d\s-]{6,14}$/;
@@ -297,16 +298,22 @@ export default function CustomSoftwareLanding() {
 
     setPopupStatus({ submitting: true, error: "", success: false });
     try {
-      const res = await fetch(`${API_BASE}/api/contacts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const response = await axios.post(CRM_API_URL, payload, {
+        headers: { "x-webhook-key": CRM_WEBHOOK_KEY, "Content-Type": "application/json" },
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || "Something went wrong. Please try again.");
-      window.location.assign("/thank-you");
+      if (response.data.success) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: "lead_form_success",
+          lead_source: "custom_software_development",
+        });
+        window.location.href = "/thank-you/";
+      } else {
+        throw new Error(response.data.message || "Something went wrong. Please try again.");
+      }
     } catch (err) {
-      setPopupStatus({ submitting: false, error: err.message || "Could not submit. Please try again.", success: false });
+      const msg = err.response?.data?.message || err.message || "Could not submit. Please try again.";
+      setPopupStatus({ submitting: false, error: msg, success: false });
     }
   }, [popupForm, closeModal]);
 
@@ -334,16 +341,22 @@ export default function CustomSoftwareLanding() {
 
     setLeadStatus({ submitting: true, error: "", success: false });
     try {
-      const res = await fetch(`${API_BASE}/api/contacts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const response = await axios.post(CRM_API_URL, payload, {
+        headers: { "x-webhook-key": CRM_WEBHOOK_KEY, "Content-Type": "application/json" },
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || "Something went wrong. Please try again.");
-      window.location.assign("/thank-you");
+      if (response.data.success) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: "lead_form_success",
+          lead_source: "custom_software_development",
+        });
+        window.location.href = "/thank-you/";
+      } else {
+        throw new Error(response.data.message || "Something went wrong. Please try again.");
+      }
     } catch (err) {
-      setLeadStatus({ submitting: false, error: err.message || "Could not submit. Please try again.", success: false });
+      const msg = err.response?.data?.message || err.message || "Could not submit. Please try again.";
+      setLeadStatus({ submitting: false, error: msg, success: false });
     }
   }, [leadForm]);
 
@@ -772,9 +785,9 @@ export default function CustomSoftwareLanding() {
       <section id="investment" style={{ padding: "0 0 104px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", boxSizing: "border-box" }}>
           <div className="inv-inner">
-            <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0 }}>
-              <h2 style={{ margin: 0, fontSize: "clamp(20px, 4vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.02em", lineHeight: 1.18 }}>Custom Software. Scoped Around Your Requirements.</h2>
-              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0, overflow: "visible" }}>
+              <h2 style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 46px)", fontWeight: 700, color: "#141420", letterSpacing: "-0.02em", lineHeight: 1.18, wordBreak: "break-word", overflowWrap: "break-word" }}>Custom Software. Scoped Around Your Requirements.</h2>
+              <p style={{ margin: 0, fontSize: 15.5, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72, wordBreak: "break-word", overflowWrap: "break-word" }}>Every project is different. Investment depends on the workflows, features, users, integrations and overall complexity involved.</p>
             </div>
             <div data-r="inv-card" style={{ background: "#fff", border: "1px solid #ebebf4", borderRadius: 18, padding: 34, display: "flex", flexDirection: "column", gap: 22, boxShadow: "0 10px 34px rgba(20,20,32,0.07)", minWidth: 0 }}>
               <p style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#5c5c7a", lineHeight: 1.72 }}>If you're looking for a customized business solution rather than a basic off-the-shelf product, let's Discuss Your Software Requirements.</p>
@@ -956,8 +969,11 @@ img, svg { max-width:100%; }
 }
 
 /* Investment section — 2-col on desktop, stacked on mobile via class not inline */
-.inv-inner { display:grid; grid-template-columns:0.85fr 1.15fr; gap:32px; align-items:start; }
-@media (max-width:991px) { .inv-inner { grid-template-columns:1fr; } }
+.inv-inner { display:grid; grid-template-columns:0.85fr 1.15fr; gap:32px; align-items:start; overflow:visible; width:100%; }
+.inv-inner > * { min-width:0; overflow:visible; width:100%; }
+@media (max-width:991px) { .inv-inner { grid-template-columns:1fr !important; } }
+@media (max-width:767px) { .inv-inner { grid-template-columns:1fr !important; gap:24px !important; } }
+@media (max-width:479px) { .inv-inner { grid-template-columns:1fr !important; gap:20px !important; } }
 
 #solutions a:hover, #why a:hover, #process a:hover, #investment a:hover { opacity:.9; }
 .foot-logo { transition:transform .2s ease; }
