@@ -85,32 +85,46 @@ const submitCustomSoftwareLead = async (form) => {
     source: "custom_software_development",
   };
 
+  // Every valid submission ends on the Thank You page. The lead has already
+  // been pushed to GTM above, so a CRM hiccup shouldn't strand the visitor on
+  // an error message — it's logged to the console and dataLayer instead.
+  let ok = true;
   try {
     const response = await axios.post(CRM_API_URL, payload, {
       headers: { "x-webhook-key": CRM_WEBHOOK_KEY, "Content-Type": "application/json" },
-      timeout: 20000,
+      timeout: 15000,
     });
     const data = response.data;
     if (data && typeof data === "object" && data.success === false) {
-      throw new Error(data.message || data.error || "We couldn't submit your details. Please try again.");
+      ok = false;
+      console.error("CRM lead submit rejected:", data);
     }
   } catch (err) {
-    if (err.response) {
-      const d = err.response.data;
-      const serverMsg = d && typeof d === "object" ? d.message || d.error : null;
-      console.error("CRM lead submit failed:", err.response.status, d);
-      throw new Error(serverMsg || `Submission failed (${err.response.status}). Please try again.`);
-    }
-    if (err.request) {
-      console.error("CRM lead submit: no response", err);
-      throw new Error("Couldn't reach the server. Please check your connection and try again.");
-    }
-    throw err;
+    ok = false;
+    console.error("CRM lead submit failed:", err.response?.status, err.response?.data || err.message);
   }
 
+  goToThankYou(ok ? "lead_form_success" : "lead_form_crm_error");
+};
+
+// Push the final tracking event, give GTM a moment to send its tags (so the
+// navigation doesn't cancel them), then open the Thank You page.
+const goToThankYou = (eventName) => {
+  if (typeof window === "undefined") return;
+  let done = false;
+  const go = () => {
+    if (done) return;
+    done = true;
+    window.location.assign("/thank-you/");
+  };
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({ event: "lead_form_success", lead_source: "custom_software_development" });
-  window.location.href = "/thank-you/";
+  window.dataLayer.push({
+    event: eventName,
+    lead_source: "custom_software_development",
+    eventCallback: go,
+    eventTimeout: 1500,
+  });
+  setTimeout(go, 1500); // fallback if GTM isn't loaded or blocked
 };
 
 const IMG = "/images/custom-software";
