@@ -45,7 +45,7 @@ export default function ThankYou() {
           <a href="/" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, whiteSpace: "nowrap", fontWeight: 600, fontSize: 15, color: "#fff", background: "#0037CA", borderRadius: 10, padding: "14px 26px", boxShadow: "0 12px 28px rgba(0,55,202,0.26)" }}>
             {icon([<path key="a" d="M3 11.5 12 4l9 7.5" />, <path key="b" d="M5 10v10h14V10" />])}Back to Home
           </a>
-          <a href="/#reviews" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, whiteSpace: "nowrap", fontWeight: 600, fontSize: 15, color: "#141420", background: "#fff", border: "1px solid #ebebf4", borderRadius: 10, padding: "14px 26px", boxShadow: "0 8px 20px rgba(20,20,32,0.06)" }}>
+          <a href="/service" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, whiteSpace: "nowrap", fontWeight: 600, fontSize: 15, color: "#141420", background: "#fff", border: "1px solid #ebebf4", borderRadius: 10, padding: "14px 26px", boxShadow: "0 8px 20px rgba(20,20,32,0.06)" }}>
             See Our Work
           </a>
         </div>
