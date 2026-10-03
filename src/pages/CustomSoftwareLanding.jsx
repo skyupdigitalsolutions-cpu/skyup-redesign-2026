@@ -296,6 +296,16 @@ export default function CustomSoftwareLanding() {
   const [leadErr, setLeadErr] = useState({});
   const [leadStatus, setLeadStatus] = useState({ submitting: false, error: "", success: false });
 
+  // ── Suppress the browser's "Install this app" PWA banner ──
+  // The site ships a manifest + service worker, so Chrome on Android fires
+  // `beforeinstallprompt`. Preventing its default stops the install banner
+  // from appearing over the page.
+  useEffect(() => {
+    const block = (e) => e.preventDefault();
+    window.addEventListener("beforeinstallprompt", block);
+    return () => window.removeEventListener("beforeinstallprompt", block);
+  }, []);
+
   // ── Lock/unlock body scroll when modal opens/closes ──
   useEffect(() => {
     if (modal === "open") {
@@ -556,7 +566,7 @@ export default function CustomSoftwareLanding() {
 
       {/* ── Hero ── */}
       <section id="top" data-r="hero" style={{ position: "relative", padding: "24px 0 96px", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -40, left: "50%", transform: "translateX(-50%)", width: 1100, height: 620, filter: "blur(90px)", opacity: 0.92, animation: "skyup-drift 16s ease-in-out infinite", background: "radial-gradient(38% 46% at 22% 34%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(34% 42% at 44% 22%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(40% 48% at 62% 42%, #7b3ff2 0%, rgba(123,63,242,0) 72%), radial-gradient(44% 52% at 40% 62%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(30% 36% at 76% 66%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
+        <div className="hero-glow" style={{ position: "absolute", top: -40, left: "50%", transform: "translateX(-50%)", width: 1100, height: 620, filter: "blur(90px)", opacity: 0.92, background: "radial-gradient(38% 46% at 22% 34%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(34% 42% at 44% 22%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(40% 48% at 62% 42%, #7b3ff2 0%, rgba(123,63,242,0) 72%), radial-gradient(44% 52% at 40% 62%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(30% 36% at 76% 66%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <header data-r="header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, marginBottom: 72, position: "relative" }}>
             <img data-r="brand" src={`${IMG}/SKYUP-Logo.svg`} alt="SKYUP Digital Solutions" style={{ height: 38 }} />
@@ -602,7 +612,7 @@ export default function CustomSoftwareLanding() {
             <div style={{ display: "flex", width: "max-content", animation: "skyup-marquee 34s linear infinite" }}>
               {[...CLIENT_LOGOS, ...CLIENT_LOGOS].map((l, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 64, padding: "0 26px", flexShrink: 0 }}>
-                  <img src={l.src} alt={l.name} loading="lazy" style={{ height: l.h, width: "auto", maxWidth: 190, objectFit: "contain", display: "block", opacity: 0.9 }} />
+                  <img src={l.src} alt={l.name} loading="lazy" decoding="async" style={{ height: l.h, width: "auto", maxWidth: 190, objectFit: "contain", display: "block", opacity: 0.9 }} />
                 </div>
               ))}
             </div>
@@ -646,7 +656,7 @@ export default function CustomSoftwareLanding() {
 
       {/* ══ 3. What We Build ══ */}
       <section id="solutions" style={{ position: "relative", padding: "32px 0 104px", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 40, left: "50%", transform: "translateX(-50%)", width: 1240, height: 820, filter: "blur(100px)", opacity: 0.62, background: "radial-gradient(32% 34% at 18% 28%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(34% 36% at 50% 20%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(32% 34% at 82% 30%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(38% 38% at 30% 78%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(30% 32% at 74% 80%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
+        <div className="blob" style={{ position: "absolute", top: 40, left: "50%", transform: "translateX(-50%)", width: 1240, height: 820, filter: "blur(100px)", opacity: 0.62, background: "radial-gradient(32% 34% at 18% 28%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(34% 36% at 50% 20%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(32% 34% at 82% 30%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(38% 38% at 30% 78%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(30% 32% at 74% 80%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, textAlign: "center", marginBottom: 40 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 14, background: "#fff", borderRadius: 9999, padding: "8px 26px 8px 8px", boxShadow: "0 12px 30px rgba(20,20,32,0.14)" }}>
@@ -676,7 +686,7 @@ export default function CustomSoftwareLanding() {
       <section id="process" style={{ padding: "0 0 104px" }}>
         <div data-r="wrap" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div data-r="proc-card" style={{ position: "relative", background: "linear-gradient(135deg,#f2e4e6 0%,#f9c7c8 22%,#efb4d4 44%,#d3c3f2 68%,#c6cff8 100%)", borderRadius: 28, padding: "56px 0 52px", overflow: "hidden" }}>
-            <div style={{ position: "absolute", top: -140, left: "50%", transform: "translateX(-50%)", width: 1100, height: 760, filter: "blur(80px)", opacity: 0.55, background: "radial-gradient(30% 34% at 18% 24%, #ffffff 0%, rgba(255,255,255,0) 70%), radial-gradient(26% 30% at 62% 14%, #ffd9c2 0%, rgba(255,217,194,0) 70%), radial-gradient(30% 34% at 88% 46%, #b9c6ff 0%, rgba(185,198,255,0) 70%), radial-gradient(32% 36% at 34% 88%, #ffc0dd 0%, rgba(255,192,221,0) 72%)" }} />
+            <div className="blob" style={{ position: "absolute", top: -140, left: "50%", transform: "translateX(-50%)", width: 1100, height: 760, filter: "blur(80px)", opacity: 0.55, background: "radial-gradient(30% 34% at 18% 24%, #ffffff 0%, rgba(255,255,255,0) 70%), radial-gradient(26% 30% at 62% 14%, #ffd9c2 0%, rgba(255,217,194,0) 70%), radial-gradient(30% 34% at 88% 46%, #b9c6ff 0%, rgba(185,198,255,0) 70%), radial-gradient(32% 36% at 34% 88%, #ffc0dd 0%, rgba(255,192,221,0) 72%)" }} />
             <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 62%, rgba(255,255,255,0.22) 100%)" }} />
             <div data-r="proc-head" style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center", marginBottom: 40, padding: "0 24px" }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 9999, padding: "7px 20px", whiteSpace: "nowrap" }}>
@@ -717,7 +727,7 @@ export default function CustomSoftwareLanding() {
 
       {/* ══ 5. Why Us ══ */}
       <section id="why" style={{ position: "relative", padding: "24px 0 104px", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 1240, height: 760, filter: "blur(100px)", opacity: 0.5, background: "radial-gradient(34% 40% at 16% 30%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(32% 36% at 48% 22%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(32% 36% at 84% 34%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(32% 36% at 70% 82%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(28% 32% at 24% 84%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
+        <div className="blob" style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 1240, height: 760, filter: "blur(100px)", opacity: 0.5, background: "radial-gradient(34% 40% at 16% 30%, #0037CA 0%, rgba(0,55,202,0) 72%), radial-gradient(32% 36% at 48% 22%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(32% 36% at 84% 34%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(32% 36% at 70% 82%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(28% 32% at 24% 84%, #22c3f0 0%, rgba(34,195,240,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div data-r="why-head" style={{ display: "grid", gridTemplateColumns: "1fr 0.85fr", gap: 48, alignItems: "end", marginBottom: 48 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -740,7 +750,7 @@ export default function CustomSoftwareLanding() {
                   style={{ flex: on ? 2.05 : 1, minHeight: on ? 512 : 400, position: "relative", overflow: "hidden", outline: "none", cursor: "default", borderRadius: 26, padding: 26, display: "flex", flexDirection: "column", background: on ? "#fff" : "linear-gradient(155deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.26) 100%)", border: "1px solid rgba(255,255,255,0.75)", boxShadow: on ? "0 30px 70px rgba(20,20,32,0.18)" : "0 10px 28px rgba(20,20,32,0.07)", transition: "flex .38s cubic-bezier(.4,0,.2,1), min-height .38s cubic-bezier(.4,0,.2,1), box-shadow .38s ease, background .38s ease" }}>
                   <div data-r="why-art" style={{ height: on ? 212 : 0, opacity: on ? 1 : 0, margin: "-8px -8px 0", borderRadius: 20, overflow: "hidden", position: "relative", flexShrink: 0, transition: "height .38s cubic-bezier(.4,0,.2,1), opacity .3s ease" }}>
                     <div style={{ position: "absolute", inset: "-30% -10%", filter: "blur(34px)", opacity: 0.55, background: "radial-gradient(38% 46% at 26% 34%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(36% 44% at 58% 26%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(34% 42% at 82% 44%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(40% 48% at 46% 82%, #0037CA 0%, rgba(0,55,202,0) 72%)" }} />
-                    <img src={r.art} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", padding: 14, boxSizing: "border-box", filter: "drop-shadow(0 12px 22px rgba(20,20,32,0.12))" }} />
+                    <img src={r.art} alt="" loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", padding: 14, boxSizing: "border-box", filter: "drop-shadow(0 12px 22px rgba(20,20,32,0.12))" }} />
                   </div>
                   <div data-r="why-num" style={{ fontSize: 52, fontWeight: 700, letterSpacing: "-0.04em", color: "#c2c2d6", opacity: on ? 0 : 1, height: on ? 0 : 66, overflow: "hidden", transition: "opacity .3s ease, height .38s cubic-bezier(.4,0,.2,1)" }}>{r.num}</div>
                   <div style={{ flex: 1 }} />
@@ -781,7 +791,7 @@ export default function CustomSoftwareLanding() {
           <div data-r="prob-stage" style={{ display: "grid", gridTemplateColumns: "1fr 440px 1fr", gridTemplateAreas: '"p1 orbit p2" "p3 p3 p3"', columnGap: 40, alignItems: "start" }}>
             <div data-r="orbit" style={{ gridArea: "orbit", position: "relative", width: 440, height: 440, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
               <div style={{ position: "absolute", inset: 0, borderRadius: 9999, border: "1px solid #d8d8e8" }} />
-              <div style={{ position: "absolute", inset: -46, borderRadius: 9999, filter: "blur(60px)", opacity: 0.5, background: "radial-gradient(38% 44% at 28% 30%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(36% 42% at 72% 34%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(40% 46% at 50% 78%, #0037CA 0%, rgba(0,55,202,0) 72%)" }} />
+              <div className="blob" style={{ position: "absolute", inset: -46, borderRadius: 9999, filter: "blur(60px)", opacity: 0.5, background: "radial-gradient(38% 44% at 28% 30%, #7b3ff2 0%, rgba(123,63,242,0) 70%), radial-gradient(36% 42% at 72% 34%, #F1891A 0%, rgba(241,137,26,0) 70%), radial-gradient(40% 46% at 50% 78%, #0037CA 0%, rgba(0,55,202,0) 72%)" }} />
               {[{ top: "12.3%", left: "12.3%", n: "01" }, { top: "12.3%", right: "12.3%", n: "02" }, { bottom: 0, left: "50%", n: "03" }].map((d) => (
                 <div key={d.n} data-r="orbit-dot" style={{ position: "absolute", top: d.top, left: d.left, right: d.right, bottom: d.bottom, transform: `translate(${d.right ? "50%" : "-50%"}, ${d.bottom === 0 ? "50%" : "-50%"})`, width: 30, height: 30, borderRadius: 9999, background: "#F1891A", color: "#fff", fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 6px rgba(241,137,26,0.16), 0 6px 16px rgba(241,137,26,0.45)", zIndex: 2 }}>{d.n}</div>
               ))}
@@ -863,7 +873,7 @@ export default function CustomSoftwareLanding() {
 
       {/* ══ 9. Contact form ══ */}
       <section id="form" style={{ position: "relative", padding: "0 0 96px", overflow: "hidden" }}>
-        <div style={{ position: "absolute", bottom: -160, left: "50%", transform: "translateX(-50%)", width: 1000, height: 520, filter: "blur(100px)", opacity: 0.7, background: "radial-gradient(36% 44% at 26% 40%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(40% 48% at 52% 52%, #7b3ff2 0%, rgba(123,63,242,0) 72%), radial-gradient(36% 44% at 76% 40%, #F1891A 0%, rgba(241,137,26,0) 70%)" }} />
+        <div className="blob" style={{ position: "absolute", bottom: -160, left: "50%", transform: "translateX(-50%)", width: 1000, height: 520, filter: "blur(100px)", opacity: 0.7, background: "radial-gradient(36% 44% at 26% 40%, #ff4fa3 0%, rgba(255,79,163,0) 70%), radial-gradient(40% 48% at 52% 52%, #7b3ff2 0%, rgba(123,63,242,0) 72%), radial-gradient(36% 44% at 76% 40%, #F1891A 0%, rgba(241,137,26,0) 70%)" }} />
         <div data-r="wrap" style={{ position: "relative", maxWidth: 760, margin: "0 auto", padding: "0 32px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 12, marginBottom: 34 }}>
             <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0037CA" }}>Let's Get In Touch</div>
@@ -1008,6 +1018,42 @@ img, svg { max-width:100%; }
 [data-r="map-hold"] { overflow:hidden; }
 [data-r="map-hold"] svg, [data-r="map-hold"] img, [data-r="map-hold"] canvas { max-width:100% !important; height:auto; }
 
+/* ══ PERF ═══════════════════════════════════════════════════════════════════
+   The two changes below are the main reason scrolling was janky on phones.   */
+
+/* 1. Skip painting offscreen sections until they're near the viewport. Huge
+      win for first paint + scroll smoothness. contain-intrinsic-size reserves
+      space so the scrollbar doesn't jump. */
+#reviews, #solutions, #process, #why, #problem, #capabilities, #investment, #form, footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 760px;
+}
+
+/* 2. The hero glow only drifts (animated 90px blur) on desktop — never on
+      touch/narrow screens or when reduced-motion is on. Animated blur is the
+      single most expensive thing a mobile GPU repaints per scroll frame. */
+.hero-glow { animation: skyup-drift 16s ease-in-out infinite; }
+@media (hover: none), (max-width: 991px), (prefers-reduced-motion: reduce) {
+  .hero-glow { animation: none !important; }
+}
+
+/* 3. backdrop-filter (live blur) is a scroll killer on phones. Drop it on
+      touch/narrow — every glass surface already has a semi-opaque background
+      so it still reads fine. */
+@media (hover: none), (max-width: 991px) {
+  [style*="backdrop-filter"] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}
+
+/* 4. Shrink the decorative colour-blob blur radius on phones so each frame
+      paints far fewer pixels. */
+@media (max-width: 767px) {
+  .blob { filter: blur(40px) !important; opacity: 0.4 !important; }
+}
+
+/* 5. Keep marquees on the GPU compositor. */
+.proc-track, [data-r="logos-card"] [style*="skyup-marquee"] { will-change: transform; transform: translateZ(0); }
+/* ════════════════════════════════════════════════════════════════════════ */
+
 /* ── Modal input heights — enforce consistent 46px on all inputs/selects ── */
 [data-r="modal-card"] input,
 [data-r="modal-card"] select { height:46px; box-sizing:border-box; }
@@ -1084,7 +1130,7 @@ img, svg { max-width:100%; }
 @media (max-width:991px) {
   [data-r="nav"], [data-r="nav-cta"] { display:none !important; }
   [data-r="burger"] { display:flex !important; }
-  [data-r="nav"][data-open="true"] { display:flex !important; flex-direction:column !important; gap:4px !important; position:absolute !important; top:64px; right:0; left:auto; width:min(280px, calc(100vw - 48px)); border-radius:20px !important; padding:12px !important; z-index:60; }
+  [data-r="nav"][data-open="true"] { display:flex !important; flex-direction:column !important; gap:4px !important; position:absolute !important; top:64px; right:0; left:auto; width:min(280px, calc(100vw - 48px)); border-radius:20px !important; padding:12px !important; z-index:60; background:#fff !important; }
   [data-r="nav"][data-open="true"] > a { justify-content:flex-start; padding:13px 18px !important; font-size:15px !important; }
   [data-r="header"] { margin-bottom:48px !important; }
   [data-r="rev-line"] { display:inline; white-space:normal; }
@@ -1160,6 +1206,7 @@ img, svg { max-width:100%; }
   [data-r="prob-card"] p { font-size:13.5px !important; }
 }
 @keyframes skyup-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+@keyframes skyup-drift { 0%,100% { transform:translateX(-50%) translateY(0); } 50% { transform:translateX(-50%) translateY(18px); } }
 /* dropdown chevron for selects */
 [data-r="form-card"] select, [data-r="modal-card"] select {
   -webkit-appearance:none !important; -moz-appearance:none !important; appearance:none !important;
