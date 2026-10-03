@@ -1170,6 +1170,10 @@ img, svg { max-width:100%; }
   [data-r="proc-practices"] > span { font-size:12.5px !important; padding:8px 12px !important; width:100% !important; box-sizing:border-box !important; justify-content:center !important; }
   .proc-step-card { width:264px !important; padding:24px !important; }
   [data-r="cap-card"] { padding:32px 20px !important; border-radius:22px !important; }
+  /* Investment CTA — stack price over button and let the long label span/wrap */
+  [data-r="inv-price"] { flex-direction:column !important; align-items:stretch !important; gap:18px !important; }
+  [data-r="inv-price"] > div { text-align:center; }
+  [data-r="inv-price"] a { width:100% !important; white-space:normal !important; text-align:center !important; padding:15px 18px !important; }
   [data-r="aud-grid"], [data-r="form-grid"] { grid-template-columns:1fr !important; }
   [data-r="form-grid"] > label { grid-column:span 1 !important; }
   [data-r="foot-grid"] { padding:32px 22px 24px !important; gap:32px !important; }
