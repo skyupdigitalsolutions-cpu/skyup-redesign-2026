@@ -1,0 +1,6 @@
+# Cloudflare Pages SPA redirect
+# Vike pre-renders every route to its own index.html in dist/client.
+# Cloudflare serves those static files directly (no redirect needed for them).
+# This rule only fires for any path that doesn't have a matching static file —
+# which handles client-side routing and any edge cases.
+/* /index.html 200

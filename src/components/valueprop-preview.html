@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ValueProposition — dark redesign preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#07060A;--orange:#F25623;--orange-l:#FF8A4C;--blue:#0037CA;--blue-l:#3D6BF0}
+  *{box-sizing:border-box;margin:0;font-family:'Poppins',sans-serif}
+  body{background:var(--bg);color:#fff}
+  .spacer{height:60vh;display:flex;align-items:center;justify-content:center;color:#444;font-size:13px;letter-spacing:.2em;text-transform:uppercase}
+  section{position:relative;overflow:hidden;padding:8rem 0}
+  .glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(55% 40% at 18% 8%,#0037CA1f,transparent 70%),radial-gradient(50% 45% at 88% 78%,#F2562318,transparent 72%)}
+  .wrap{position:relative;z-index:1;max-width:72rem;margin:0 auto;padding:0 2.5rem}
+  .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.28em;color:var(--orange)}
+  .eyebrow .dot{height:6px;width:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 10px var(--orange)}
+  h2{margin-top:1.5rem;font-weight:700;line-height:1.08;letter-spacing:-.02em;font-size:clamp(2.1rem,5vw,3.4rem);max-width:48rem}
+  h2 .hl{color:var(--orange-l)}
+  .sub{margin-top:1.5rem;max-width:42rem;color:rgba(255,255,255,.55);font-size:1.05rem;line-height:1.65}
+  .chips{margin-top:2.5rem;display:flex;flex-wrap:wrap;gap:.75rem}
+  .chip{display:inline-flex;align-items:center;gap:.65rem;border-radius:999px;padding:.65rem 1rem;font-size:.875rem;font-weight:500;color:rgba(255,255,255,.85);background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09)}
+  .chk{display:flex;height:20px;width:20px;align-items:center;justify-content:center;border-radius:50%;background:var(--blue);box-shadow:0 0 12px #003787;font-size:11px}
+  .pillars{margin-top:6rem}
+  .label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.28em;color:var(--blue-l)}
+  h3{margin-top:.5rem;font-weight:700;letter-spacing:-.015em;font-size:clamp(1.7rem,3.4vw,2.5rem)}
+  .grid{margin-top:2.5rem;display:grid;grid-template-columns:1fr;gap:1.25rem}
+  @media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+  .card{position:relative;overflow:hidden;border-radius:1.5rem;padding:1.75rem;height:100%;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));border:1px solid rgba(255,255,255,.08);transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s,border-color .4s}
+  .card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.18);box-shadow:0 28px 60px -26px rgba(242,86,35,.45)}
+  .idx{position:absolute;right:1.25rem;top:.75rem;font-size:4.5rem;font-weight:700;line-height:1;color:#fff;opacity:.04;user-select:none}
+  .accent{position:absolute;left:0;top:0;height:2px;width:0;border-radius:0 999px 999px 0;background:linear-gradient(90deg,var(--orange),var(--orange-l));transition:width .5s}
+  .card:hover .accent{width:100%}
+  .crow{display:flex;align-items:center;gap:.9rem;margin-bottom:1rem}
+  .ico{display:flex;height:48px;width:48px;align-items:center;justify-content:center;border-radius:1rem;background:#00378726;border:1px solid #00378755;color:var(--orange-l);transition:transform .3s}
+  .card:hover .ico{transform:scale(1.05)}
+  .ctitle{font-size:1.125rem;font-weight:700;letter-spacing:-.01em}
+  .cdesc{color:rgba(255,255,255,.55);font-size:.95rem;line-height:1.6}
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+  .reveal.in{opacity:1;transform:none}
+</style></head>
+<body>
+<div class="spacer">↑ orbit section above · scroll down ↓</div>
+<section>
+  <div class="glow"></div>
+  <div class="wrap">
+    <span class="eyebrow reveal"><span class="dot"></span>Why Skyup</span>
+    <h2 class="reveal" style="transition-delay:.07s">Helping brands turn digital marketing into <span class="hl">consistent revenue</span></h2>
+    <p class="sub reveal" style="transition-delay:.14s">A full-service digital marketing agency blending creative, AI automation, and conversion-focused strategy — engineered to spend smarter and grow what lasts.</p>
+
+    <div class="chips" id="chips"></div>
+
+    <div class="pillars">
+      <p class="label reveal">How we deliver</p>
+      <h3 class="reveal" style="transition-delay:.07s">Four pillars behind every campaign</h3>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+</section>
+<div class="spacer">↓ street section below ↓</div>
+
+<script>
+  const outcomes=["Stronger search rankings","Qualified leads, not noise","Higher conversion rates","Better ad ROI","Faster customer acquisition","Sustainable, compounding growth"];
+  const pillars=[
+    {i:"📊",t:"Results-driven marketing",d:"Every campaign tied to a real outcome — leads, cost per acquisition, and revenue, tracked and reported honestly."},
+    {i:"⚙️",t:"AI-powered execution",d:"Automated lead follow-up and predictive audience targeting that run 24/7 and get smarter over time."},
+    {i:"🧩",t:"Conversion-focused builds",d:"Websites, landing pages, and funnels engineered to turn traffic into paying customers."},
+    {i:"👁",t:"Transparent reporting",d:"Clear updates and open access to your campaign data. No smoke, no mirrors — just honest answers."},
+  ];
+  const chips=document.getElementById('chips');
+  outcomes.forEach((o,i)=>{const s=document.createElement('span');s.className='chip reveal';s.style.transitionDelay=(i*.07)+'s';s.innerHTML='<span class="chk">✓</span>'+o;chips.appendChild(s)});
+  const grid=document.getElementById('grid');
+  pillars.forEach((p,i)=>{const w=document.createElement('div');w.className='reveal';w.style.transitionDelay=((i+2)*.07)+'s';
+    w.innerHTML='<div class="card"><span class="idx">0'+(i+1)+'</span><span class="accent"></span><div class="crow"><span class="ico">'+p.i+'</span><span class="ctitle">'+p.t+'</span></div><p class="cdesc">'+p.d+'</p></div>';grid.appendChild(w)});
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.2});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body></html>

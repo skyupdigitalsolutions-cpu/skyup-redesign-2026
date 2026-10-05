@@ -1,0 +1,17 @@
+{
+  "name": "Skyup Digital Solutions",
+  "short_name": "Skyup",
+  "description": "AI-powered digital marketing, SEO, and web development agency.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0037CA",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

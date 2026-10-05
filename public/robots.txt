@@ -1,0 +1,77 @@
+# robots.txt — Skyup Digital Solutions
+
+# --- All crawlers (default) ---
+User-agent: *
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+# --- Google search ---
+User-agent: Googlebot
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+# Google's AI / Gemini crawler (separate from search indexing)
+User-agent: Google-Extended
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+# --- AI answer engines (explicitly welcomed for GEO) ---
+User-agent: GPTBot
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+User-agent: CCBot
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /demo
+Disallow: /service-3d
+Disallow: /service-preview
+Disallow: /works-courtyard
+
+Sitemap: https://www.skyupdigitalsolutions.com/sitemap.xml

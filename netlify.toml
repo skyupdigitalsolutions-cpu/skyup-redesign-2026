@@ -1,0 +1,32 @@
+[build]
+  command   = "npm run build"
+  publish   = "dist/client"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Vike pre-renders every page to its own index.html.
+# e.g. /about -> dist/client/about/index.html
+#      /service/seo -> dist/client/service/seo/index.html
+#
+# The redirect below uses `force = false` (the default) which means Netlify
+# will ONLY use this rule if no matching static file exists.
+# This preserves all pre-rendered pages while still handling any
+# dynamic or unknown routes via the root SPA entry.
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+  force  = false
+
+# Cache hashed assets forever (safe — filenames change on rebuild)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Never cache HTML — always serve fresh
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
