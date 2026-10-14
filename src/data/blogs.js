@@ -1,5 +1,191 @@
 export const BLOGS = [
   {
+    "slug": "how-ai-is-booming-in-india-key-trends-and-insights",
+    "title": "How AI is Booming in India: Key Trends and Insights",
+    "sections": [
+      {
+        "type": "h2",
+        "text": "What is Driving the AI Boom in India?",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "The AI boom in India is primarily driven by three factors: government initiatives, a robust startup ecosystem, and the increasing availability of data. The Indian government has launched various programs like the National AI Strategy to promote AI adoption, while startups are innovating in sectors like healthcare, agriculture, and finance.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "h2",
+        "text": "How Much is the AI Market Growing in India?",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "The AI market in India is projected to reach $7.8 billion by 2025, growing at a CAGR of 20.2% from 2020. This growth is fueled by investments in AI technologies and an increasing number of AI applications across various industries.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "h2",
+        "text": "Which Sectors are Benefiting from AI in India?",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "Several sectors in India are experiencing significant benefits from AI, including:",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "ul",
+        "text": [
+          "Healthcare: AI is being used for diagnostics and personalized medicine.",
+          "Banking and Finance: AI enhances risk assessment and fraud detection.",
+          "Agriculture: AI optimizes crop management and supply chain efficiency."
+        ]
+      },
+      {
+        "type": "h2",
+        "text": "What Role Do Startups Play in AI Development?",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "Indian startups are at the forefront of AI innovation, with over 1,600 AI startups operating in the country. Companies like Niramai and CropIn are leveraging AI to solve real-world problems, contributing to the overall growth of the sector.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "h2",
+        "text": "How is the Government Supporting AI Initiatives?",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "The Indian government has launched initiatives like the National AI Mission and Digital India, aiming to enhance AI research and development. These initiatives provide funding, infrastructure, and policy support to foster a conducive environment for AI growth.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "h2",
+        "text": "What Are the Challenges Facing AI Adoption in India?",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "Despite the growth, challenges such as data privacy concerns, skill shortages, and infrastructure limitations exist. Addressing these issues is crucial for sustaining AI’s momentum in the Indian market.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "h2",
+        "text": "How Can Businesses Leverage AI in Their Operations?",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "Businesses can leverage AI by integrating tools like machine learning algorithms and natural language processing into their operations. Solutions such as chatbots and AI analytics can enhance customer service and improve decision-making.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "h2",
+        "text": "What Future Trends Can We Expect in AI in India?",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "Future trends in AI in India include increased focus on ethical AI, greater collaboration between academia and industry, and the rise of AI-driven automation tools. These trends will shape the next phase of AI development in the country.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "h2",
+        "text": "Frequently Asked Questions",
+        "fontWeight": "font-bold"
+      },
+      {
+        "type": "p",
+        "text": "What is the current size of the AI market in India?",
+        "fontWeight": "font-semibold"
+      },
+      {
+        "type": "p",
+        "text": "The AI market in India is projected to reach $7.8 billion by 2025, growing at a CAGR of 20.2%.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "p",
+        "text": "Which industries are leading in AI adoption in India?",
+        "fontWeight": "font-semibold"
+      },
+      {
+        "type": "p",
+        "text": "Industries like healthcare, banking, and agriculture are leading in AI adoption in India.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "p",
+        "text": "How is the Indian government supporting AI initiatives?",
+        "fontWeight": "font-semibold"
+      },
+      {
+        "type": "p",
+        "text": "The Indian government supports AI through initiatives like the National AI Mission and Digital India, providing funding and policy support.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "p",
+        "text": "What are some challenges to AI adoption in India?",
+        "fontWeight": "font-semibold"
+      },
+      {
+        "type": "p",
+        "text": "Challenges include data privacy concerns, skill shortages, and infrastructure limitations.",
+        "fontWeight": "font-normal"
+      },
+      {
+        "type": "p",
+        "text": "How can small businesses implement AI solutions?",
+        "fontWeight": "font-semibold"
+      },
+      {
+        "type": "p",
+        "text": "Small businesses can implement AI by using tools like chatbots and AI analytics to improve customer service and decision-making.",
+        "fontWeight": "font-normal"
+      }
+    ],
+    "id": 1791979118864,
+    "category": "AI Automation",
+    "headline": "Exploring the Rapid Growth of AI in India and Its Impacts",
+    "description": "Discover how AI is booming in India, driving innovation and growth across various sectors. Learn key trends and impacts on the economy.",
+    "date": "Oct 14, 2026",
+    "updated": "Oct 14, 2026",
+    "Keywords": "how AI is booming in India",
+    "author": "Skyup Editorial Team",
+    "image": "https://res.cloudinary.com/dirndjtve/image/upload/v1791979148/rocky/blog-covers/hgsz5rv8yzj4uffkbfir.webp",
+    "heroImage": "https://res.cloudinary.com/dirndjtve/image/upload/v1791979148/rocky/blog-covers/hgsz5rv8yzj4uffkbfir.webp",
+    "coverImage": "https://res.cloudinary.com/dirndjtve/image/upload/v1791979148/rocky/blog-covers/hgsz5rv8yzj4uffkbfir.webp",
+    "imageAlt": "How AI is Booming in India: Key Trends and Insights",
+    "tags": [
+      "how-ai-is-booming-in-india-key-trends-and-insights"
+    ],
+    "faqs": [
+      {
+        "q": "What is the current size of the AI market in India?",
+        "a": "The AI market in India is projected to reach $7.8 billion by 2025, growing at a CAGR of 20.2%."
+      },
+      {
+        "q": "Which industries are leading in AI adoption in India?",
+        "a": "Industries like healthcare, banking, and agriculture are leading in AI adoption in India."
+      },
+      {
+        "q": "How is the Indian government supporting AI initiatives?",
+        "a": "The Indian government supports AI through initiatives like the National AI Mission and Digital India, providing funding and policy support."
+      },
+      {
+        "q": "What are some challenges to AI adoption in India?",
+        "a": "Challenges include data privacy concerns, skill shortages, and infrastructure limitations."
+      },
+      {
+        "q": "How can small businesses implement AI solutions?",
+        "a": "Small businesses can implement AI by using tools like chatbots and AI analytics to improve customer service and decision-making."
+      }
+    ]
+  },
+  {
     "slug": "how-to-use-whatsapp-automation-for-lead-follow-up",
     "title": "How to Use WhatsApp Automation for Lead Follow-Up",
     "sections": [
