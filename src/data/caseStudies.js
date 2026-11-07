@@ -9,7 +9,7 @@ export const COVERS = [
   "from-[#0037CA] to-[#002896]",
 ];
 
-export const CASE_STUDIES = [
+const RAW_CASE_STUDIES = [
 
   // ── Software Development — Abhicabs ───────────────────────────────────
   {
@@ -212,3 +212,14 @@ export const CASE_STUDIES = [
   },
 
 ];
+
+// Safety net: the same project can never show twice, even if it is pasted again
+// by mistake. Two entries count as the same project when client + title match
+// (or the slug only differs by a trailing "-2", "-3", ...). The first one wins.
+const projectKey = (c) =>
+  `${(c.client || "").trim().toLowerCase()}|${(c.title || "").trim().toLowerCase()}`;
+const baseSlug = (c) => (c.slug || "").replace(/-\d+$/, "");
+
+export const CASE_STUDIES = RAW_CASE_STUDIES.filter((c, i, all) =>
+  all.findIndex((x) => projectKey(x) === projectKey(c) || baseSlug(x) === baseSlug(c)) === i
+);
