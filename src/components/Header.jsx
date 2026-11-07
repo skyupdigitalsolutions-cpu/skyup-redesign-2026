@@ -6,12 +6,13 @@ const SERVICE_LINKS = [
   { label: "Custom Software Development", href: "/service/custom-software-development" },
   { label: "Mobile App Development",      href: "/service/mobile-app-development" },
   { label: "Web Development",             href: "/service/web-development" },
-  { label: "AI Automation",               href: "/service/ai-automation" },
+  { label: "AI & ML",                      href: "/service/ai-automation" },
   { label: "SEO",                         href: "/service/seo" },
   { label: "Social Media Marketing",      href: "/service/social-media-marketing" },
   { label: "Performance Marketing",       href: "/service/performance-marketing" },
   { label: "UI/UX Design",               href: "/service/ui-ux-design" },
   { label: "Branding",                    href: "/service/graphic-design" },
+  { label: "Cyber Security",              href: "/service/cyber-security" },
 ];
 
 const navLinks = [
@@ -109,7 +110,7 @@ export default function Header() {
                     {/* FLAT HORIZONTAL DROPDOWN */}
                     {dropOpen && (
                       <div className="absolute left-1/2 top-full mt-3 -translate-x-1/2 overflow-hidden rounded-2xl border border-white/10 bg-[#0d0f1e]/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]"
-                        style={{ minWidth: "max-content" }}>
+                        style={{ width: "max-content", maxWidth: "calc(100vw - 2rem)" }}>
                         {/* All services in one horizontal row with pipe separators */}
                         <div className="flex items-center flex-wrap px-5 py-3">
                           {SERVICE_LINKS.map(({ label, href }, idx) => (
