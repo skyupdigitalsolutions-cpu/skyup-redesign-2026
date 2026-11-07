@@ -7,62 +7,6 @@ export const COVERS = [
   "from-[#002896] to-[#1b60f4]",
   "from-[#1b60f4] to-[#87b6f4]",
   "from-[#0037CA] to-[#002896]",
-
-  // ── Web Development — The Vector Graphics ─────────────────────────────
-  {
-    id: 7,
-    slug: "vector-graphics-agency-site",
-    category: "Web Development",
-    client: "The Vector Graphics",
-    title: "A packaging-design agency site that sells",
-    summary:
-      "A bold marketing website for a packaging-design agency — built to showcase the work and turn visitors into briefs.",
-    image: "/images/case-studies/vector-graphics.avif",
-    industry: "Design Agency",
-    role: "Design + build",
-    services: ["Web Design", "Web Development", "Brand Presentation"],
-    stack: ["React", "Tailwind", "Vite"],
-    overview:
-      "A packaging-design agency needed a site that proved its craft on first impression and made it obvious how to start a project.",
-    approach: [
-      "Put the portfolio front and centre with a confident, high-contrast design language.",
-      "Structured services and process so prospects can self-qualify quickly.",
-      "Kept clear calls to action that route serious visitors into an enquiry.",
-    ],
-    results: [
-      "A distinctive site that reflects the agency's own design standard.",
-      "A clear path from showcase to project enquiry.",
-    ],
-    deliverables: ["Responsive marketing website", "Portfolio showcase", "Services & process pages", "Enquiry capture"],
-  },
-
-  // ── Web Development — Novara Nature Estate ────────────────────────────
-  {
-    id: 8,
-    slug: "novara-nature-estate-2",
-    category: "Web Development",
-    client: "Novara Nature Estate",
-    title: "A farmland investment site built to convert",
-    summary:
-      "A fast, mobile-first website for managed farmland near Bangalore — clear storytelling, strong visuals, and an effortless enquiry path.",
-    image: "/images/case-studies/novara-nature-estate.avif",
-    industry: "Real Estate",
-    role: "Design + build",
-    services: ["Web Design", "Web Development", "Local SEO", "Lead Generation"],
-    stack: ["React", "Tailwind", "Vite"],
-    overview:
-      "Novara sells managed farmland — a high-consideration purchase researched over weeks, mostly on mobile.",
-    approach: [
-      "Led with the investment story and credibility signals a cautious buyer looks for first.",
-      "Presented the estate through immersive visuals, location context, and clear highlights.",
-      "Made contact frictionless on mobile with persistent enquiry and WhatsApp actions.",
-    ],
-    results: [
-      "A premium, mobile-first experience that loads fast even on modest connections.",
-      "A clear path from browsing to a real, trackable enquiry.",
-    ],
-    deliverables: ["Responsive marketing website", "Enquiry & WhatsApp capture", "Image galleries", "Local SEO setup"],
-  },
 ];
 
 export const CASE_STUDIES = [
@@ -267,31 +211,4 @@ export const CASE_STUDIES = [
     deliverables: ["Responsive marketing website", "Portfolio showcase", "Services & process pages", "Enquiry capture"],
   },
 
-  // ── Web Development — Novara Nature Estate ────────────────────────────
-  {
-    id: 8,
-    slug: "novara-nature-estate-2",
-    category: "Web Development",
-    client: "Novara Nature Estate",
-    title: "A farmland investment site built to convert",
-    summary:
-      "A fast, mobile-first website for managed farmland near Bangalore — clear storytelling, strong visuals, and an effortless enquiry path.",
-    image: "/images/case-studies/novara-nature-estate.avif",
-    industry: "Real Estate",
-    role: "Design + build",
-    services: ["Web Design", "Web Development", "Local SEO", "Lead Generation"],
-    stack: ["React", "Tailwind", "Vite"],
-    overview:
-      "Novara sells managed farmland — a high-consideration purchase researched over weeks, mostly on mobile.",
-    approach: [
-      "Led with the investment story and credibility signals a cautious buyer looks for first.",
-      "Presented the estate through immersive visuals, location context, and clear highlights.",
-      "Made contact frictionless on mobile with persistent enquiry and WhatsApp actions.",
-    ],
-    results: [
-      "A premium, mobile-first experience that loads fast even on modest connections.",
-      "A clear path from browsing to a real, trackable enquiry.",
-    ],
-    deliverables: ["Responsive marketing website", "Enquiry & WhatsApp capture", "Image galleries", "Local SEO setup"],
-  },
 ];
